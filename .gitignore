@@ -1,0 +1,34 @@
+## .NET
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+*.log
+*.pid
+*.pidb
+*.suo
+*.tmp
+*.user
+*.userosscache
+*.sln.docstates
+
+## Build
+publish/
+dist/
+build/
+
+## Rider
+.idea/
+*.sln
+*.slnx
+
+## VS
+.vs/
+*.csproj.user
+
+## OS
+.DS_Store
+Thumbs.db
+
+## App Data
+*.json

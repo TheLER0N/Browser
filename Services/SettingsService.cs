@@ -1,0 +1,190 @@
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Sockets;
+using System.Text.Json;
+using System.Threading.Tasks;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using System.Windows.Input;
+using GhostBrowser.ViewModels;
+
+namespace GhostBrowser.Services
+{
+    public class DnsPreset
+    {
+        public string Name { get; set; } = "";
+        public string Primary { get; set; } = "";
+        public string Secondary { get; set; } = "";
+    }
+
+    public class AppSettings
+    {
+        public bool UseCustomDns { get; set; }
+        public string CustomDns { get; set; } = "";
+        public string SelectedDnsPreset { get; set; } = "Google";
+        public bool DarkTheme { get; set; } = true;
+        public double FontSize { get; set; } = 14;
+        public string HomePage { get; set; } = "ghost://newtab";
+        public string DefaultSearchEngine { get; set; } = "Google";
+        public bool BlockTrackers { get; set; } = true;
+        public bool BlockThirdPartyCookies { get; set; } = false;
+    }
+
+    public class SettingsService : INotifyPropertyChanged
+    {
+        private AppSettings _settings = new();
+        private readonly string _settingsFile;
+        private readonly HttpClient _httpClient;
+        private bool _isTestingDns;
+        private string _dnsTestResult = "";
+        private string _saveNotification = "";
+
+        public static List<DnsPreset> DnsPresets { get; } = new()
+        {
+            new DnsPreset { Name = "Google", Primary = "8.8.8.8", Secondary = "8.8.4.4" },
+            new DnsPreset { Name = "Cloudflare", Primary = "1.1.1.1", Secondary = "1.0.0.1" },
+            new DnsPreset { Name = "OpenDNS", Primary = "208.67.222.222", Secondary = "208.67.220.220" },
+            new DnsPreset { Name = "Quad9", Primary = "9.9.9.9", Secondary = "149.112.112.112" },
+            new DnsPreset { Name = "AdGuard", Primary = "94.140.14.14", Secondary = "94.140.15.15" },
+            new DnsPreset { Name = "Cloudflare (RU bypass)", Primary = "1.1.1.1", Secondary = "1.0.0.1" },
+            new DnsPreset { Name = "Google Public (RU bypass)", Primary = "8.8.8.8", Secondary = "8.8.4.4" },
+            new DnsPreset { Name = "UncensoredDNS (Дания)", Primary = "89.233.43.71", Secondary = "" },
+            new DnsPreset { Name = "Digitale-Gesellschaft (RU)", Primary = "185.95.218.42", Secondary = "185.95.218.43" },
+            new DnsPreset { Name = "AppliedPrivacy (Люксембург)", Primary = "85.214.7.22", Secondary = "" },
+            new DnsPreset { Name = "BlahDNS (Финляндия)", Primary = "185.194.244.57", Secondary = "" },
+            new DnsPreset { Name = "Quad9 (RU bypass)", Primary = "9.9.9.9", Secondary = "149.112.112.112" },
+            new DnsPreset { Name = "Control D (Anti-block)", Primary = "76.76.2.0", Secondary = "76.76.10.0" },
+            new DnsPreset { Name = "NextDNS (Free tier)", Primary = "45.90.28.0", Secondary = "45.90.30.0" },
+            new DnsPreset { Name = "Yandex (базовый)", Primary = "77.88.8.8", Secondary = "77.88.8.1" },
+            new DnsPreset { Name = "Яндекс DNS (безопасный)", Primary = "77.88.8.88", Secondary = "77.88.8.2" },
+            new DnsPreset { Name = "xbox-dns.ru", Primary = "31.192.108.181", Secondary = "" },
+        };
+
+        public ObservableCollection<DnsPreset> DnsPresetsSource { get; } = new();
+        public ICommand TestDnsCommand { get; }
+
+        public SettingsService()
+        {
+            _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(5) };
+            var appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "GhostBrowser");
+            Directory.CreateDirectory(appData);
+            _settingsFile = Path.Combine(appData, "settings.json");
+            LoadSettings();
+            foreach (var p in DnsPresets) DnsPresetsSource.Add(p);
+            TestDnsCommand = new RelayCommand(_ => TestDns(), _ => !string.IsNullOrEmpty(CustomDns));
+        }
+
+        public AppSettings Settings { get => _settings; set { _settings = value; OnPropertyChanged(); } }
+        public bool UseCustomDns { get => _settings.UseCustomDns; set { if (_settings.UseCustomDns != value) { _settings.UseCustomDns = value; OnPropertyChanged(); SaveSettings(); } } }
+        public string CustomDns { get => _settings.CustomDns; set { if (_settings.CustomDns != value) { _settings.CustomDns = value; OnPropertyChanged(); } } }
+        public string SelectedDnsPreset { get => _settings.SelectedDnsPreset; set { if (_settings.SelectedDnsPreset != value) { _settings.SelectedDnsPreset = value; ApplyDnsPreset(value); OnPropertyChanged(); } } }
+        public bool DarkTheme { get => _settings.DarkTheme; set { if (_settings.DarkTheme != value) { _settings.DarkTheme = value; OnPropertyChanged(); SaveSettings(); } } }
+        public double FontSize { get => _settings.FontSize; set { if (_settings.FontSize != value) { _settings.FontSize = value; OnPropertyChanged(); SaveSettings(); } } }
+        public string HomePage { get => _settings.HomePage; set { if (_settings.HomePage != value) { _settings.HomePage = value; OnPropertyChanged(); } } }
+        public string DefaultSearchEngine { get => _settings.DefaultSearchEngine; set { if (_settings.DefaultSearchEngine != value) { _settings.DefaultSearchEngine = value; OnPropertyChanged(); SaveSettings(); } } }
+        public bool BlockTrackers { get => _settings.BlockTrackers; set { if (_settings.BlockTrackers != value) { _settings.BlockTrackers = value; OnPropertyChanged(); SaveSettings(); } } }
+        public bool BlockThirdPartyCookies { get => _settings.BlockThirdPartyCookies; set { if (_settings.BlockThirdPartyCookies != value) { _settings.BlockThirdPartyCookies = value; OnPropertyChanged(); SaveSettings(); } } }
+        public bool IsTestingDns { get => _isTestingDns; set { _isTestingDns = value; OnPropertyChanged(); } }
+        public string DnsTestResult { get => _dnsTestResult; set { _dnsTestResult = value; OnPropertyChanged(); } }
+        public string SaveNotification { get => _saveNotification; set { _saveNotification = value; OnPropertyChanged(); } }
+
+        private void ApplyDnsPreset(string name) { var p = DnsPresets.Find(x => x.Name == name); if (p != null) { CustomDns = p.Primary; SaveSettings(); } }
+
+        /// <summary>Основной метод теста — вызывается ТОЛЬКО из Task.Run (фоновый поток).</summary>
+        public async Task<List<string>> RunDnsTestAsync(string dns)
+        {
+            var results = new List<string>();
+            var sites = new[]
+            {
+                ("Google", "https://www.google.com"),
+                ("Gmail", "https://mail.google.com"),
+                ("Cloudflare", "https://www.cloudflare.com"),
+                ("Gemini", "https://gemini.google.com"),
+                ("YouTube", "https://www.youtube.com"),
+            };
+
+            foreach (var (name, url) in sites)
+            {
+                try
+                {
+                    var sw = System.Diagnostics.Stopwatch.StartNew();
+                    var resp = await _httpClient.GetAsync(url);
+                    sw.Stop();
+                    results.Add(resp.IsSuccessStatusCode ? $"🟢 {name} — {sw.ElapsedMilliseconds}мс" : $"🟡 {name} — {(int)resp.StatusCode}");
+                }
+                catch (HttpRequestException) { results.Add($"🔴 {name} — заблокирован"); }
+                catch (TaskCanceledException) { results.Add($"🔴 {name} — таймаут"); }
+                catch (Exception ex) { results.Add($"🔴 {name} — {ex.GetType().Name}"); }
+            }
+
+            if (!string.IsNullOrWhiteSpace(dns) && IsValidIp(dns))
+            {
+                try
+                {
+                    var sw = System.Diagnostics.Stopwatch.StartNew();
+                    using var udp = new UdpClient();
+                    udp.Client.ReceiveTimeout = 5000;
+                    udp.Connect(IPAddress.Parse(dns), 53);
+                    byte[] query = { 0xAA,0xAA,0x01,0x00,0x00,0x01,0x00,0x00,0x00,0x00,0x00,0x00, 0x06,0x67,0x6F,0x6F,0x67,0x6C,0x65,0x03,0x63,0x6F,0x6D,0x00, 0x00,0x01,0x00,0x01 };
+                    await udp.SendAsync(query, query.Length);
+                    var rcv = udp.ReceiveAsync();
+                    var tmo = Task.Delay(5000);
+                    var done = await Task.WhenAny(rcv, tmo);
+                    sw.Stop();
+                    if (done == rcv) { var r = await rcv; results.Add(r.Buffer.Length > 0 ? $"🟢 DNS {dns} — {sw.ElapsedMilliseconds}мс" : $"🔴 DNS {dns} — пустой ответ"); }
+                    else results.Add($"🔴 DNS {dns} — таймаут");
+                }
+                catch (Exception ex) { results.Add($"🔴 DNS {dns} — {ex.GetType().Name}"); }
+            }
+
+            var blocked = results.Any(r => r.StartsWith("🔴"));
+            results.Add("");
+            results.Add(blocked ? "⚠️ Некоторые сайты заблокированы" : "✅ Все сайты доступны");
+            return results;
+        }
+
+        /// <summary>Устаревший — для обратной совместимости.</summary>
+        public async Task<bool> TestDnsAsync(string dns)
+        {
+            if (string.IsNullOrWhiteSpace(dns)) { DnsTestResult = "⚠️ Введите адрес DNS"; return false; }
+            if (!IsValidIp(dns)) { DnsTestResult = $"❌ Некорректный IP: {dns}"; return false; }
+            IsTestingDns = true;
+            DnsTestResult = "⏳ Проверка...";
+            var results = await RunDnsTestAsync(dns);
+            DnsTestResult = string.Join("\n", results);
+            IsTestingDns = false;
+            return !results.Any(r => r.StartsWith("🔴"));
+        }
+
+        private void TestDns() { _ = Task.Run(async () => { try { await TestDnsAsync(CustomDns); } catch { } }); }
+        private async Task RunTestSafe() { try { await TestDnsAsync(CustomDns); } catch { } }
+
+        public static bool IsValidIp(string ip) => IPAddress.TryParse(ip, out _);
+
+        public void SaveSettings()
+        {
+            try
+            {
+                var json = JsonSerializer.Serialize(_settings, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(_settingsFile, json);
+                SaveNotification = "✅ Настройки сохранены";
+                _ = Task.Delay(3000).ContinueWith(_ => SaveNotification = "");
+            }
+            catch (Exception ex) { SaveNotification = $"❌ {ex.Message}"; }
+        }
+
+        private void LoadSettings()
+        {
+            try { if (File.Exists(_settingsFile)) { var l = JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(_settingsFile)); if (l != null) _settings = l; } } catch { }
+        }
+
+        public void ResetToDefaults() { _settings = new AppSettings(); OnPropertyChanged(); SaveSettings(); }
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string? n = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
+    }
+}
