@@ -163,8 +163,43 @@ namespace GhostBrowser
 
         protected override void OnKeyDown(KeyEventArgs e)
         {
+            // F11 — полноэкранный режим
+            if (e.Key == Key.F11)
+            {
+                ToggleFullScreen();
+                e.Handled = true;
+                return;
+            }
+
             ViewModel.HandleKeyboardShortcut(e.Key, e.KeyboardDevice.Modifiers);
             base.OnKeyDown(e);
+        }
+
+        private void ToggleFullScreen()
+        {
+            _isMaximized = !_isMaximized;
+
+            if (_isMaximized)
+            {
+                // Вход в полноэкранный режим
+                WindowStyle = WindowStyle.None;
+                ResizeMode = ResizeMode.NoResize;
+                Left = 0;
+                Top = 0;
+                Width = SystemParameters.PrimaryScreenWidth;
+                Height = SystemParameters.PrimaryScreenHeight;
+                BtnMaximize.Content = "❐";
+            }
+            else
+            {
+                // Выход из полноэкранного режима
+                WindowStyle = WindowStyle.None;
+                ResizeMode = ResizeMode.CanResizeWithGrip;
+                Width = 1280;
+                Height = 720;
+                WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                BtnMaximize.Content = "□";
+            }
         }
 
         private void UpdateBookmarksBar()
