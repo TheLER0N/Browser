@@ -37,6 +37,7 @@ namespace GhostBrowser.ViewModels
         public BookmarkService BookmarkService { get; }
         public SearchService SearchService { get; }
         public SettingsService SettingsService { get; }
+        public Services.DownloadService DownloadService { get; }
 
         // ==================== Collections ====================
 
@@ -178,6 +179,10 @@ namespace GhostBrowser.ViewModels
             BookmarkService = new BookmarkService();
             SearchService = new SearchService();
             SettingsService = new SettingsService();
+            DownloadService = new Services.DownloadService();
+
+            // Загружаем папку загрузок из настроек
+            DownloadService.LoadDownloadFolder(SettingsService);
 
             // Commands — AddTab использует AsyncRelayCommand для async Task
             AddTabCommand = new AsyncRelayCommand(_ => CreateTabAsync());
@@ -299,7 +304,7 @@ namespace GhostBrowser.ViewModels
             // поэтому нам не нужно await'ить что-то здесь — просто создаём и добавляем.
             await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
             {
-                var tab = new TabViewModel(env, SearchService, url);
+                var tab = new TabViewModel(env, SearchService, DownloadService, url);
                 Tabs.Add(tab);
                 SelectedTab = tab;
                 UpdateCloseTabCanExecute();
@@ -650,6 +655,7 @@ namespace GhostBrowser.ViewModels
             _clockTimer.Stop();
             StealthService.Dispose();
             SettingsService.Dispose(); // Освобождает HttpClient
+            DownloadService.Dispose(); // Останавливает таймер и отменяет загрузки
 
             foreach (var tab in Tabs)
             {

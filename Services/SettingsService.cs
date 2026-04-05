@@ -33,6 +33,8 @@ namespace GhostBrowser.Services
         public string DefaultSearchEngine { get; set; } = "Google";
         public bool BlockTrackers { get; set; } = true;
         public bool BlockThirdPartyCookies { get; set; } = false;
+        /// <summary>Папка для сохранения загруженных файлов.</summary>
+        public string DownloadFolder { get; set; } = "";
     }
 
     /// <summary>
@@ -92,6 +94,34 @@ namespace GhostBrowser.Services
         public string DefaultSearchEngine { get => _settings.DefaultSearchEngine; set { if (_settings.DefaultSearchEngine != value) { _settings.DefaultSearchEngine = value; OnPropertyChanged(); SaveSettings(); } } }
         public bool BlockTrackers { get => _settings.BlockTrackers; set { if (_settings.BlockTrackers != value) { _settings.BlockTrackers = value; OnPropertyChanged(); SaveSettings(); } } }
         public bool BlockThirdPartyCookies { get => _settings.BlockThirdPartyCookies; set { if (_settings.BlockThirdPartyCookies != value) { _settings.BlockThirdPartyCookies = value; OnPropertyChanged(); SaveSettings(); } } }
+        
+        /// <summary>
+        /// Папка загрузок по умолчанию.
+        /// Если пуста — возвращает %USERPROFILE%\Downloads.
+        /// </summary>
+        public string DownloadFolder
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_settings.DownloadFolder))
+                {
+                    // Дефолтная папка: %USERPROFILE%\Downloads
+                    _settings.DownloadFolder = Path.Combine(
+                        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
+                }
+                return _settings.DownloadFolder;
+            }
+            set
+            {
+                if (_settings.DownloadFolder != value)
+                {
+                    _settings.DownloadFolder = value;
+                    OnPropertyChanged();
+                    SaveSettings();
+                }
+            }
+        }
+        
         public bool IsTestingDns { get => _isTestingDns; set { _isTestingDns = value; OnPropertyChanged(); } }
         public string DnsTestResult { get => _dnsTestResult; set { _dnsTestResult = value; OnPropertyChanged(); } }
         public string SaveNotification { get => _saveNotification; set { _saveNotification = value; OnPropertyChanged(); } }

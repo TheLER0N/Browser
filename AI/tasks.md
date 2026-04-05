@@ -217,6 +217,16 @@
 - [x] Очистка cookies, кэша и папки профиля при закрытии
 - [x] Фиолетовый прогресс-бар и индикатор "INCOGNITO"
 
+### ✅ Менеджер загрузок (05.04.2026)
+- [x] Models/DownloadItem.cs — модель загрузки с прогрессом и скоростью
+- [x] Models/DownloadItemStatus.cs — enum статусов
+- [x] Services/DownloadService.cs — сервис загрузок с pause/resume (HTTP Range)
+- [x] Перехват загрузок WebView2 (DownloadStarting → e.Cancel)
+- [x] Секция "📥 Загрузки" в SettingsPage
+- [x] Пауза/возобновление/отмена/удаление загрузок
+- [x] Папка загрузок по умолчанию (настраивается)
+- [x] История загрузок → downloads.json
+
 ---
 
 ## 🗂️ Структура проекта (для справки)

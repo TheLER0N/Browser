@@ -155,7 +155,12 @@ namespace GhostBrowser
         }
 
         private void Menu_Downloads_Click(object sender, RoutedEventArgs e)
-            => ViewModel.StatusText = "Загрузки скоро будут доступны";
+        {
+            _settingsPage ??= new Views.SettingsPage { DataContext = ViewModel };
+            ViewModel.OpenSettings(_settingsPage);
+            // Активируем раздел загрузок
+            Dispatcher.InvokeAsync(() => _settingsPage!.ActivateDownloads());
+        }
 
         private void Menu_Bookmarks_Click(object sender, RoutedEventArgs e)
         {

@@ -33,6 +33,7 @@ namespace GhostBrowser.ViewModels
         private WebView2? _webView;
         private readonly CoreWebView2Environment _environment;
         private readonly SearchService _searchService;
+        private readonly Services.DownloadService? _downloadService;
 
         /// <summary>
         /// Событие завершения навигации. Вызывается из WebView_NavigationCompleted
@@ -40,10 +41,11 @@ namespace GhostBrowser.ViewModels
         /// </summary>
         public event EventHandler<TabNavigationCompletedEventArgs>? NavigationCompleted;
 
-        public TabViewModel(CoreWebView2Environment environment, SearchService searchService, string? initialUrl = null)
+        public TabViewModel(CoreWebView2Environment environment, SearchService searchService, Services.DownloadService? downloadService = null, string? initialUrl = null)
         {
             _environment = environment;
             _searchService = searchService;
+            _downloadService = downloadService;
 
             if (!string.IsNullOrEmpty(initialUrl))
             {
@@ -108,6 +110,7 @@ namespace GhostBrowser.ViewModels
             webView.NavigationCompleted += WebView_NavigationCompleted;
             webView.SourceChanged += WebView_SourceChanged;
             webView.ContentLoading += WebView_ContentLoading;
+            webView.CoreWebView2InitializationCompleted += WebView_CoreWebView2InitializationCompleted;
 
             _ = InitializeWebViewAsync(webView);
 
@@ -351,6 +354,46 @@ namespace GhostBrowser.ViewModels
                    "<h1>GhostBrowser</h1></body></html>";
         }
 
+        // ==================== Download Interception ====================
+
+        /// <summary>
+        /// Обработчик события начала загрузки файла.
+        /// Перехватывает загрузку: отменяет стандартную загрузку WebView2
+        /// и передаёт управление в DownloadService.
+        /// </summary>
+        private void CoreWebView2_DownloadStarting(object? sender, CoreWebView2DownloadStartingEventArgs e)
+        {
+            // Отменяем стандартную загрузку WebView2
+            e.Cancel = true;
+
+            // Если DownloadService доступен — передаём ему загрузку
+            if (_downloadService != null)
+            {
+                var url = e.DownloadOperation.Uri;
+                var suggestedName = e.ResultFilePath; // Предлагаемое имя файла от WebView2
+                var fileName = string.IsNullOrEmpty(suggestedName)
+                    ? null
+                    : System.IO.Path.GetFileName(suggestedName);
+
+                _downloadService.StartDownload(url, fileName);
+
+                System.Diagnostics.Debug.WriteLine($"Download intercepted: {url} -> {fileName}");
+            }
+        }
+
+        /// <summary>
+        /// Обработчик завершения инициализации CoreWebView2.
+        /// Подписывается на событие DownloadStarting после инициализации.
+        /// </summary>
+        private void WebView_CoreWebView2InitializationCompleted(object? sender, Microsoft.Web.WebView2.Core.CoreWebView2InitializationCompletedEventArgs e)
+        {
+            if (e.IsSuccess && WebView?.CoreWebView2 != null)
+            {
+                // Подписываемся на событие начала загрузки файлов
+                WebView.CoreWebView2.DownloadStarting += CoreWebView2_DownloadStarting;
+            }
+        }
+
         // ==================== Cleanup ====================
 
         /// <summary>
@@ -368,6 +411,8 @@ namespace GhostBrowser.ViewModels
                 WebView.NavigationCompleted -= WebView_NavigationCompleted;
                 WebView.SourceChanged -= WebView_SourceChanged;
                 WebView.ContentLoading -= WebView_ContentLoading;
+                if (WebView.CoreWebView2 != null)
+                    WebView.CoreWebView2.DownloadStarting -= CoreWebView2_DownloadStarting;
 
                 // Затем уничтожаем WebView
                 WebView.Dispose();

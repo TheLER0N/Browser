@@ -77,21 +77,24 @@
 ## 📈 Текущее состояние проекта (обновлено 05.04.2026)
 
 ### ✅ Выполнено
+- Режим инкогнито — отдельное окно с изолированным профилем WebView2
+- Менеджер загрузок — пауза/возобновление, прогресс, скорость, downloads.json
 - 3 критических бага (вкладки, F11, ресайз)
 - 13 пунктов стабилизации (HttpClient, catch, поисковик, закладки и т.д.)
 - 6 пунктов архитектуры (AsyncRelayCommand, UtcNow, дедупликация и т.д.)
-- Режим инкогнито — отдельное окно с изолированным профилем WebView2
 - Мёртвый код удалён (SettingsViewModel.cs, HistoryWindow.cs)
 - Глобальные обработчики исключений добавлены
 - NewTabPage.html исправлен (UTF-8 + data:URI + CSS)
 
 ### 📁 Структура проекта актуальна
+- `Models/DownloadItem.cs` — создан
+- `Models/DownloadItemStatus.cs` — создан
+- `Services/DownloadService.cs` — создан
 - `ViewModels/AsyncRelayCommand.cs` — создан
 - `ViewModels/IncognitoViewModel.cs` — создан
 - `IncognitoWindow.xaml(.cs)` — созданы
 - `ViewModels/SettingsViewModel.cs` — удалён
 - `HistoryWindow.cs` — удалён
-- Все AI-файлы обновлены и непротиворечивы
 
 ---
 

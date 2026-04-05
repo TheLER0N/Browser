@@ -44,7 +44,10 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TabControl">
-                        <ItemsPresenter/>
+                        <!-- Горизонтальная панель вкладок: слева направо -->
+                        <StackPanel IsItemsHost="True"
+                                    Orientation="Horizontal"
+                                    VerticalAlignment="Center"/>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
