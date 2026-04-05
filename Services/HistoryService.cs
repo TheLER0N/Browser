@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Text.Json;
@@ -22,22 +23,22 @@ namespace GhostBrowser.Services
         public void AddEntry(string title, string url)
         {
             if (url.StartsWith("ghost://")) return;
-            
+
             var entry = new HistoryEntry
             {
                 Title = title,
                 Url = url,
-                VisitedAt = DateTime.Now
+                VisitedAt = DateTime.UtcNow
             };
-            
+
             History.Insert(0, entry);
-            
+
             // Limit to 1000 entries
             while (History.Count > 1000)
             {
                 History.RemoveAt(History.Count - 1);
             }
-            
+
             SaveHistory();
         }
 
@@ -51,9 +52,14 @@ namespace GhostBrowser.Services
                     var entries = JsonSerializer.Deserialize<HistoryEntry[]>(json);
                     if (entries != null)
                     {
+                        // Дедупликация: убираем записи с одинаковым URL (оставляем первую)
+                        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                         foreach (var entry in entries)
                         {
-                            History.Add(entry);
+                            if (seen.Add(entry.Url))
+                            {
+                                History.Add(entry);
+                            }
                         }
                     }
                 }

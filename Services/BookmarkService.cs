@@ -22,17 +22,14 @@ namespace GhostBrowser.Services
 
         public void AddBookmark(string title, string url)
         {
-            // Check if already exists
-            foreach (var bm in Bookmarks)
-            {
-                if (bm.Url == url) return;
-            }
+            // Check if already exists — case-insensitive URL comparison
+            if (Bookmarks.Any(b => b.Url.Equals(url, StringComparison.OrdinalIgnoreCase))) return;
 
             var bookmark = new Bookmark
             {
                 Title = title,
                 Url = url,
-                CreatedAt = DateTime.Now
+                CreatedAt = DateTime.UtcNow
             };
 
             Bookmarks.Add(bookmark);
@@ -51,7 +48,7 @@ namespace GhostBrowser.Services
 
         public bool IsBookmarked(string url)
         {
-            return Bookmarks.Any(b => b.Url == url);
+            return Bookmarks.Any(b => b.Url.Equals(url, StringComparison.OrdinalIgnoreCase));
         }
 
         public void ClearBookmarks()

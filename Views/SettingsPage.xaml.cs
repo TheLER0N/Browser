@@ -31,19 +31,9 @@ namespace GhostBrowser.Views
         {
             if (SS == null || VM == null) return;
 
-            // Настройки DNS
-            UseCustomDnsToggle.IsChecked = SS.UseCustomDns;
-            UseCustomDnsToggle.Checked += (s, ev) => SS.UseCustomDns = true;
-            UseCustomDnsToggle.Unchecked += (s, ev) => SS.UseCustomDns = false;
-            DnsInput.Text = SS.CustomDns;
-            DnsInput.TextChanged += (s, ev) => SS.CustomDns = DnsInput.Text;
-
-            // General — привязки настроены в XAML через Binding
-            FontSizeSlider.Value = SS.FontSize;
+            // Все основные настройки привязаны через XAML Binding.
+            // Только FontSizeText требует ручного обновления (отображение значения).
             FontSizeText.Text = $"{SS.FontSize}px";
-            FontSizeSlider.ValueChanged += (s, ev) => { SS.FontSize = FontSizeSlider.Value; FontSizeText.Text = $"{SS.FontSize}px"; };
-
-            // Privacy — привязки настроены в XAML через Binding
         }
 
         private void ShowSection(string section)

@@ -18,7 +18,23 @@ namespace GhostBrowser
     public partial class MainWindow : Window
     {
         private MainViewModel ViewModel => (MainViewModel)DataContext;
-        private bool _isMaximized = false;
+
+        // Два независимых флага: обычный maximize и полноэкранный режим.
+        // Раньше был один _isMaximized для обоих режимов — это вызывало
+        // race condition при быстром переключении F11 → кнопка разворачивания.
+        private bool _isWindowMaximized = false;
+        private bool _isFullScreen = false;
+
+        // Сохранённое состояние окна перед входом в фуллскрин.
+        // Нужно для корректного восстановления при выходе.
+        private WindowState _preFullScreenWindowState;
+        private double _preFullScreenWidth;
+        private double _preFullScreenHeight;
+        private double _preFullScreenLeft;
+        private double _preFullScreenTop;
+        private WindowStyle _preFullScreenWindowStyle;
+        private ResizeMode _preFullScreenResizeMode;
+
         private Views.SettingsPage? _settingsPage;
 
         public MainWindow()
@@ -29,8 +45,6 @@ namespace GhostBrowser
 
             // Инициализируем сервис stealth mode после создания оконного хэндла
             vm.StealthService.Initialize(this);
-
-            UpdateBookmarksBar();
 
             // Анимация появления окна
             Loaded += (s, e) =>
@@ -86,11 +100,19 @@ namespace GhostBrowser
 
         private void BtnClose_Click(object sender, RoutedEventArgs e) => Close();
 
+        /// <summary>
+        /// Переключает состояние обычного maximize (не фуллскрин).
+        /// Заблокировано, если активен полноэкранный режим — чтобы избежать
+        /// конфликта состояний (race condition F11 → кнопка).
+        /// </summary>
         private void ToggleMaximize()
         {
-            _isMaximized = !_isMaximized;
-            WindowState = _isMaximized ? WindowState.Maximized : WindowState.Normal;
-            BtnMaximize.Content = _isMaximized ? "❐" : "□";
+            // Блокируем кнопку во время фуллскрина — предотвращаем конфликт
+            if (_isFullScreen) return;
+
+            _isWindowMaximized = !_isWindowMaximized;
+            WindowState = _isWindowMaximized ? WindowState.Maximized : WindowState.Normal;
+            BtnMaximize.Content = _isWindowMaximized ? "❐" : "□";
         }
 
         // ==================== Меню (Settings/History/Bookmarks) ====================
@@ -112,6 +134,16 @@ namespace GhostBrowser
                 _settingsPage ??= new Views.SettingsPage { DataContext = ViewModel };
                 ViewModel.OpenSettings(_settingsPage);
             }
+        }
+
+        /// <summary>
+        /// Открывает окно режима инкогнито.
+        /// Инкогнито использует изолированный профиль WebView2 и не сохраняет данные.
+        /// </summary>
+        private void BtnIncognito_Click(object sender, RoutedEventArgs e)
+        {
+            var incognitoWindow = new IncognitoWindow();
+            incognitoWindow.Show();
         }
 
         private void Menu_History_Click(object sender, RoutedEventArgs e)
@@ -161,6 +193,22 @@ namespace GhostBrowser
                 DragMove();
         }
 
+        /// <summary>
+        /// Обработчик изменения размера окна.
+        /// Вызывает перерисовку для устранения визуальных артефактов,
+        /// которые возникают из-за комбинации WindowChrome + AllowsTransparency.
+        /// Performed через Dispatcher.InvokeAsync с низким приоритетом, чтобы
+        /// дать WPF завершить текущий layout pass.
+        /// </summary>
+        private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            Dispatcher.InvokeAsync(() =>
+            {
+                InvalidateVisual();
+                UpdateLayout();
+            }, System.Windows.Threading.DispatcherPriority.Background);
+        }
+
         protected override void OnKeyDown(KeyEventArgs e)
         {
             // F11 — полноэкранный режим
@@ -171,41 +219,112 @@ namespace GhostBrowser
                 return;
             }
 
+            // Ctrl+Shift+N — новое окно инкогнито
+            if (e.KeyboardDevice.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift) && e.Key == Key.N)
+            {
+                var incognitoWindow = new IncognitoWindow();
+                incognitoWindow.Show();
+                e.Handled = true;
+                return;
+            }
+
             ViewModel.HandleKeyboardShortcut(e.Key, e.KeyboardDevice.Modifiers);
             base.OnKeyDown(e);
         }
 
+        /// <summary>
+        /// Переключает полноэкранный режим (F11).
+        ///
+        /// При входе: сохраняет текущее состояние окна и разворачивает на весь экран.
+        /// При выходе: восстанавливает сохранённое состояние и вызывает перерисовку.
+        ///
+        /// Использует Dispatcher.InvokeAsync для безопасного обновления UI
+        /// и InvalidateVisual() для корректной перерисовки после выхода.
+        /// </summary>
         private void ToggleFullScreen()
         {
-            _isMaximized = !_isMaximized;
-
-            if (_isMaximized)
+            try
             {
-                // Вход в полноэкранный режим
-                WindowStyle = WindowStyle.None;
-                ResizeMode = ResizeMode.NoResize;
-                Left = 0;
-                Top = 0;
-                Width = SystemParameters.PrimaryScreenWidth;
-                Height = SystemParameters.PrimaryScreenHeight;
-                BtnMaximize.Content = "❐";
-            }
-            else
-            {
-                // Выход из полноэкранного режима
-                WindowStyle = WindowStyle.None;
-                ResizeMode = ResizeMode.CanResizeWithGrip;
-                Width = 1280;
-                Height = 720;
-                WindowStartupLocation = WindowStartupLocation.CenterScreen;
-                BtnMaximize.Content = "□";
-            }
-        }
+                if (!_isFullScreen)
+                {
+                    // === Вход в полноэкранный режим ===
+                    // Сохраняем текущее состояние для последующего восстановления
+                    _preFullScreenWindowState = WindowState;
+                    _preFullScreenWidth = Width;
+                    _preFullScreenHeight = Height;
+                    _preFullScreenLeft = Left;
+                    _preFullScreenTop = Top;
+                    _preFullScreenWindowStyle = WindowStyle;
+                    _preFullScreenResizeMode = ResizeMode;
 
-        private void UpdateBookmarksBar()
-        {
-            BookmarksBar.ItemsSource = null;
-            BookmarksBar.ItemsSource = ViewModel.BookmarkService.Bookmarks;
+                    _isFullScreen = true;
+
+                    // Обновляем кнопку maximize — показываем что мы в фуллскрине
+                    BtnMaximize.Content = "❐";
+
+                    // Разворачиваем на весь экран
+                    WindowStyle = WindowStyle.None;
+                    ResizeMode = ResizeMode.NoResize;
+                    Left = 0;
+                    Top = 0;
+                    Width = SystemParameters.PrimaryScreenWidth;
+                    Height = SystemParameters.PrimaryScreenHeight;
+                    WindowState = WindowState.Normal;
+
+                    System.Diagnostics.Debug.WriteLine("Entered fullscreen");
+                }
+                else
+                {
+                    // === Выход из полноэкранного режима ===
+                    _isFullScreen = false;
+
+                    // Восстанавливаем сохранённое состояние
+                    WindowStyle = _preFullScreenWindowStyle;
+                    ResizeMode = _preFullScreenResizeMode;
+                    Width = _preFullScreenWidth;
+                    Height = _preFullScreenHeight;
+                    Left = _preFullScreenLeft;
+                    Top = _preFullScreenTop;
+                    WindowState = _preFullScreenWindowState;
+
+                    // Обновляем кнопку maximize в соответствии с восстановленным состоянием
+                    _isWindowMaximized = (WindowState == WindowState.Maximized);
+                    BtnMaximize.Content = _isWindowMaximized ? "❐" : "□";
+
+                    // Вызываем перерисовку для устранения визуальных артефактов
+                    Dispatcher.InvokeAsync(() =>
+                    {
+                        InvalidateVisual();
+                        UpdateLayout();
+                    }, System.Windows.Threading.DispatcherPriority.Background);
+
+                    System.Diagnostics.Debug.WriteLine("Exited fullscreen");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"ToggleFullScreen error: {ex.Message}");
+
+                // Аварийное восстановление: сбрасываем фуллскрин в безопасное состояние
+                _isFullScreen = false;
+                Dispatcher.InvokeAsync(() =>
+                {
+                    try
+                    {
+                        WindowStyle = WindowStyle.None;
+                        ResizeMode = ResizeMode.CanResizeWithGrip;
+                        Width = 1280;
+                        Height = 720;
+                        WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                        BtnMaximize.Content = "□";
+                        InvalidateVisual();
+                    }
+                    catch (Exception restoreEx)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Fullscreen restore fallback error: {restoreEx.Message}");
+                    }
+                });
+            }
         }
 
         private void OnStealthModeChanged(object? sender, bool isStealth)
@@ -225,6 +344,9 @@ namespace GhostBrowser
 
         protected override void OnClosed(EventArgs e)
         {
+            // Освобождаем SettingsPage — предотвращаем утечку памяти
+            _settingsPage = null;
+
             ViewModel.Cleanup();
             base.OnClosed(e);
         }

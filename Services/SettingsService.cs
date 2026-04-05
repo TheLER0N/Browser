@@ -35,7 +35,12 @@ namespace GhostBrowser.Services
         public bool BlockThirdPartyCookies { get; set; } = false;
     }
 
-    public class SettingsService : INotifyPropertyChanged
+    /// <summary>
+    /// Сервис настроек приложения.
+    /// Реализует INotifyPropertyChanged (архитектурная проблема — будет вынесено в SettingsViewModel в Фазе 3).
+    /// Реализует IDisposable для корректного освобождения HttpClient.
+    /// </summary>
+    public class SettingsService : INotifyPropertyChanged, IDisposable
     {
         private AppSettings _settings = new();
         private readonly string _settingsFile;
@@ -43,6 +48,7 @@ namespace GhostBrowser.Services
         private bool _isTestingDns;
         private string _dnsTestResult = "";
         private string _saveNotification = "";
+        private bool _isDisposed;
 
         public static List<DnsPreset> DnsPresets { get; } = new()
         {
@@ -51,13 +57,10 @@ namespace GhostBrowser.Services
             new DnsPreset { Name = "OpenDNS", Primary = "208.67.222.222", Secondary = "208.67.220.220" },
             new DnsPreset { Name = "Quad9", Primary = "9.9.9.9", Secondary = "149.112.112.112" },
             new DnsPreset { Name = "AdGuard", Primary = "94.140.14.14", Secondary = "94.140.15.15" },
-            new DnsPreset { Name = "Cloudflare (RU bypass)", Primary = "1.1.1.1", Secondary = "1.0.0.1" },
-            new DnsPreset { Name = "Google Public (RU bypass)", Primary = "8.8.8.8", Secondary = "8.8.4.4" },
             new DnsPreset { Name = "UncensoredDNS (Дания)", Primary = "89.233.43.71", Secondary = "" },
             new DnsPreset { Name = "Digitale-Gesellschaft (RU)", Primary = "185.95.218.42", Secondary = "185.95.218.43" },
             new DnsPreset { Name = "AppliedPrivacy (Люксембург)", Primary = "85.214.7.22", Secondary = "" },
             new DnsPreset { Name = "BlahDNS (Финляндия)", Primary = "185.194.244.57", Secondary = "" },
-            new DnsPreset { Name = "Quad9 (RU bypass)", Primary = "9.9.9.9", Secondary = "149.112.112.112" },
             new DnsPreset { Name = "Control D (Anti-block)", Primary = "76.76.2.0", Secondary = "76.76.10.0" },
             new DnsPreset { Name = "NextDNS (Free tier)", Primary = "45.90.28.0", Secondary = "45.90.30.0" },
             new DnsPreset { Name = "Yandex (базовый)", Primary = "77.88.8.8", Secondary = "77.88.8.1" },
@@ -161,11 +164,29 @@ namespace GhostBrowser.Services
             return !results.Any(r => r.StartsWith("🔴"));
         }
 
-        private void TestDns() { _ = Task.Run(async () => { try { await TestDnsAsync(CustomDns); } catch { } }); }
-        private async Task RunTestSafe() { try { await TestDnsAsync(CustomDns); } catch { } }
+        /// <summary>
+        /// Запускает DNS-тест в фоновом потоке.
+        /// Обёрнут в try-catch с выводом результата пользователю.
+        /// </summary>
+        private async void TestDns()
+        {
+            try
+            {
+                await Task.Run(async () => { await TestDnsAsync(CustomDns); });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"TestDns error: {ex.Message}");
+                DnsTestResult = $"❌ Ошибка теста: {ex.Message}";
+            }
+        }
 
         public static bool IsValidIp(string ip) => IPAddress.TryParse(ip, out _);
 
+        /// <summary>
+        /// Сохраняет настройки в JSON-файл.
+        /// Уведомление автоматически очищается через 3 секунды (DispatcherTimer, не ContinueWith).
+        /// </summary>
         public void SaveSettings()
         {
             try
@@ -173,18 +194,62 @@ namespace GhostBrowser.Services
                 var json = JsonSerializer.Serialize(_settings, new JsonSerializerOptions { WriteIndented = true });
                 File.WriteAllText(_settingsFile, json);
                 SaveNotification = "✅ Настройки сохранены";
-                _ = Task.Delay(3000).ContinueWith(_ => SaveNotification = "");
+
+                // Используем DispatcherTimer вместо ContinueWith — безопасно для UI-потока
+                var timer = new System.Windows.Threading.DispatcherTimer
+                {
+                    Interval = TimeSpan.FromSeconds(3)
+                };
+                timer.Tick += (s, e) =>
+                {
+                    timer.Stop();
+                    if (!_isDisposed) SaveNotification = "";
+                };
+                timer.Start();
             }
-            catch (Exception ex) { SaveNotification = $"❌ {ex.Message}"; }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"SaveSettings error: {ex.Message}");
+                SaveNotification = $"❌ {ex.Message}";
+            }
         }
 
+        /// <summary>
+        /// Загружает настройки из JSON. Если файл повреждён — использует дефолтные настройки.
+        /// </summary>
         private void LoadSettings()
         {
-            try { if (File.Exists(_settingsFile)) { var l = JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(_settingsFile)); if (l != null) _settings = l; } } catch { }
+            try
+            {
+                if (File.Exists(_settingsFile))
+                {
+                    var json = File.ReadAllText(_settingsFile);
+                    var loaded = JsonSerializer.Deserialize<AppSettings>(json);
+                    if (loaded != null)
+                        _settings = loaded;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Файл настроек повреждён — используем дефолтные настройки
+                System.Diagnostics.Debug.WriteLine($"LoadSettings error (using defaults): {ex.Message}");
+                _settings = new AppSettings();
+            }
         }
 
         public void ResetToDefaults() { _settings = new AppSettings(); OnPropertyChanged(); SaveSettings(); }
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string? n = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
+
+        /// <summary>
+        /// Освобождает ресурсы — DISPOSит HttpClient.
+        /// Вызывается из MainViewModel.Cleanup() при закрытии окна.
+        /// </summary>
+        public void Dispose()
+        {
+            if (_isDisposed) return;
+            _isDisposed = true;
+            _httpClient?.Dispose();
+        }
     }
 }

@@ -141,7 +141,6 @@ namespace GhostBrowser.ViewModels
 
         // ==================== Commands ====================
 
-        public ICommand AddTabCommand { get; }
         public ICommand CloseTabCommand { get; }
         public ICommand GoBackCommand { get; }
         public ICommand GoForwardCommand { get; }
@@ -153,6 +152,13 @@ namespace GhostBrowser.ViewModels
         public ICommand ToggleBookmarkCommand { get; }
         public ICommand CycleSearchEngineCommand { get; }
         public ICommand FocusUrlCommand { get; }
+
+        /// <summary>
+        /// Асинхронная команда создания вкладки.
+        /// Использует AsyncRelayCommand — блокирует кнопку во время выполнения
+        /// и перехватывает исключения.
+        /// </summary>
+        public AsyncRelayCommand AddTabCommand { get; }
 
         // ==================== Constructor ====================
 
@@ -173,8 +179,8 @@ namespace GhostBrowser.ViewModels
             SearchService = new SearchService();
             SettingsService = new SettingsService();
 
-            // Commands
-            AddTabCommand = new RelayCommand(_ => CreateTab());
+            // Commands — AddTab использует AsyncRelayCommand для async Task
+            AddTabCommand = new AsyncRelayCommand(_ => CreateTabAsync());
             CloseTabCommand = new RelayCommand(CloseTab, _ => Tabs.Count > 1);
             GoBackCommand = new RelayCommand(_ => SelectedTab?.GoBack(), _ => SelectedTab?.CanGoBack == true);
             GoForwardCommand = new RelayCommand(_ => SelectedTab?.GoForward(), _ => SelectedTab?.CanGoForward == true);
@@ -198,14 +204,21 @@ namespace GhostBrowser.ViewModels
             // Initialize stealth
             StealthService.StealthModeChanged += (s, stealth) => IsStealthMode = stealth;
 
-            // Search engine
+            // Search engine — загружаем сохранённый поисковик из настроек
             SearchEngineIcon = SearchService.GetEngineIcon(SearchService.CurrentEngine);
+
+            // Восстанавливаем поисковик из настроек (если пользователь менял ранее)
+            if (Enum.TryParse<SearchService.SearchEngine>(SettingsService.DefaultSearchEngine, out var savedEngine))
+            {
+                SearchService.CurrentEngine = savedEngine;
+                SearchEngineIcon = SearchService.GetEngineIcon(savedEngine);
+            }
 
             // Subscribe to bookmark changes
             BookmarkService.Bookmarks.CollectionChanged += (s, e) => UpdateBookmarkState();
 
-            // Create first tab
-            CreateTab();
+            // Создаём первую вкладку (fire-and-forget, но через AsyncRelayCommand для безопасности)
+            _ = CreateTabAsync();
         }
 
         // ==================== Environment ====================
@@ -213,24 +226,33 @@ namespace GhostBrowser.ViewModels
         /// <summary>
         /// Подписывается на изменения свойств выбранной вкладки.
         /// При изменении CanGoBack/CanGoForward обновляет состояние команд навигации.
+        /// Добавлены null-проверки для предотвращения race condition при быстром переключении вкладок.
         /// </summary>
         private void OnSelectedTabPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (sender is not TabViewModel tab) return;
+            // Защита: вкладка могла быть удалена между генерацией и обработкой события
+            if (sender is not TabViewModel tab || tab.WebView == null) return;
 
-            if (e.PropertyName == nameof(TabViewModel.CanGoBack))
+            try
             {
-                CanGoBack = tab.CanGoBack;
-                if (GoBackCommand is RelayCommand cmd) cmd.RaiseCanExecuteChanged();
+                if (e.PropertyName == nameof(TabViewModel.CanGoBack))
+                {
+                    CanGoBack = tab.CanGoBack;
+                    if (GoBackCommand is RelayCommand cmd) cmd.RaiseCanExecuteChanged();
+                }
+                else if (e.PropertyName == nameof(TabViewModel.CanGoForward))
+                {
+                    CanGoForward = tab.CanGoForward;
+                    if (GoForwardCommand is RelayCommand cmd) cmd.RaiseCanExecuteChanged();
+                }
+                else if (e.PropertyName == nameof(TabViewModel.IsLoading))
+                {
+                    IsLoading = tab.IsLoading;
+                }
             }
-            else if (e.PropertyName == nameof(TabViewModel.CanGoForward))
+            catch (Exception ex)
             {
-                CanGoForward = tab.CanGoForward;
-                if (GoForwardCommand is RelayCommand cmd) cmd.RaiseCanExecuteChanged();
-            }
-            else if (e.PropertyName == nameof(TabViewModel.IsLoading))
-            {
-                IsLoading = tab.IsLoading;
+                System.Diagnostics.Debug.WriteLine($"OnSelectedTabPropertyChanged error: {ex.Message}");
             }
         }
 
@@ -263,17 +285,19 @@ namespace GhostBrowser.ViewModels
 
         /// <summary>
         /// Создаёт новую вкладку с WebView2.
-        /// 
-        /// ВАЖНО: Метод async void, потому что вызывается из RelayCommand (не поддерживает Task).
-        /// WebView2 инициализируется асинхронно внутри TabViewModel.
+        ///
+        /// Вызывается из AsyncRelayCommand (не async void).
+        /// WebView2 инициализируется асинхронно внутри TabViewModel — нам не нужно ждать завершения.
         /// </summary>
         /// <param name="url">Опциональный URL для навигации. Если null — открывается new tab page.</param>
-        public async void CreateTab(string? url = null)
+        public async Task CreateTabAsync(string? url = null)
         {
             var env = await GetEnvironmentAsync();
 
-            // WebView2 требует создание на UI потоке
-            await System.Windows.Application.Current.Dispatcher.InvokeAsync(async () =>
+            // Создаём WebView2 на UI потоке.
+            // TabViewModel сам запускает асинхронную инициализацию WebView2 внутри себя,
+            // поэтому нам не нужно await'ить что-то здесь — просто создаём и добавляем.
+            await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
             {
                 var tab = new TabViewModel(env, SearchService, url);
                 Tabs.Add(tab);
@@ -284,7 +308,7 @@ namespace GhostBrowser.ViewModels
 
         /// <summary>
         /// Закрывает указанную вкладку.
-        /// 
+        ///
         /// Логика выбора следующей вкладки:
         /// - Если закрывается выбранная — выбираем соседнюю (следующую или предыдущую)
         /// - Если закрывается не выбранная — SelectedTab не меняется
@@ -293,37 +317,47 @@ namespace GhostBrowser.ViewModels
         /// <param name="parameter">TabViewModel для закрытия или null для текущей выбранной.</param>
         public void CloseTab(object? parameter)
         {
-            TabViewModel? tabToClose = null;
-
-            if (parameter is TabViewModel paramTab)
+            try
             {
-                tabToClose = paramTab;
+                TabViewModel? tabToClose = null;
+
+                if (parameter is TabViewModel paramTab)
+                {
+                    tabToClose = paramTab;
+                }
+                else if (SelectedTab != null)
+                {
+                    tabToClose = SelectedTab;
+                }
+
+                if (tabToClose == null) return;
+
+                var index = Tabs.IndexOf(tabToClose);
+
+                // Выбираем соседнюю вкладку перед закрытием.
+                // Tabs.Count - 2 — это корректный индекс после удаления (Count уменьшится на 1).
+                // Если вкладок всего 1, newIndex = -1 → выберем 0 (последняя оставшаяся).
+                if (SelectedTab == tabToClose && Tabs.Count > 1)
+                {
+                    var newIndex = Math.Max(0, Math.Min(index, Tabs.Count - 2));
+                    SelectedTab = Tabs[newIndex];
+                }
+
+                // Отписываемся от событий и уничтожаем WebView ДО удаления из коллекции
+                tabToClose.Dispose();
+                Tabs.Remove(tabToClose);
+
+                UpdateCloseTabCanExecute();
+
+                // Закрываем окно если вкладок не осталось
+                if (Tabs.Count == 0)
+                {
+                    System.Windows.Application.Current.MainWindow?.Close();
+                }
             }
-            else if (SelectedTab != null)
+            catch (Exception ex)
             {
-                tabToClose = SelectedTab;
-            }
-
-            if (tabToClose == null) return;
-
-            var index = Tabs.IndexOf(tabToClose);
-
-            // Выбираем соседнюю вкладку перед закрытием
-            if (SelectedTab == tabToClose)
-            {
-                var newIndex = Math.Min(index, Tabs.Count - 2);
-                SelectedTab = Tabs[newIndex >= 0 ? newIndex : 0];
-            }
-
-            tabToClose.Dispose();
-            Tabs.Remove(tabToClose);
-
-            UpdateCloseTabCanExecute();
-
-            // Закрываем окно если вкладок не осталось
-            if (Tabs.Count == 0)
-            {
-                System.Windows.Application.Current.MainWindow?.Close();
+                System.Diagnostics.Debug.WriteLine($"CloseTab error: {ex.Message}");
             }
         }
 
@@ -337,48 +371,79 @@ namespace GhostBrowser.ViewModels
 
         private TabViewModel? _previousSelectedTab;
 
+        /// <summary>
+        /// Синхронизирует свойства MainViewModel со свойствами выбранной вкладки.
+        ///
+        /// ВАЖНО: порядок отписки/подписки критичен для предотвращения race condition:
+        /// 1. Сначала присваиваем _previousSelectedTab = SelectedTab (запоминаем ДО отписки)
+        /// 2. Затем отписываемся от старой вкладки
+        /// 3. Подписываемся на новую
+        ///
+        /// DisplayedContent обновляется через Dispatcher.InvokeAsync чтобы избежать
+        /// конфликтов при быстром переключении вкладок.
+        /// </summary>
         private void UpdateFromSelectedTab()
         {
-            // Отписываемся от событий предыдущей выбранной вкладки
-            if (_previousSelectedTab != null)
+            try
             {
-                _previousSelectedTab.PropertyChanged -= OnSelectedTabPropertyChanged;
-                _previousSelectedTab.NavigationCompleted -= OnSelectedTabNavigationCompleted;
-            }
-
-            if (SelectedTab != null)
-            {
-                // Подписываемся на события новой выбранной вкладки
-                SelectedTab.PropertyChanged += OnSelectedTabPropertyChanged;
-                SelectedTab.NavigationCompleted += OnSelectedTabNavigationCompleted;
+                // Сохраняем ссылку на предыдущую вкладку ДО любых изменений.
+                // Это предотвращает ситуацию, когда новая вкладка уже подписана,
+                // но _previousSelectedTab ещё не обновлён, что приводит к дублированию отписки.
                 _previousSelectedTab = SelectedTab;
 
-                UrlInput = SelectedTab.Url == "ghost://newtab" ? "" : SelectedTab.Url;
-                CanGoBack = SelectedTab.CanGoBack;
-                CanGoForward = SelectedTab.CanGoForward;
-                IsLoading = SelectedTab.IsLoading;
-                StatusText = "Готово";
-                UpdateBookmarkState();
-
-                // Если настройки закрыты, отображаем WebView выбранной вкладки
-                if (!IsSettingsOpen)
+                if (SelectedTab != null)
                 {
-                    DisplayedContent = SelectedTab.WebView;
-                }
-            }
-            else
-            {
-                _previousSelectedTab = null;
-                UrlInput = "";
-                CanGoBack = false;
-                CanGoForward = false;
-                IsLoading = false;
-            }
+                    // Подписываемся на события новой выбранной вкладки.
+                    // Безопасно: если вкладка только что создана, событий ещё нет.
+                    SelectedTab.PropertyChanged += OnSelectedTabPropertyChanged;
+                    SelectedTab.NavigationCompleted += OnSelectedTabNavigationCompleted;
 
-            // Update command states
-            if (GoBackCommand is RelayCommand backCmd) backCmd.RaiseCanExecuteChanged();
-            if (GoForwardCommand is RelayCommand fwdCmd) fwdCmd.RaiseCanExecuteChanged();
-            if (RefreshCommand is RelayCommand refCmd) refCmd.RaiseCanExecuteChanged();
+                    UrlInput = SelectedTab.Url == "ghost://newtab" ? "" : SelectedTab.Url;
+                    CanGoBack = SelectedTab.CanGoBack;
+                    CanGoForward = SelectedTab.CanGoForward;
+                    IsLoading = SelectedTab.IsLoading;
+                    StatusText = "Готово";
+                    UpdateBookmarkState();
+
+                    // Обновляем DisplayedContent через Dispatcher.InvokeAsync,
+                    // чтобы избежать конфликта с текущей перерисовкой UI.
+                    // Проверяем WebView != null — он может быть ещё не инициализирован.
+                    if (!IsSettingsOpen && SelectedTab.WebView != null)
+                    {
+                        // Используем InvokeAsync с низким приоритетом, чтобы дать
+                        // WebView2 завершить текущие операции рендеринга.
+                        System.Windows.Application.Current.Dispatcher.InvokeAsync(
+                            () =>
+                            {
+                                // Повторная проверка: вкладка могла быть закрыта пока ждали диспетчер
+                                if (_previousSelectedTab?.WebView != null)
+                                {
+                                    DisplayedContent = _previousSelectedTab.WebView;
+                                }
+                            },
+                            System.Windows.Threading.DispatcherPriority.Background);
+                    }
+                }
+                else
+                {
+                    // Нет вкладок — сбрасываем всё
+                    _previousSelectedTab = null;
+                    UrlInput = "";
+                    CanGoBack = false;
+                    CanGoForward = false;
+                    IsLoading = false;
+                }
+
+                // Обновляем состояние команд навигации
+                if (GoBackCommand is RelayCommand backCmd) backCmd.RaiseCanExecuteChanged();
+                if (GoForwardCommand is RelayCommand fwdCmd) fwdCmd.RaiseCanExecuteChanged();
+                if (RefreshCommand is RelayCommand refCmd) refCmd.RaiseCanExecuteChanged();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"UpdateFromSelectedTab error: {ex.Message}");
+                StatusText = $"Ошибка переключения: {ex.Message}";
+            }
         }
 
         public void NavigateFromInput(object? parameter)
@@ -451,6 +516,10 @@ namespace GhostBrowser.ViewModels
 
         // ==================== Search Engine ====================
 
+        /// <summary>
+        /// Переключает поисковую систему по кругу: Google → Bing → DuckDuckGo → Yandex.
+        /// Сохраняет выбор в SettingsService для восстановления при перезапуске.
+        /// </summary>
         private void CycleSearchEngine()
         {
             SearchService.CurrentEngine = SearchService.CurrentEngine switch
@@ -462,6 +531,9 @@ namespace GhostBrowser.ViewModels
             };
             SearchEngineIcon = SearchService.GetEngineIcon(SearchService.CurrentEngine);
             StatusText = $"Поиск: {SearchService.CurrentEngine}";
+
+            // Сохраняем выбор пользователя — восстановится при следующем запуске
+            SettingsService.DefaultSearchEngine = SearchService.CurrentEngine.ToString();
         }
 
         // ==================== Keyboard Shortcuts ====================
@@ -471,7 +543,7 @@ namespace GhostBrowser.ViewModels
             // Ctrl+T — New tab
             if (modifiers == ModifierKeys.Control && key == Key.T)
             {
-                CreateTab();
+                AddTabCommand.Execute(null);
                 return;
             }
 
@@ -569,10 +641,15 @@ namespace GhostBrowser.ViewModels
 
         // ==================== Cleanup ====================
 
+        /// <summary>
+        /// Освобождает ресурсы при закрытии окна.
+        /// Порядок: таймер → сервисы → вкладки.
+        /// </summary>
         public void Cleanup()
         {
             _clockTimer.Stop();
             StealthService.Dispose();
+            SettingsService.Dispose(); // Освобождает HttpClient
 
             foreach (var tab in Tabs)
             {

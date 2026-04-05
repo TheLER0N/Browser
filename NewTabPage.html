@@ -13,11 +13,11 @@
   --danger:#ef4444;--success:#2dd4a0;
   --radius:16px;--radius-sm:12px;--radius-xs:8px;
 }
-html,body{height:100%}
+html{height:100%;overflow:hidden}
 body{
   background:var(--bg);color:var(--text);
   font-family:'Segoe UI Variable','Segoe UI',system-ui,-apple-system,sans-serif;
-  min-height:100vh;overflow-x:hidden;position:relative;
+  height:100%;overflow-x:hidden;position:relative;
   -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
 }
 
@@ -68,7 +68,8 @@ body{
 .main{
   position:relative;z-index:5;
   display:flex;flex-direction:column;align-items:center;
-  justify-content:center;min-height:100vh;padding:60px 24px 40px;
+  justify-content:center;height:100%;padding:60px 24px 40px;
+  overflow-y:auto;
 }
 
 /* ── Logo ── */

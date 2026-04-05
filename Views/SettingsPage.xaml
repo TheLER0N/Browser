@@ -85,6 +85,7 @@
                                        VerticalAlignment="Center"
                                        FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
                             <ToggleButton x:Name="UseCustomDnsToggle"
+                                          IsChecked="{Binding SettingsService.UseCustomDns}"
                                           Grid.Column="1"
                                           Style="{StaticResource ToggleSwitch}"/>
                         </Grid>
@@ -139,6 +140,7 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <TextBox x:Name="DnsInput"
+                                 Text="{Binding SettingsService.CustomDns, UpdateSourceTrigger=PropertyChanged}"
                                  Style="{StaticResource SettingsTextBox}"
                                  FontFamily="Consolas, 'Cascadia Code', monospace"
                                  FontSize="13"/>
@@ -187,6 +189,7 @@
                             <ColumnDefinition Width="50"/>
                         </Grid.ColumnDefinitions>
                         <Slider x:Name="FontSizeSlider"
+                                Value="{Binding SettingsService.FontSize}"
                                 Minimum="10" Maximum="24" TickFrequency="1"
                                 IsSnapToTickEnabled="True"
                                 Style="{StaticResource SettingsSlider}"/>

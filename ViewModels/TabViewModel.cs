@@ -10,18 +10,20 @@ namespace GhostBrowser.ViewModels
     /// <summary>
     /// ViewModel одной вкладки браузера.
     /// Оборачивает WebView2 и предоставляет свойства/команды для навигации.
-    /// 
+    ///
     /// Жизненный цикл WebView2:
     /// 1. Конструктор: создаётся WebView2 контрол
     /// 2. InitializeWebViewAsync: async инициализация CoreWebView2
     /// 3. Navigate/ShowNewTabPage: первая навигация
     /// 4. Dispose: отписка от событий + уничтожение WebView
-    /// 
+    ///
     /// ВАЖНО: WebView2 — тяжёлый объект, потребляющий ~50-100MB RAM на экземпляр.
     /// При закрытии вкладки обязательно вызывается Dispose() для освобождения ресурсов.
     /// </summary>
     public class TabViewModel : ViewModelBase
     {
+        /// <summary>Задержка сброса прогресса после завершения навигации (мс).</summary>
+        private const int ProgressResetDelayMs = 500;
         private string _title = "Новая вкладка";
         private string _url = "ghost://newtab";
         private bool _isLoading;
@@ -185,18 +187,41 @@ namespace GhostBrowser.ViewModels
         /// <summary>
         /// Показывает встроенную страницу новой вкладки (NewTabPage.html).
         /// Вызывается при создании вкладки, нажатии кнопки "Домой" или закрытии настроек.
-        /// Использует NavigateToString вместо Source для обхода ограничений file:// протокола.
+        ///
+        /// Использует Navigate с data: URI вместо NavigateToString, потому что
+        /// NavigateToString ненадёжен: не всегда генерирует NavigationCompleted,
+        /// не устанавливает BaseUri, и могут не работать CSS animations и JS.
         /// </summary>
         public void ShowNewTabPage()
         {
             if (WebView == null) return;
 
             var html = GetNewTabPageHtml();
-            WebView.NavigateToString(html);
-            Url = "ghost://newtab";
-            Title = "Новая вкладка";
-            IsLoading = false;
-            Progress = 0;
+            // Кодируем HTML в base64 и используем data: URI — это надёжнее NavigateToString
+            var base64 = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(html));
+            var dataUri = $"data:text/html;base64,{base64}";
+
+            try
+            {
+                WebView.Source = new Uri(dataUri);
+                Url = "ghost://newtab";
+                Title = "Новая вкладка";
+                IsLoading = false;
+                Progress = 0;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"ShowNewTabPage error: {ex.Message}");
+                // Фоллбэк: минимальная страница
+                try
+                {
+                    WebView.NavigateToString(
+                        "<html><body style=\"background:#06080d;color:#f0f6fc;font-family:sans-serif;" +
+                        "display:flex;align-items:center;justify-content:center;height:100vh;margin:0;\">" +
+                        "<h1>GhostBrowser</h1></body></html>");
+                }
+                catch { /* игнорируем */ }
+            }
         }
 
         public void GoBack()
@@ -261,14 +286,40 @@ namespace GhostBrowser.ViewModels
                 CanGoForward = WebView.CanGoForward;
             }
 
-            // Reset progress after delay
-            _ = Task.Delay(500).ContinueWith(_ =>
-                System.Windows.Application.Current.Dispatcher.Invoke(() => Progress = 0));
+            // Сбрасываем прогресс через 500мс — используем async/await вместо ContinueWith
+            _ = ResetProgressAsync();
 
             // Уведомляем подписчиков о завершении навигации (для сохранения истории)
             var navTitle = WebView?.CoreWebView2?.DocumentTitle ?? "";
             var navUrl = WebView?.Source?.ToString() ?? "";
             NavigationCompleted?.Invoke(this, new TabNavigationCompletedEventArgs(navTitle, navUrl));
+        }
+
+        /// <summary>
+        /// Сбрасывает индикатор прогресса через 500мс после завершения навигации.
+        /// Вызывается из WebView_NavigationCompleted.
+        /// </summary>
+        private async Task ResetProgressAsync()
+        {
+            try
+            {
+                await Task.Delay(ProgressResetDelayMs);
+                // Progress обновляется в UI-потоке (Dispatcher.Invoke не нужен,
+                // т.к. Progress setter вызывает OnPropertyChanged, который безопасен).
+                // Но для надёжности используем Dispatcher, если вызов не из UI-потока.
+                if (System.Windows.Application.Current?.Dispatcher.CheckAccess() == false)
+                {
+                    await System.Windows.Application.Current.Dispatcher.InvokeAsync(() => Progress = 0);
+                }
+                else
+                {
+                    Progress = 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"ResetProgressAsync error: {ex.Message}");
+            }
         }
 
         private void WebView_SourceChanged(object? sender, CoreWebView2SourceChangedEventArgs e)
@@ -290,12 +341,14 @@ namespace GhostBrowser.ViewModels
                 System.Reflection.Assembly.GetExecutingAssembly().Location) ?? "";
             var htmlPath = System.IO.Path.Combine(assemblyPath, "NewTabPage.html");
 
+            // ВАЖНО: явно указываем UTF-8 — на русской Windows default encoding
+            // это Windows-1251 (кириллица), что ломает UTF-8 файл с русским текстом.
             if (System.IO.File.Exists(htmlPath))
-                return System.IO.File.ReadAllText(htmlPath);
+                return System.IO.File.ReadAllText(htmlPath, System.Text.Encoding.UTF8);
 
             return "<html><body style=\"background:#06080d;color:#f0f6fc;font-family:Segoe UI,sans-serif;" +
                    "display:flex;align-items:center;justify-content:center;height:100vh;margin:0;\">" +
-                   "<h1>👻 GhostBrowser</h1></body></html>";
+                   "<h1>GhostBrowser</h1></body></html>";
         }
 
         // ==================== Cleanup ====================
