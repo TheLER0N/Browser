@@ -25,7 +25,7 @@
 
 ## [моя просьба]
 
-Моя задача: Выложи это C:\Users\Пользователь\Desktop\test_qwen\GhostBrowser на гитхаб https://github.com/TheLER0N/Browser.git в main
+Моя задача: Выложи это C:\Users\Пользователь\Desktop\test_qwen\GhostBrowser на гитхаб https://github.com/TheLER0N/Browser.git в main и добавить туда релиз для NET 7 чтобы можно было скачать готовую версию и использовать её
 
 
 
