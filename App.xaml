@@ -9,39 +9,46 @@
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
 
             <!-- ═══════════════════════════════════════════ -->
-            <!-- COLORS — Premium Dark Graphite Palette     -->
+            <!-- COLORS — KING Chess Royal Palette           -->
             <!-- ═══════════════════════════════════════════ -->
-            <Color x:Key="BgDeepest">#030508</Color>
-            <Color x:Key="BgDeep">#080b12</Color>
-            <Color x:Key="BgPrimary">#0c1017</Color>
-            <Color x:Key="BgSurface">#131820</Color>
-            <Color x:Key="BgElevated">#1a2030</Color>
-            <Color x:Key="BgOverlay">#222a3a</Color>
+            <!-- Dark Wood & Gold — королевская шахматная тема -->
+            <Color x:Key="BgDeepest">#1a1208</Color>
+            <Color x:Key="BgDeep">#2d1f0e</Color>
+            <Color x:Key="BgPrimary">#231709</Color>
+            <Color x:Key="BgSurface">#3d2b14</Color>
+            <Color x:Key="BgElevated">#4a3520</Color>
+            <Color x:Key="BgOverlay">#5a4228</Color>
 
-            <Color x:Key="Accent">#7c5cfc</Color>
-            <Color x:Key="AccentSoft">#9b80fc</Color>
-            <Color x:Key="AccentGlow">#a78bfa</Color>
-            <Color x:Key="AccentDeep">#5b3fd4</Color>
+            <Color x:Key="Accent">#d4a017</Color>
+            <Color x:Key="AccentSoft">#f0c040</Color>
+            <Color x:Key="AccentGlow">#e8b830</Color>
+            <Color x:Key="AccentDeep">#a07818</Color>
 
-            <Color x:Key="Cyan">#00d4aa</Color>
-            <Color x:Key="CyanSoft">#33e0be</Color>
-            <Color x:Key="CyanDeep">#00b894</Color>
+            <Color x:Key="Cyan">#d4a017</Color>
+            <Color x:Key="CyanSoft">#f0c040</Color>
+            <Color x:Key="CyanDeep">#a07818</Color>
 
-            <Color x:Key="TextPrimary">#eaeef6</Color>
-            <Color x:Key="TextSecondary">#8a93a6</Color>
-            <Color x:Key="TextTertiary">#525b6e</Color>
-            <Color x:Key="TextDisabled">#3a4155</Color>
+            <Color x:Key="TextPrimary">#f5e6c8</Color>
+            <Color x:Key="TextSecondary">#c4a882</Color>
+            <Color x:Key="TextTertiary">#8b7355</Color>
+            <Color x:Key="TextDisabled">#5a4a38</Color>
 
-            <Color x:Key="BorderSubtle">#1c2233</Color>
-            <Color x:Key="BorderDefault">#262e42</Color>
-            <Color x:Key="BorderStrong">#353d54</Color>
+            <Color x:Key="BorderSubtle">#5a4228</Color>
+            <Color x:Key="BorderDefault">#6b5535</Color>
+            <Color x:Key="BorderStrong">#7d6642</Color>
 
-            <Color x:Key="Success">#2dd4a0</Color>
-            <Color x:Key="SuccessDeep">#1fb888</Color>
-            <Color x:Key="Warning">#f0b429</Color>
-            <Color x:Key="WarningDeep">#d49a1e</Color>
-            <Color x:Key="Danger">#ef4444</Color>
-            <Color x:Key="DangerDeep">#dc2626</Color>
+            <Color x:Key="Success">#2d5a1e</Color>
+            <Color x:Key="SuccessDeep">#1e4410</Color>
+            <Color x:Key="Warning">#d4a017</Color>
+            <Color x:Key="WarningDeep">#a07818</Color>
+            <Color x:Key="Danger">#8b1a1a</Color>
+            <Color x:Key="DangerDeep">#6b1212</Color>
+
+            <!-- Board colors (chess board) -->
+            <Color x:Key="BoardLight">#d4a574</Color>
+            <Color x:Key="BoardDark">#8b6914</Color>
+            <Color x:Key="KingPurple">#6b3fa0</Color>
+            <Color x:Key="KingPurpleLight">#8b5fbf</Color>
 
             <!-- ═══════════════════════════════════════════ -->
             <!-- BRUSHES                                     -->
