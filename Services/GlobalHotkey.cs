@@ -47,6 +47,7 @@ namespace GhostBrowser.Services
         // === Virtual-key codes ===
         private const uint VK_SNAPSHOT = 0x2C;           // PrintScreen
         private const uint VK_ESCAPE = 0x1B;             // Escape
+        private const uint VK_F12 = 0x7B;                // F12 — Паник-кнопка
 
         // === Модификаторы ===
         private const uint MOD_NOREPEAT = 0x4000;        // Не повторять при удержании
@@ -61,6 +62,7 @@ namespace GhostBrowser.Services
         private IntPtr _hWnd;
         private HwndSource? _hwndSource;
         private bool _isBlockingEnabled;
+        private bool _isPanicKeyEnabled;
 
         /// <summary>
         /// Событие срабатывания горячей клавиши.
@@ -71,6 +73,11 @@ namespace GhostBrowser.Services
         /// Включена ли блокировка PrintScreen.
         /// </summary>
         public bool IsBlockingEnabled => _isBlockingEnabled;
+
+        /// <summary>
+        /// Включена ли паник-кнопка F12.
+        /// </summary>
+        public bool IsPanicKeyEnabled => _isPanicKeyEnabled;
 
         /// <summary>
         /// Инициализирует сервис и подписывается на сообщения окна.
@@ -95,6 +102,12 @@ namespace GhostBrowser.Services
             if (_isBlockingEnabled)
             {
                 RegisterAllHotkeys();
+            }
+
+            // Если паник-кнопка была включена до инициализации — применяем сейчас
+            if (_isPanicKeyEnabled)
+            {
+                RegisterPanicKey();
             }
         }
 
@@ -207,9 +220,78 @@ namespace GhostBrowser.Services
             return key == Key.Snapshot || key == Key.PrintScreen;
         }
 
+        // ═══════════════════════════════════════════
+        // ПАНИК-КНОПКА (F12)
+        // ═══════════════════════════════════════════
+
+        /// <summary>
+        /// Включает паник-кнопку F12.
+        /// При нажатии F12 генерируется событие HotKeyPressed с ID = 100.
+        /// </summary>
+        public void EnablePanicKey()
+        {
+            if (_isPanicKeyEnabled) return;
+            _isPanicKeyEnabled = true;
+
+            if (_hWnd == IntPtr.Zero) return;
+            RegisterPanicKey();
+        }
+
+        /// <summary>
+        /// Выключает паник-кнопку F12.
+        /// </summary>
+        public void DisablePanicKey()
+        {
+            if (!_isPanicKeyEnabled) return;
+            _isPanicKeyEnabled = false;
+
+            UnregisterPanicKey();
+        }
+
+        /// <summary>
+        /// Переключает состояние паник-кнопки.
+        /// </summary>
+        public void TogglePanicKey()
+        {
+            if (_isPanicKeyEnabled)
+                DisablePanicKey();
+            else
+                EnablePanicKey();
+        }
+
+        /// <summary>
+        /// Регистрирует хоткей F12 (ID = 100).
+        /// </summary>
+        private void RegisterPanicKey()
+        {
+            if (_hWnd == IntPtr.Zero) return;
+
+            bool success = RegisterHotKey(_hWnd, 100, MOD_NOREPEAT, VK_F12);
+            if (!success)
+            {
+                var error = Marshal.GetLastWin32Error();
+                System.Diagnostics.Debug.WriteLine($"RegisterHotKey F12 failed. Error: {error}");
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("Panic key (F12) enabled");
+            }
+        }
+
+        /// <summary>
+        /// Снимает хоткей F12.
+        /// </summary>
+        private void UnregisterPanicKey()
+        {
+            if (_hWnd == IntPtr.Zero) return;
+            UnregisterHotKey(_hWnd, 100);
+            System.Diagnostics.Debug.WriteLine("Panic key (F12) disabled");
+        }
+
         public void Dispose()
         {
             UnregisterAllHotkeys();
+            UnregisterPanicKey();
 
             if (_hwndSource != null)
             {
@@ -226,6 +308,7 @@ namespace GhostBrowser.Services
 
             _hWnd = IntPtr.Zero;
             _isBlockingEnabled = false;
+            _isPanicKeyEnabled = false;
         }
     }
 }

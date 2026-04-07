@@ -56,6 +56,9 @@ namespace GhostBrowser
             // Инициализируем сервис блокировки PrintScreen
             vm.GlobalHotkeyService.Initialize(this);
 
+            // Подписываемся на событие нажатия горячих клавиш (F12 паник-кнопка)
+            vm.GlobalHotkeyService.HotKeyPressed += GlobalHotkeyService_HotKeyPressed;
+
             // Инициализируем сервис блокировки Snipping Tool
             vm.SnippingToolBlockerService.Initialize(this);
 
@@ -366,6 +369,21 @@ namespace GhostBrowser
                     ? "Защита от захвата экрана активна"
                     : "Готово";
             });
+        }
+
+        /// <summary>
+        /// Обработчик события нажатия глобальной горячей клавиши.
+        /// ID 100 = F12 (паник-кнопка).
+        /// </summary>
+        private void GlobalHotkeyService_HotKeyPressed(object? sender, int hotkeyId)
+        {
+            if (hotkeyId == 100) // F12 — паник-кнопка
+            {
+                Dispatcher.InvokeAsync(() =>
+                {
+                    ViewModel.ExecutePanicAsync(this);
+                });
+            }
         }
 
         protected override void OnClosed(EventArgs e)

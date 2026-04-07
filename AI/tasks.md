@@ -163,35 +163,35 @@
 
 ---
 
-### Подплан 1: NewTabPage.html → BW Monochrome (КРИТИЧНО)
-- **Файлы:** `NewTabPage.html`
-- **Что сделать:** Заменить все фиолетовые (#6c63ff) и бирюзовые (#00d4aa) цвета на белый/серый из BW палитры. Обновить hover-эффекты карточек, свечение логотипа, чипы, search bar.
-- **Как проверить:** dotnet build → dotnet run → NewTabPage.html в чёрно-белых тонах
-- **Статус:** ⏳ pending
+### Подплан 1: Глобальный хук клавиатуры для F12
+- **Файлы:** `Services/GlobalHotkey.cs` (расширить), `MainWindow.xaml.cs`
+- **Что сделать:** Зарегистрировать F12 как глобальную горячую клавишу через `RegisterHotKey` API. Расширить GlobalHotkey.cs методом `RegisterPanicKey(IntPtr hWnd, Action callback)` и `UnregisterPanicKey()`.
+- **Как проверить:** dotnet build → dotnet run → нажатие F12 → срабатывание callback
+- **Статус:** ✅ completed
 
-### Подплан 2: Title Bar — SVG Path иконки + анимации
-- **Файлы:** `MainWindow.xaml`
-- **Что сделать:** Заменить TextBlock "─", "□", "✕" на Path с SVG data. Добавить плавные анимации hover через VisualStateManager. Добавить эффект свечения для KING11.png.
-- **Как проверить:** dotnet build → dotnet run → кнопки окна с SVG иконками
-- **Статус:** ⏳ pending
+### Подплан 2: Логика паник-кнопки в MainViewModel
+- **Файлы:** `ViewModels/MainViewModel.cs`
+- **Что сделать:** Метод `ExecutePanicAsync()` — сворачивает окно (`WindowState = Minimized`), навигация на Google (`NavigateToUrl("https://www.google.com")`), очистка cookies/кэша WebView2 (`CoreWebView2.Profile.ClearBrowsingDataAsync()`), стирание истории сессии (временное хранение + восстановление). Добавить флаг `_isPanicMode`.
+- **Как проверить:** dotnet build → вызов метода → проверка что окно свернуто, Google открыт, cookies очищены
+- **Статус:** ✅ completed
 
-### Подплан 3: Навигационные кнопки — SVG Path
-- **Файлы:** `MainWindow.xaml`, `App.xaml`
-- **Что сделать:** Заменить Unicode символы "←", "→", "⟳", "⌂", "⋮" на SVG Path иконки. Добавить tooltip с анимацией появления.
-- **Как проверить:** dotnet build → dotnet run → навигация с SVG иконками
-- **Статус:** ⏳ pending
+### Подплан 3: Интеграция с MainWindow
+- **Файлы:** `MainWindow.xaml.cs`
+- **Что сделать:** В обработчике `SourceInitialized` зарегистрировать F12 через GlobalHotkey. При срабатывании → вызвать `vm.ExecutePanicAsync()`. Добавить `WndProc` перехват для `WM_HOTKEY`.
+- **Как проверить:** dotnet build → dotnet run → F12 → окно сворачивается, открывается Google
+- **Статус:** ✅ completed
 
-### Подплан 4: Вкладки — улучшенные эффекты
-- **Файлы:** `MainWindow.xaml`, `App.xaml`, `TabViewModel.cs`
-- **Что сделать:** Добавить плавную анимацию появления/закрытия вкладок. Улучшить hover-эффекты. Добавить реальную фавиконку сайта через WebView2 API (CoreWebView2.FaviconChanged).
-- **Как проверить:** dotnet build → dotnet run → вкладки с фавиконками и анимациями
-- **Статус:** ⏳ pending
+### Подплан 4: Настройка в SettingsPage
+- **Файлы:** `Views/SettingsPage.xaml`, `Views/SettingsPage.xaml.cs`, `Services/SettingsService.cs`
+- **Что сделать:** Добавить настройку `EnablePanicKey: bool` (по умолчанию true). Добавить toggle "Паник-кнопка (F12)" в секцию Stealth 2.0 SettingsPage. Сохранение/загрузка из settings.json.
+- **Как проверить:** dotnet build → SettingsPage → toggle паник-кнопки → сохранение
+- **Статус:** ✅ completed
 
-### Подплан 5: SettingsPage — BW сайдбар + плавные переходы
-- **Файлы:** `Views/SettingsPage.xaml`, `Views/SettingsPage.xaml.cs`
-- **Что сделать:** Заменить emoji иконки в сайдбаре на текстовые/SVG. Добавить плавные переходы между секциями (Storyboard анимация Visibility).
-- **Как проверить:** dotnet build → dotnet run → SettingsPage без emoji, плавные переходы
-- **Статус:** ⏳ pending
+### Подплан 5: Восстановление после паники
+- **Файлы:** `ViewModels/MainViewModel.cs`, `MainWindow.xaml.cs`
+- **Что сделать:** При повторном нажатии F12 → восстановление окна (`WindowState = Normal`), возврат на предыдущую вкладку. Сохранение состояния до паники (SelectedTab, URL). Добавить `_previousState` для восстановления.
+- **Как проверить:** dotnet build → dotnet run → F12 → паника → F12 → восстановление состояния
+- **Статус:** ✅ completed (уже реализовано в ExecutePanicAsync)
 
 ### Подплан 6: Status Bar — улучшенный
 - **Файлы:** `MainWindow.xaml`

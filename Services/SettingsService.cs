@@ -45,6 +45,8 @@ namespace GhostBrowser.Services
         public bool BlockSnippingTool { get; set; } = true;
         /// <summary>Включить защиту от fingerprinting (canvas, WebGL).</summary>
         public bool AntiFingerprint { get; set; } = true;
+        /// <summary>Включить паник-кнопку F12.</summary>
+        public bool EnablePanicKey { get; set; } = true;
     }
 
     /// <summary>
@@ -110,6 +112,7 @@ namespace GhostBrowser.Services
         public bool AutoBlockPrintScreen { get => _settings.AutoBlockPrintScreen; set { if (_settings.AutoBlockPrintScreen != value) { _settings.AutoBlockPrintScreen = value; OnPropertyChanged(); SaveSettings(); } } }
         public bool BlockSnippingTool { get => _settings.BlockSnippingTool; set { if (_settings.BlockSnippingTool != value) { _settings.BlockSnippingTool = value; OnPropertyChanged(); SaveSettings(); } } }
         public bool AntiFingerprint { get => _settings.AntiFingerprint; set { if (_settings.AntiFingerprint != value) { _settings.AntiFingerprint = value; OnPropertyChanged(); SaveSettings(); } } }
+        public bool EnablePanicKey { get => _settings.EnablePanicKey; set { if (_settings.EnablePanicKey != value) { _settings.EnablePanicKey = value; OnPropertyChanged(); SaveSettings(); } } }
         
         /// <summary>
         /// Папка загрузок по умолчанию.

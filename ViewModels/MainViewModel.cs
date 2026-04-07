@@ -28,6 +28,12 @@ namespace GhostBrowser.ViewModels
         private object? _displayedContent;
         private bool _isSettingsOpen;
 
+        // Panic mode
+        private bool _isPanicMode;
+        private TabViewModel? _panicSelectedTab;
+        private string? _panicUrl;
+        private bool _panicWasSettingsOpen;
+
         private CoreWebView2Environment? _environment;
         private readonly System.Windows.Threading.DispatcherTimer _clockTimer;
 
@@ -142,6 +148,15 @@ namespace GhostBrowser.ViewModels
             }
         }
 
+        /// <summary>
+        /// True когда активен режим паники (F12).
+        /// </summary>
+        public bool IsPanicMode
+        {
+            get => _isPanicMode;
+            set => Set(ref _isPanicMode, value);
+        }
+
         // ==================== Commands ====================
 
         public ICommand CloseTabCommand { get; }
@@ -246,6 +261,10 @@ namespace GhostBrowser.ViewModels
             {
                 SnippingToolBlockerService.EnableBlocking();
             }
+
+            // === Stealth 2.0: Паник-кнопка F12 ===
+            // По умолчанию включена (STEALTH-002)
+            GlobalHotkeyService.EnablePanicKey();
 
             // Subscribe to bookmark changes
             BookmarkService.Bookmarks.CollectionChanged += (s, e) => UpdateBookmarkState();
@@ -570,6 +589,116 @@ namespace GhostBrowser.ViewModels
             StatusText = SnippingToolBlockerService.IsEnabled
                 ? "Блокировка Snipping Tool включена"
                 : "Блокировка Snipping Tool выключена";
+        }
+
+        // ═══════════════════════════════════════════
+        // ПАНИК-КНОПКА (F12) — STEALTH-002
+        // ═══════════════════════════════════════════
+
+        /// <summary>
+        /// Выполняет панику: сворачивает окно, открывает Google, очищает cookies/кэш.
+        /// При повторном вызове — восстанавливает состояние до паники.
+        ///
+        /// Логика:
+        /// 1. Если НЕ в режиме паники → активируем панику
+        ///    - Сохраняем текущее состояние (вкладка, URL, настройки)
+        ///    - Сворачиваем окно
+        ///    - Открываем Google
+        ///    - Очищаем cookies и кэш WebView2
+        /// 2. Если УЖЕ в режиме паники → восстанавливаем
+        ///    - Разворачиваем окно
+        ///    - Восстанавливаем вкладку и URL
+        /// </summary>
+        public async void ExecutePanicAsync(System.Windows.Window window)
+        {
+            try
+            {
+                if (!_isPanicMode)
+                {
+                    // === АКТИВИРУЕМ ПАНИКУ ===
+                    _isPanicMode = true;
+                    IsPanicMode = true;
+
+                    // Сохраняем состояние до паники
+                    _panicSelectedTab = SelectedTab;
+                    _panicUrl = SelectedTab?.Url;
+                    _panicWasSettingsOpen = IsSettingsOpen;
+
+                    System.Diagnostics.Debug.WriteLine("PANIC MODE ACTIVATED");
+
+                    // Сворачиваем окно
+                    window.WindowState = System.Windows.WindowState.Minimized;
+
+                    // Закрываем настройки если открыты
+                    if (IsSettingsOpen)
+                    {
+                        CloseSettings();
+                    }
+
+                    // Переходим на Google
+                    NavigateToUrl("https://www.google.com");
+
+                    // Очищаем cookies и кэш текущей вкладки
+                    if (SelectedTab?.WebView?.CoreWebView2 != null)
+                    {
+                        try
+                        {
+                            var profile = SelectedTab.WebView.CoreWebView2.Profile;
+                            // ClearBrowsingDataAsync без параметров очищает ВСЕ данные
+                            await profile.ClearBrowsingDataAsync();
+                            System.Diagnostics.Debug.WriteLine("Panic: All browser data cleared");
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Panic clear data error: {ex.Message}");
+                        }
+                    }
+
+                    StatusText = "⚠️ PANIC MODE — F12 to restore";
+                }
+                else
+                {
+                    // === ВОССТАНАВЛИВАЕМ ===
+                    _isPanicMode = false;
+                    IsPanicMode = false;
+
+                    System.Diagnostics.Debug.WriteLine("PANIC MODE DEACTIVATED");
+
+                    // Разворачиваем окно
+                    window.WindowState = System.Windows.WindowState.Normal;
+                    window.Activate();
+
+                    // Восстанавливаем вкладку
+                    if (_panicSelectedTab != null && Tabs.Contains(_panicSelectedTab))
+                    {
+                        SelectedTab = _panicSelectedTab;
+
+                        // Восстанавливаем URL если он был
+                        if (!string.IsNullOrEmpty(_panicUrl))
+                        {
+                            NavigateToUrl(_panicUrl);
+                        }
+                    }
+
+                    // Восстанавливаем настройки если были открыты
+                    if (_panicWasSettingsOpen)
+                    {
+                        // Note: SettingsPage нужно открыть отдельно через MainWindow
+                    }
+
+                    StatusText = "Готово";
+
+                    // Очищаем сохранённое состояние
+                    _panicSelectedTab = null;
+                    _panicUrl = null;
+                    _panicWasSettingsOpen = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"ExecutePanicAsync error: {ex.Message}");
+                StatusText = $"Panic error: {ex.Message}";
+            }
         }
 
         // ==================== Search Engine ====================

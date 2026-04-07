@@ -279,6 +279,7 @@ namespace GhostBrowser.Views
             if (BlockPrintScreenToggle != null) BlockPrintScreenToggle.IsChecked = SS.AutoBlockPrintScreen;
             if (BlockSnippingToolToggle != null) BlockSnippingToolToggle.IsChecked = SS.BlockSnippingTool;
             if (AntiFingerprintToggle != null) AntiFingerprintToggle.IsChecked = SS.AntiFingerprint;
+            if (EnablePanicKeyToggle != null) EnablePanicKeyToggle.IsChecked = SS.EnablePanicKey;
 
             UpdateStealthStatus();
         }
@@ -295,6 +296,7 @@ namespace GhostBrowser.Views
             if (SS.AutoBlockPrintScreen) parts.Add("PrintScreen: ✅");
             if (SS.BlockSnippingTool) parts.Add("Snipping: ✅");
             if (SS.AntiFingerprint) parts.Add("Anti-FP: ✅");
+            if (SS.EnablePanicKey) parts.Add("F12 Panic: ✅");
 
             StealthStatusText.Text = parts.Count > 0
                 ? $"Активны: {string.Join(", ", parts)}"
@@ -347,6 +349,22 @@ namespace GhostBrowser.Views
             if (SS != null)
             {
                 SS.AntiFingerprint = AntiFingerprintToggle.IsChecked == true;
+                UpdateStealthStatus();
+            }
+        }
+
+        private void EnablePanicKeyToggle_Changed(object sender, RoutedEventArgs e)
+        {
+            if (VM?.GlobalHotkeyService != null && SS != null)
+            {
+                bool isEnabled = EnablePanicKeyToggle.IsChecked == true;
+                SS.EnablePanicKey = isEnabled;
+
+                if (isEnabled)
+                    VM.GlobalHotkeyService.EnablePanicKey();
+                else
+                    VM.GlobalHotkeyService.DisablePanicKey();
+
                 UpdateStealthStatus();
             }
         }
