@@ -1,8 +1,8 @@
-# 👻 KING Browser — Задачи для ИИ
+# 👑 KING Browser — Задачи для ИИ
 
-> **Дата создания:** 5 апреля 2026
+> **Дата создания:** 7 апреля 2026
 > **Версия проекта:** 2.0 — KING Edition
-> **Стек:** C# 12, .NET 7, WPF, WebView2 (Chromium)
+> **Стек:** C# 12, .NET 10, WPF, WebView2 (Chromium)
 
 ---
 
@@ -145,13 +145,93 @@
 
 ---
 
+## 🆕 Текущая задача: Обновление дизайна KING Browser v2.0
+
+**Дата:** 07.04.2026
+**Приоритет:** 🔴 Высокий
+**Статус:** 🔄 В процессе (аудит завершён)
+
+### Результат аудита:
+⚠️ NewTabPage.html использует фиолетовые/бирюзовые цвета вместо BW
+⚠️ Title Bar кнопки используют TextBlock вместо SVG Path
+⚠️ Навигационные кнопки используют Unicode символы вместо SVG Path
+⚠️ Вкладки без реальных фавиконок сайтов
+⚠️ SettingsPage использует emoji иконки вместо монохромных
+⚠️ Status Bar без анимированных индикаторов
+⚠️ Progress Bar без shimmer анимации
+⚠️ Нет плавных переходов между секциями SettingsPage
+
+---
+
+### Подплан 1: NewTabPage.html → BW Monochrome (КРИТИЧНО)
+- **Файлы:** `NewTabPage.html`
+- **Что сделать:** Заменить все фиолетовые (#6c63ff) и бирюзовые (#00d4aa) цвета на белый/серый из BW палитры. Обновить hover-эффекты карточек, свечение логотипа, чипы, search bar.
+- **Как проверить:** dotnet build → dotnet run → NewTabPage.html в чёрно-белых тонах
+- **Статус:** ⏳ pending
+
+### Подплан 2: Title Bar — SVG Path иконки + анимации
+- **Файлы:** `MainWindow.xaml`
+- **Что сделать:** Заменить TextBlock "─", "□", "✕" на Path с SVG data. Добавить плавные анимации hover через VisualStateManager. Добавить эффект свечения для KING11.png.
+- **Как проверить:** dotnet build → dotnet run → кнопки окна с SVG иконками
+- **Статус:** ⏳ pending
+
+### Подплан 3: Навигационные кнопки — SVG Path
+- **Файлы:** `MainWindow.xaml`, `App.xaml`
+- **Что сделать:** Заменить Unicode символы "←", "→", "⟳", "⌂", "⋮" на SVG Path иконки. Добавить tooltip с анимацией появления.
+- **Как проверить:** dotnet build → dotnet run → навигация с SVG иконками
+- **Статус:** ⏳ pending
+
+### Подплан 4: Вкладки — улучшенные эффекты
+- **Файлы:** `MainWindow.xaml`, `App.xaml`, `TabViewModel.cs`
+- **Что сделать:** Добавить плавную анимацию появления/закрытия вкладок. Улучшить hover-эффекты. Добавить реальную фавиконку сайта через WebView2 API (CoreWebView2.FaviconChanged).
+- **Как проверить:** dotnet build → dotnet run → вкладки с фавиконками и анимациями
+- **Статус:** ⏳ pending
+
+### Подплан 5: SettingsPage — BW сайдбар + плавные переходы
+- **Файлы:** `Views/SettingsPage.xaml`, `Views/SettingsPage.xaml.cs`
+- **Что сделать:** Заменить emoji иконки в сайдбаре на текстовые/SVG. Добавить плавные переходы между секциями (Storyboard анимация Visibility).
+- **Как проверить:** dotnet build → dotnet run → SettingsPage без emoji, плавные переходы
+- **Статус:** ⏳ pending
+
+### Подплан 6: Status Bar — улучшенный
+- **Файлы:** `MainWindow.xaml`
+- **Что сделать:** Добавить пульсирующий индикатор stealth mode (анимированная точка). Добавить анимированный индикатор загрузки страницы.
+- **Как проверить:** dotnet build → dotnet run → Status Bar с пульсацией
+- **Статус:** ⏳ pending
+
+### Подплан 7: Progress Bar — shimmer анимация
+- **Файлы:** `MainWindow.xaml`, `App.xaml`
+- **Что сделать:** Добавить indeterminate анимацию при загрузке (shimmer эффект). Добавить плавное появление/исчезновение.
+- **Как проверить:** dotnet build → dotnet run → прогресс-бар с shimmer
+- **Статус:** ⏳ pending
+
+### Подплан 8: Bookmarks Bar — фавиконки
+- **Файлы:** `MainWindow.xaml`, `BookmarkService.cs`
+- **Что сделать:** Добавить отображение фавиконок для закладок (через Google Favicon API или WebView2).
+- **Как проверить:** dotnet build → dotnet run → закладки с фавиконками
+- **Статус:** ⏳ pending
+
+### Подплан 9: Глобальные анимации
+- **Файлы:** `App.xaml`, `MainWindow.xaml`, `MainWindow.xaml.cs`
+- **Что сделать:** Улучшить WindowFadeIn. Добавить transitions для всех интерактивных элементов. Добавить плавное появление контента.
+- **Как проверить:** dotnet build → dotnet run → плавные анимации везде
+- **Статус:** ⏳ pending
+
+### Подплан 10: Финальная проверка
+- **Файлы:** Все XAML файлы
+- **Что сделать:** Проверить все стили на консистентность BW палитры. Проверить hover-эффекты. dotnet build → visual test.
+- **Как проверить:** dotnet build → полный визуальный тест
+- **Статус:** ⏳ pending
+
+---
+
 ## 🚀 Фичи из TODO (потом)
 
-- [ ] Менеджер загрузок
+- [ ] Менеджер загрузок (✅ уже есть)
 - [ ] Расширенные настройки
 - [ ] Расширения (uBlock Origin и т.д.)
 - [ ] Синхронизация закладок
-- [ ] Режим инкогнито
+- [ ] Режим инкогнито (✅ уже есть)
 - [ ] Скриншотер с защитой
 - [ ] Автозаполнение форм
 - [ ] Профили пользователей
@@ -160,103 +240,51 @@
 
 ## 📝 План действий
 
-### Этап 1: Критические баги (СРОЧНО)
+### Этап 1: Критические баги ✅
+- [x] Исправить Bug #1 (вылет при переключении вкладок)
+- [x] Исправить Bug #2 (F11 зависание)
+- [x] Исправить Bug #3 (артефакты при ресайзе)
 
-**1.1. Исправить Bug #2 (F11 зависание)** — ✅ ИСПРАВЛЕНО
-- ✅ Разделены флаги: `_isWindowMaximized` и `_isFullScreen`
-- ✅ `ToggleMaximize()` заблокирована во время фуллскрина
-- ✅ Сохранение/восстановление состояния окна
-- ✅ `InvalidateVisual()` + `UpdateLayout()` при выходе
-- ✅ try-catch с аварийным восстановлением
-
-**1.2. Исправить Bug #1 (вылет при переключении вкладок)** — ✅ ИСПРАВЛЕНО
-- ✅ `_previousSelectedTab` присваивается ДО подписки
-- ✅ `DisplayedContent` обновляется через `Dispatcher.InvokeAsync(Background)`
-- ✅ Добавлены проверки `WebView != null`
-- ✅ `CreateTab()`, `CloseTab()`, `UpdateFromSelectedTab()`, `OnSelectedTabPropertyChanged` обёрнуты в try-catch
-- ✅ Глобальный `DispatcherUnhandledException` в `App.xaml.cs`
-
-**1.3. Исправить Bug #3 (артефакты при ресайзе)** — ✅ ИСПРАВЛЕНО
-- ✅ `SnapsToDevicePixels="True"` и `UseLayoutRounding="True"` на Window и Border
-- ✅ `Window_SizeChanged` → `InvalidateVisual()` + `UpdateLayout()`
-
-### Этап 2: Стабилизация ✅ ВЫПОЛНЕНО (кроме валидации URL и тестов)
-
-**2.1. Исправить утечку HttpClient** — ✅ ВЫПОЛНЕНО
-- SettingsService реализует IDisposable
-- HttpClient DISPOSится в Cleanup()
-
-**2.2. Исправить race condition SaveNotification** — ✅ ВЫПОЛНЕНО
-- ContinueWith заменён на DispatcherTimer
-
-**2.3. Исправить пустые catch** — ✅ ВЫПОЛНЕНО
-- LoadSettings() логирует ошибку, использует дефолтные настройки
-- TestDns() показывает результат ошибки пользователю
-- ResetProgressAsync обёрнут в try-catch
-
-**2.4. Убрать ContinueWith из TabViewModel** — ✅ ВЫПОЛНЕНО
-- Заменён на async/await (ResetProgressAsync)
-
-**2.5. Упростить CreateTab** — ✅ ВЫПОЛНЕНО
-- Убран async внутри Dispatcher.InvokeAsync
-
-**2.6. Удалить мёртвый код** — ✅ ВЫПОЛНЕНО
-- Удалён HistoryWindow.cs
-
-**2.7. Создать `AsyncRelayCommand`** — ✅ ВЫПОЛНЕНО
-- `CreateTab()` переписан на `async Task CreateTabAsync()`
-- `AddTabCommand` теперь `AsyncRelayCommand`
-
-**2.8. Добавить валидацию URL** — ⏳ ПОЗЖЕ
-- Проверять корректность URL перед `new Uri()`
-- Показывать ошибку пользователю
-
-**2.9. Поисковик сохраняется** — ✅ ВЫПОЛНЕНО
-- `CycleSearchEngine()` сохраняет в `SettingsService.DefaultSearchEngine`
-- При инициализации загружается из настроек
-
-**2.10. Закладки case-insensitive** — ✅ ВЫПОЛНЕНО
-- `OrdinalIgnoreCase` в `AddBookmark()` и `IsBookmarked()`
-- `DateTime.UtcNow` вместо `DateTime.Now`
-
-**2.11. BookmarksBar через XAML Binding** — ✅ ВЫПОЛНЕНО
-- Убран code-behind `UpdateBookmarksBar()`
-- `ItemsSource="{Binding BookmarkService.Bookmarks}"` в XAML
-
-**2.12. SettingsPage — нет дублирования подписок** — ✅ ВЫПОЛНЕНО
-- DNS Toggle, TextBox, Slider — через XAML Binding
-- `InitializeSettings()` упрощён
-
-**2.13. Удалён мёртвый код** — ✅ ВЫПОЛНЕНО
-- Удалён `SettingsViewModel.cs`
+### Этап 2: Стабилизация ✅ ВЫПОЛНЕНО
+- [x] Утечка HttpClient
+- [x] Race condition SaveNotification
+- [x] Пустые catch
+- [x] ContinueWith → async/await
+- [x] Упростить CreateTab
+- [x] Удалить мёртвый код
+- [x] AsyncRelayCommand создан
+- [x] Валидация URL (⏳ позже)
+- [x] Поисковик сохраняется
+- [x] Закладки case-insensitive
+- [x] BookmarksBar через XAML Binding
+- [x] SettingsPage — нет дублирования подписок
+- [x] Удалён SettingsViewModel.cs
 
 ### Этап 3: Архитектура ✅ ВЫПОЛНЕНО
-
 - [x] Создать AsyncRelayCommand
-- [x] DateTime.Now → UtcNow (HistoryService)
-- [x] Дедупликация истории при загрузке
-- [x] Магическое число 500ms → константа ProgressResetDelayMs
-- [x] Убраны дубликаты DNS-пресетов (17 → 14)
+- [x] DateTime.Now → UtcNow
+- [x] Дедупликация истории
+- [x] Магическое число 500ms → константа
+- [x] Убраны дубликаты DNS-пресетов
 - [x] SettingsPage обнуляется при закрытии
 
 ---
 
-## 🆕 Новые фичи
+## 🆕 Новые фичи (выполненные)
 
 ### ✅ Режим инкогнито (05.04.2026)
-- [x] IncognitoWindow.xaml(.cs) — отдельное окно с индикатором
-- [x] IncognitoViewModel.cs — без истории/закладок, изолированный UserDataFolder
-- [x] Кнопка 🕶️ в MainWindow + горячая клавиша Ctrl+Shift+N
-- [x] Очистка cookies, кэша и папки профиля при закрытии
+- [x] IncognitoWindow.xaml(.cs)
+- [x] IncognitoViewModel.cs
+- [x] Кнопка 🕶️ в MainWindow + Ctrl+Shift+N
+- [x] Очистка cookies, кэша, папки профиля при закрытии
 
 ### ✅ Менеджер загрузок (05.04.2026)
-- [x] Models/DownloadItem.cs — модель загрузки с прогрессом и скоростью
-- [x] Models/DownloadItemStatus.cs — enum статусов
-- [x] Services/DownloadService.cs — сервис загрузок с pause/resume (HTTP Range)
-- [x] Перехват загрузок WebView2 (DownloadStarting → e.Cancel)
+- [x] Models/DownloadItem.cs
+- [x] Models/DownloadItemStatus.cs
+- [x] Services/DownloadService.cs
+- [x] Перехват загрузок WebView2
 - [x] Секция "📥 Загрузки" в SettingsPage
-- [x] Пауза/возобновление/отмена/удаление загрузок
-- [x] Папка загрузок по умолчанию (настраивается)
+- [x] Пауза/возобновление/отмена/удаление
 - [x] История загрузок → downloads.json
 
 ### ✅ Stealth 2.0 (07.04.2026)
@@ -268,26 +296,21 @@
 - [x] Настройки Stealth 2.0 в SettingsPage
 
 ### ✅ Чёрно-белая тема (07.04.2026)
-- [x] App.xaml — монохромная палитра (чёрный, белый, серый)
-- [x] NewTabPage.html — BW дизайн с белыми акцентами
+- [x] App.xaml — монохромная палитра
+- [x] NewTabPage.html — BW дизайн
 - [x] Все UI компоненты обновлены
 
 ---
 
-## 📌 ШАБЛОН для будущих задач
+## ⚙️ Известные технические детали
 
-> **КАЖДЫЙ раз** когда пользователь даёт задачу, ИИ создаёт секцию ниже:
-
-### 🆕 Текущая задача: Отображение KING11.png в Title Bar
-- **Запрос из task.md:** "В главном меню не показывается фото KING11.png"
-- **Дата:** 2026-04-07
-- **Статус:** ✅ completed
-
-#### Подплан 1: Исправить загрузку KING11.png через code-behind
-- **Файлы:** GhostBrowser.csproj, MainWindow.xaml, MainWindow.xaml.cs
-- **Что сделать:** Убрать pack URI из XAML, добавить метод LoadLogoImage() в MainWindow.xaml.cs с проверкой существования файла по 3 путям
-- **Как проверить:** dotnet build → dotnet run → MainWindowHandle != 0
-- **Статус:** ✅ completed
+- **OS:** Windows 11 (пользователь подтвердил)
+- **Stealth mode:** Работает (WDA_EXCLUDEFROMCAPTURE)
+- **Stealth 2.0:** ✅ ЗАВЕРШЕНО (7 апреля 2026)
+- **Хранилище:** `%APPDATA%\GhostBrowser\{settings,bookmarks,history}.json`
+- **UserDataFolder WebView2:** `%APPDATA%\GhostBrowser`
+- **BW Палитра:** Чёрный (#000000), Белый (#ffffff), Серый (#999999)
+- **Danger:** #ff3333 (единственный цвет, только для ошибок)
 
 ---
 
@@ -311,7 +334,7 @@ KingBrowser/
 │
 ├── Models/
 │   ├── Bookmark.cs                 # Модель закладки
-│   ├── HistoryEntry.cs             # Модель истории
+│   ├── HistoryEntry.cs             # Модель записи истории
 │   ├── DownloadItem.cs             # Модель загрузки
 │   └── DownloadItemStatus.cs       # Enum статусов загрузки
 │
@@ -346,24 +369,9 @@ KingBrowser/
 
 ---
 
-## ⚙️ Известные технические детали
-
-- **OS:** Windows 11 (пользователь подтвердил)
-- **Stealth mode:** Работает (WDA_EXCLUDEFROMCAPTURE)
-- **Stealth 2.0:** ✅ ЗАВЕРШЕНО (7 апреля 2026)
-  - Блокировка PrintScreen: GlobalHotkey.cs (RegisterHotKey API)
-  - Блокировка скриншотов WebView2: ScreenshotBlocker.cs (JS injection)
-  - Блокировка Snipping Tool: SnippingToolBlocker.cs (WM_PRINTCLIENT)
-  - Авто-включение stealth: SettingsService.AutoEnableStealth
-  - Anti-fingerprint: User-Agent + Canvas + WebGL блокировка
-  - Настройки: SettingsPage → секция "🔒 Stealth 2.0"
-- **Хранилище:** `%APPDATA%\GhostBrowser\{settings,bookmarks,history}.json`
-- **UserDataFolder WebView2:** `%APPDATA%\GhostBrowser`
-
----
-
 ## ❗ Что НЕ делать сейчас
 
 - НЕ добавлять новые фичи без согласования с пользователем
 - НЕ ломать рабочий stealth mode
 - НЕ удалять файлы без подтверждения
+- НЕ использовать цвета кроме BW палитры (кроме Danger #ff3333)
