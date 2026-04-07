@@ -19,7 +19,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="PNG\KING.png" />
+    <Content Include="KING11.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>
