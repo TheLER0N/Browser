@@ -178,17 +178,43 @@ namespace GhostBrowser.ViewModels
         // ==================== Environment ====================
 
         /// <summary>
-        /// Создаёт изолированное окружение WebView2 с отдельным UserDataFolder.
-        /// Это гарантирует, что cookies, кэш и история не пересекаются с обычным режимом.
+        /// Создаёт изолированное окружение WebView2 с отдельным UserDataFolder
+        /// и применением настроек прокси для обхода блокировок.
         /// </summary>
         private async Task<CoreWebView2Environment> GetEnvironmentAsync()
         {
             if (_environment == null)
             {
-                // Создаём папку если не существует
                 Directory.CreateDirectory(_incognitoUserDataFolder);
 
-                _environment = await CoreWebView2Environment.CreateAsync(null, _incognitoUserDataFolder);
+                // Формируем аргументы для WebView2
+                var additionalArgs = "";
+
+                // Применяем прокси если включен
+                var bypassMode = SettingsService.Settings.BypassMode;
+                if (bypassMode == "proxy")
+                {
+                    var proxyArg = Services.ProxyService.BuildProxyArgument(
+                        SettingsService.Settings.ProxyType,
+                        SettingsService.Settings.ProxyServer,
+                        SettingsService.Settings.ProxyServerPort,
+                        SettingsService.Settings.ProxyUsername,
+                        SettingsService.Settings.ProxyPassword);
+
+                    if (!string.IsNullOrEmpty(proxyArg))
+                    {
+                        additionalArgs += proxyArg;
+                    }
+                }
+
+                // DoH режимы
+                if (bypassMode == "doh_cloudflare" || bypassMode == "doh_google")
+                {
+                    additionalArgs += " --dns-over-https=secure";
+                }
+
+                var options = new Microsoft.Web.WebView2.Core.CoreWebView2EnvironmentOptions(additionalArgs);
+                _environment = await CoreWebView2Environment.CreateAsync(null, _incognitoUserDataFolder, options);
             }
             return _environment;
         }

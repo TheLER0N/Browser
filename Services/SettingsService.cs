@@ -47,6 +47,22 @@ namespace GhostBrowser.Services
         public bool AntiFingerprint { get; set; } = true;
         /// <summary>Включить паник-кнопку F12.</summary>
         public bool EnablePanicKey { get; set; } = true;
+
+        // === Сеть и обход блокировок ===
+        /// <summary>Режим обхода: "none", "doh_cloudflare", "doh_google", "proxy"</summary>
+        public string BypassMode { get; set; } = "none";
+        /// <summary>Тип прокси: "socks5", "http"</summary>
+        public string ProxyType { get; set; } = "socks5";
+        /// <summary>Адрес прокси-сервера</summary>
+        public string ProxyServer { get; set; } = "";
+        /// <summary>Порт прокси-сервера</summary>
+        public int ProxyServerPort { get; set; } = 1080;
+        /// <summary>Имя пользователя прокси</summary>
+        public string ProxyUsername { get; set; } = "";
+        /// <summary>Пароль прокси</summary>
+        public string ProxyPassword { get; set; } = "";
+        /// <summary>Включить DevTools по F12</summary>
+        public bool EnableDevTools { get; set; } = false;
     }
 
     /// <summary>

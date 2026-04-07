@@ -47,6 +47,9 @@
                 <Button x:Name="NavStealthBtn" Content="🔒  Stealth 2.0"
                         Style="{StaticResource MenuNavItemBtn}" Margin="8,2"
                         Click="NavStealth_Click" FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                <Button x:Name="NavNetworkBtn" Content="🌍  Сеть и обход"
+                        Style="{StaticResource MenuNavItemBtn}" Margin="8,2"
+                        Click="NavNetwork_Click" FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
                 <Button x:Name="NavHistoryBtn" Content="📜  История"
                         Style="{StaticResource MenuNavItemBtn}" Margin="8,2"
                         Click="NavHistory_Click" FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
@@ -259,6 +262,356 @@
                                           Grid.Column="1"
                                           Style="{StaticResource ToggleSwitch}"/>
                         </Grid>
+                    </Border>
+                </StackPanel>
+
+                <!-- ─── Network / Bypass Section ─── -->
+                <StackPanel x:Name="NetworkSection" Visibility="Collapsed">
+                    <TextBlock Text="🌍 Сеть и обход блокировок" FontSize="22" FontWeight="SemiBold"
+                               Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,4"
+                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                    <TextBlock Text="Обход блокировок без прав администратора"
+                               Foreground="{StaticResource TextTertiaryBrush}" FontSize="12.5"
+                               Margin="0,0,0,28"
+                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+
+                    <!-- Bypass Mode Selection -->
+                    <TextBlock Text="Режим обхода" FontSize="11.5" FontWeight="SemiBold"
+                               Foreground="{StaticResource TextTertiaryBrush}"
+                               Margin="0,0,0,8"/>
+                    <ComboBox x:Name="BypassModeCombo"
+                              Style="{StaticResource SettingsCombo}"
+                              Margin="0,0,0,16">
+                        <ComboBoxItem Content="Прямое подключение (без обхода)" Tag="none"/>
+                        <ComboBoxItem Content="🌐 DoH Cloudflare (DNS over HTTPS)" Tag="doh_cloudflare"/>
+                        <ComboBoxItem Content="🌐 DoH Google (DNS over HTTPS)" Tag="doh_google"/>
+                        <ComboBoxItem Content="🔗 SOCKS5 Прокси" Tag="proxy_socks5"/>
+                        <ComboBoxItem Content="🔗 HTTP Прокси" Tag="proxy_http"/>
+                    </ComboBox>
+
+                    <!-- Proxy Settings Card -->
+                    <Border x:Name="ProxySettingsCard"
+                            Background="{StaticResource BgSurfaceBrush}"
+                            BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1"
+                            CornerRadius="14" Padding="18" Margin="0,0,0,16"
+                            Visibility="Collapsed">
+                        <StackPanel>
+                            <TextBlock Text="Настройки прокси" FontSize="14" FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       Margin="0,0,0,14"
+                                       FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+
+                            <!-- Server + Port -->
+                            <TextBlock Text="Сервер" FontSize="12" FontWeight="Medium"
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       Margin="0,0,0,6"
+                                       FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                            <TextBox x:Name="ProxyServerInput"
+                                     Style="{StaticResource SettingsTextBox}"
+                                     Margin="0,0,0,12"
+                                     FontFamily="Consolas, 'Cascadia Code', monospace"
+                                     FontSize="13"/>
+
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="80"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="Порт" FontSize="12" FontWeight="Medium"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               Margin="0,0,0,6"
+                                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                                    <TextBox x:Name="ProxyPortInput"
+                                             Style="{StaticResource SettingsTextBox}"
+                                             FontFamily="Consolas, 'Cascadia Code', monospace"
+                                             FontSize="13"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="10,22,0,0">
+                                    <TextBlock Text=" " FontSize="12" Margin="0,0,0,6"/>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <Button x:Name="ApplyProxyBtn" Content="✅ Применить"
+                                                Style="{StaticResource GlassBtn}"
+                                                Padding="14,10" Margin="0,0,8,0"
+                                                Click="ApplyProxyBtn_Click"
+                                                FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                                        <Button x:Name="TestProxyBtn" Content="🔍 Тест"
+                                                Style="{StaticResource GlassBtn}"
+                                                Padding="14,10"
+                                                Click="TestProxyBtn_Click"
+                                                FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Auth (optional) -->
+                            <TextBlock Text="Авторизация (необязательно)" FontSize="12" FontWeight="Medium"
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       Margin="0,8,0,6"
+                                       FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                            <TextBox x:Name="ProxyUsernameInput"
+                                     Style="{StaticResource SettingsTextBox}"
+                                     Margin="0,0,0,8"
+                                     FontSize="13"
+                                     FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                            <TextBox x:Name="ProxyPasswordInput"
+                                     Style="{StaticResource SettingsTextBox}"
+                                     Margin="0,0,0,0"
+                                     FontSize="13"
+                                     FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Info Card -->
+                    <Border Background="{StaticResource BgSurfaceBrush}"
+                            BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1"
+                            CornerRadius="12" Padding="14" Margin="0,0,0,18">
+                        <StackPanel>
+                            <TextBlock Text="💡 Как это работает" FontSize="13" FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       Margin="0,0,0,8"
+                                       FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                            <TextBlock Text="• DoH — шифрует DNS-запросы через HTTPS, обходит DNS-блокировки"
+                                       FontSize="11.5" Foreground="{StaticResource TextSecondaryBrush}"
+                                       TextWrapping="Wrap" LineHeight="17"
+                                       Margin="0,0,0,4"
+                                       FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                            <TextBlock Text="• Прокси — весь трафик браузера идёт через прокси-сервер"
+                                       FontSize="11.5" Foreground="{StaticResource TextSecondaryBrush}"
+                                       TextWrapping="Wrap" LineHeight="17"
+                                       Margin="0,0,0,4"
+                                       FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                            <TextBlock Text="• НЕ требует прав администратора — работает только для этого браузера"
+                                       FontSize="11.5" Foreground="{StaticResource AccentSoftBrush}"
+                                       TextWrapping="Wrap" LineHeight="17"
+                                       FontWeight="Medium"
+                                       FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Warning Card -->
+                    <Border Background="{StaticResource BgSurfaceBrush}"
+                            BorderBrush="#FFB000" BorderThickness="1"
+                            CornerRadius="12" Padding="14" Margin="0,0,0,18"
+                            Visibility="Collapsed" x:Name="ProxyWarningCard">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="⚠️" FontSize="15" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="Прокси не настроен или некорректен. Укажите сервер и порт."
+                                       FontSize="12" Foreground="#FFB000"
+                                       TextWrapping="Wrap" LineHeight="17"
+                                       FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Status -->
+                    <TextBlock x:Name="NetworkStatusText"
+                               Text="" FontSize="12"
+                               Foreground="{StaticResource TextSecondaryBrush}"
+                               TextWrapping="Wrap"
+                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"
+                               Margin="0,0,0,14"/>
+
+                    <!-- Test Sites Button -->
+                    <Button x:Name="TestSitesBtn" Content="🌐  Тест сайтов"
+                            Style="{StaticResource GlassBtn}"
+                            Padding="16,12"
+                            FontSize="13"
+                            Click="TestSitesBtn_Click"
+                            FontFamily="Segoe UI Variable, Segoe UI, sans-serif"
+                            Margin="0,0,0,14"/>
+
+                    <!-- Free Proxy List -->
+                    <TextBlock Text="🔗 Бесплатные прокси" FontSize="13" FontWeight="SemiBold"
+                               Foreground="{StaticResource TextPrimaryBrush}"
+                               Margin="0,0,0,8"
+                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+
+                    <Button x:Name="RefreshProxyListBtn" Content="🔄  Проверить все"
+                            Style="{StaticResource GlassBtn}"
+                            Padding="14,10"
+                            FontSize="12"
+                            Click="RefreshProxyListBtn_Click"
+                            FontFamily="Segoe UI Variable, Segoe UI, sans-serif"
+                            Margin="0,0,0,10"/>
+
+                    <!-- Proxy List -->
+                    <Border x:Name="ProxyListCard"
+                            Background="{StaticResource BgSurfaceBrush}"
+                            BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1"
+                            CornerRadius="12" Padding="10" Margin="0,0,0,14">
+
+                        <!-- Header -->
+                        <Border.Child>
+                            <StackPanel>
+                                <!-- Column Headers -->
+                                <Grid Margin="0,0,0,6" Opacity="0.5">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="28"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="" FontSize="9" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="1" Text="Адрес" FontSize="9" FontWeight="SemiBold"
+                                               Foreground="{StaticResource TextTertiaryBrush}"
+                                               VerticalAlignment="Center"
+                                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                                    <TextBlock Grid.Column="2" Text="⚡ Скорость" FontSize="9" FontWeight="SemiBold"
+                                               Foreground="{StaticResource TextTertiaryBrush}"
+                                               VerticalAlignment="Center" TextAlignment="Right"
+                                               Margin="12,0,0,0"
+                                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                                    <TextBlock Grid.Column="3" Text="" FontSize="9"
+                                               VerticalAlignment="Center" Margin="10,0,0,0"
+                                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                                </Grid>
+
+                                <ListView x:Name="ProxyListView"
+                                          MaxHeight="300"
+                                          Background="Transparent"
+                                          BorderThickness="0"
+                                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                          ScrollViewer.VerticalScrollBarVisibility="Auto">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Padding="10,8" Margin="0,2"
+                                            CornerRadius="8"
+                                            Background="Transparent">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="#1AFFFFFF"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="28"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Status Icon -->
+                                            <TextBlock Grid.Column="0" FontSize="14" VerticalAlignment="Center">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsWorking}" Value="True">
+                                                                <Setter Property="Text" Value="🟢"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding IsWorking}" Value="False">
+                                                                <Setter Property="Text" Value="🔴"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+
+                                            <!-- Info -->
+                                            <StackPanel Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center">
+                                                <TextBlock FontSize="12" FontWeight="Medium"
+                                                           Foreground="{StaticResource TextPrimaryBrush}"
+                                                           FontFamily="Consolas, 'Cascadia Code', monospace">
+                                                    <TextBlock.Text>
+                                                        <MultiBinding StringFormat="{}{0}:{1}">
+                                                            <Binding Path="Address"/>
+                                                            <Binding Path="Port"/>
+                                                        </MultiBinding>
+                                                    </TextBlock.Text>
+                                                </TextBlock>
+                                                <TextBlock FontSize="10.5"
+                                                           Foreground="{StaticResource TextTertiaryBrush}"
+                                                           Margin="0,1,0,0">
+                                                    <TextBlock.Text>
+                                                        <MultiBinding StringFormat="{}{0} {1} • {2}">
+                                                            <Binding Path="CountryFlag"/>
+                                                            <Binding Path="Country"/>
+                                                            <Binding Path="Type"/>
+                                                        </MultiBinding>
+                                                    </TextBlock.Text>
+                                                </TextBlock>
+                                            </StackPanel>
+
+                                            <!-- Speed -->
+                                            <TextBlock Grid.Column="2" FontSize="10.5"
+                                                       VerticalAlignment="Center"
+                                                       Margin="12,0,0,0"
+                                                       FontFamily="Consolas, monospace">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsWorking}" Value="True">
+                                                                <Setter Property="Text">
+                                                                    <Setter.Value>
+                                                                        <MultiBinding StringFormat="{}{0}мс">
+                                                                            <Binding Path="SpeedMs"/>
+                                                                        </MultiBinding>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding IsWorking}" Value="False">
+                                                                <Setter Property="Text" Value="✖"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+
+                                            <!-- Apply Button -->
+                                            <Button Grid.Column="3" Content="→"
+                                                    Padding="10,6" Margin="10,0,0,0"
+                                                    FontSize="13" FontWeight="Bold"
+                                                    VerticalAlignment="Center"
+                                                    Click="ProxyApplyBtn_Click"
+                                                    Tag="{Binding}">
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource GlassBtn}">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsWorking}" Value="False">
+                                                                <Setter Property="IsEnabled" Value="False"/>
+                                                                <Setter Property="Opacity" Value="0.4"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                            </StackPanel>
+                        </Border.Child>
+                    </Border>
+
+                    <!-- Recommendation -->
+                    <TextBlock x:Name="ProxyRecommendationText"
+                               Text="" FontSize="11"
+                               Foreground="{StaticResource TextTertiaryBrush}"
+                               TextWrapping="Wrap" LineHeight="16"
+                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"
+                               Margin="0,0,0,10"/>
+
+                    <!-- Test Results -->
+                    <Border x:Name="TestResultsCard"
+                            Background="{StaticResource BgSurfaceBrush}"
+                            BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1"
+                            CornerRadius="12" Padding="14" Margin="0,14,0,0"
+                            Visibility="Collapsed">
+                        <StackPanel>
+                            <TextBlock Text="Результаты теста" FontSize="13" FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       Margin="0,0,0,10"
+                                       FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                            <TextBlock x:Name="TestResultsText"
+                                       FontSize="12"
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       TextWrapping="Wrap" LineHeight="20"
+                                       FontFamily="Consolas, 'Cascadia Code', monospace"/>
+                        </StackPanel>
                     </Border>
                 </StackPanel>
 

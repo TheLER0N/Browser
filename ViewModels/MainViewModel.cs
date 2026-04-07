@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -322,15 +323,134 @@ namespace GhostBrowser.ViewModels
 
         // ==================== Environment ====================
 
+        /// <summary>
+        /// Создаёт окружение WebView2 с применением настроек прокси для обхода блокировок.
+        /// Прокси применяется только к трафику браузера — НЕ требует прав администратора.
+        /// </summary>
         private async Task<CoreWebView2Environment> GetEnvironmentAsync()
         {
             if (_environment == null)
             {
-                var userDataFolder = System.IO.Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "GhostBrowser");
-                _environment = await CoreWebView2Environment.CreateAsync(null, userDataFolder);
+                _environment = await CreateEnvironmentAsync();
             }
             return _environment;
+        }
+
+        /// <summary>
+        /// Формирует аргументы командной строки для WebView2 на основе текущих настроек.
+        /// </summary>
+        private string BuildEnvironmentArguments()
+        {
+            var args = "";
+            var settings = SettingsService.Settings;
+
+            // Прокси
+            if (settings.BypassMode == "proxy")
+            {
+                var proxyArg = Services.ProxyService.BuildProxyArgument(
+                    settings.ProxyType,
+                    settings.ProxyServer,
+                    settings.ProxyServerPort,
+                    settings.ProxyUsername,
+                    settings.ProxyPassword);
+
+                if (!string.IsNullOrEmpty(proxyArg))
+                {
+                    args += proxyArg;
+                    System.Diagnostics.Debug.WriteLine($"Proxy enabled: {settings.ProxyServer}:{settings.ProxyServerPort}");
+                }
+            }
+
+            // DoH
+            if (settings.BypassMode == "doh_cloudflare" || settings.BypassMode == "doh_google")
+            {
+                args += " --dns-over-https=secure";
+                System.Diagnostics.Debug.WriteLine($"DoH enabled: {settings.BypassMode}");
+            }
+
+            // DevTools
+            if (!settings.EnableDevTools)
+            {
+                args += " --disable-remote-debugging-port";
+            }
+
+            return args;
+        }
+
+        /// <summary>
+        /// Создаёт новое окружение WebView2 с текущими настройками.
+        /// </summary>
+        private async Task<CoreWebView2Environment> CreateEnvironmentAsync()
+        {
+            var userDataFolder = System.IO.Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "GhostBrowser");
+
+            var additionalArgs = BuildEnvironmentArguments();
+            var options = new Microsoft.Web.WebView2.Core.CoreWebView2EnvironmentOptions(additionalArgs);
+
+            return await CoreWebView2Environment.CreateAsync(null, userDataFolder, options);
+        }
+
+        /// <summary>
+        /// Пересоздаёт среду WebView2 и все вкладки с новыми настройками прокси/DoH.
+        /// Вызывается автоматически при изменении сетевых настроек.
+        /// URL вкладок сохраняются.
+        /// </summary>
+        public async Task ReinitializeEnvironmentAsync()
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("=== Reinitializing WebView2 environment ===");
+
+                // Сохраняем URL всех вкладок
+                var savedUrls = new List<string?>();
+                foreach (var tab in Tabs)
+                {
+                    var url = tab.Url == "ghost://newtab" ? null : tab.Url;
+                    savedUrls.Add(url);
+                }
+                var selectedIndex = SelectedTab != null ? Tabs.IndexOf(SelectedTab) : -1;
+
+                // Закрываем все вкладки с Dispose
+                var tabsToClose = Tabs.ToList();
+                Tabs.Clear();
+                SelectedTab = null;
+                foreach (var tab in tabsToClose)
+                {
+                    tab.Dispose();
+                }
+
+                // Пересоздаём среду
+                _environment = null;
+                _environment = await CreateEnvironmentAsync();
+
+                // Пересоздаём вкладки с сохранёнными URL
+                foreach (var url in savedUrls)
+                {
+                    var tab = new TabViewModel(_environment, SearchService, DownloadService, SettingsService, url);
+                    Tabs.Add(tab);
+                }
+
+                // Восстанавливаем выбранную вкладку
+                if (selectedIndex >= 0 && selectedIndex < Tabs.Count)
+                {
+                    SelectedTab = Tabs[selectedIndex];
+                }
+                else if (Tabs.Count > 0)
+                {
+                    SelectedTab = Tabs[0];
+                }
+
+                UpdateCloseTabCanExecute();
+                StatusText = "✅ Настройки сети применены";
+
+                System.Diagnostics.Debug.WriteLine("=== Environment reinitialized successfully ===");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"ReinitializeEnvironment error: {ex.Message}");
+                StatusText = $"❌ Ошибка применения настроек: {ex.Message}";
+            }
         }
 
         // ==================== Tab Management ====================
