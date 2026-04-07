@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -56,101 +55,6 @@ namespace GhostBrowser.Services
         {
             Bookmarks.Clear();
             SaveBookmarks();
-        }
-
-        /// <summary>
-        /// Экспорт закладок в указанный файл (копия bookmarks.json).
-        /// </summary>
-        public bool ExportBookmarks(string destinationPath)
-        {
-            try
-            {
-                var json = JsonSerializer.Serialize(Bookmarks, new JsonSerializerOptions { WriteIndented = true });
-                File.WriteAllText(destinationPath, json);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Bookmark export error: {ex.Message}");
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Импорт закладок из файла с умным слиянием (merge).
-        /// Дедупликация по URL (case-insensitive). Возвращает SyncResult со статистикой.
-        /// </summary>
-        public SyncResult ImportAndMergeBookmarks(string sourcePath)
-        {
-            var result = new SyncResult();
-
-            try
-            {
-                var json = File.ReadAllText(sourcePath);
-                var importedBookmarks = JsonSerializer.Deserialize<List<Bookmark>>(json);
-
-                if (importedBookmarks == null || importedBookmarks.Count == 0)
-                {
-                    result.ErrorMessage = "Файл не содержит закладок";
-                    return result;
-                }
-
-                result.TotalImported = importedBookmarks.Count;
-
-                // Коллекция существующих URL для быстрой проверки (case-insensitive)
-                var existingUrls = new HashSet<string>(
-                    Bookmarks.Select(b => b.Url.ToLowerInvariant())
-                );
-
-                foreach (var imported in importedBookmarks)
-                {
-                    // Пропускаем закладки с пустыми полями
-                    if (string.IsNullOrWhiteSpace(imported.Url))
-                    {
-                        result.Errors++;
-                        continue;
-                    }
-
-                    // Дедупликация по URL (case-insensitive)
-                    if (existingUrls.Contains(imported.Url.ToLowerInvariant()))
-                    {
-                        result.Skipped++;
-                        continue;
-                    }
-
-                    // Добавляем новую закладку
-                    var bookmark = new Bookmark
-                    {
-                        Id = imported.Id != Guid.Empty ? imported.Id : Guid.NewGuid(),
-                        Title = imported.Title ?? "",
-                        Url = imported.Url,
-                        Favicon = imported.Favicon ?? "",
-                        CreatedAt = imported.CreatedAt != default ? imported.CreatedAt : DateTime.UtcNow
-                    };
-
-                    Bookmarks.Add(bookmark);
-                    existingUrls.Add(imported.Url.ToLowerInvariant());
-                    result.Added++;
-                }
-
-                // Сохраняем обновлённый список
-                if (result.Added > 0)
-                {
-                    SaveBookmarks();
-                }
-            }
-            catch (JsonException ex)
-            {
-                result.ErrorMessage = $"Невалидный JSON: {ex.Message}";
-                System.Diagnostics.Debug.WriteLine($"Bookmark import JSON error: {ex.Message}");
-            }
-            catch (Exception ex)
-            {
-                result.ErrorMessage = $"Ошибка импорта: {ex.Message}";
-                System.Diagnostics.Debug.WriteLine($"Bookmark import error: {ex.Message}");
-            }
-
-            return result;
         }
 
         private void LoadBookmarks()

@@ -18,9 +18,4 @@
     </None>
   </ItemGroup>
 
-  <ItemGroup>
-    <Content Include="KING.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
 </Project>

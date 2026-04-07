@@ -34,21 +34,18 @@ namespace GhostBrowser.ViewModels
         private readonly CoreWebView2Environment _environment;
         private readonly SearchService _searchService;
         private readonly Services.DownloadService? _downloadService;
-        private readonly Services.AdBlockService? _adBlockService;
-        private readonly Services.AutoFillService? _autoFillService;
 
         /// <summary>
-        /// Событие завершения навигации.
+        /// Событие завершения навигации. Вызывается из WebView_NavigationCompleted
+        /// для уведомления MainViewModel о необходимости сохранить историю.
         /// </summary>
         public event EventHandler<TabNavigationCompletedEventArgs>? NavigationCompleted;
 
-        public TabViewModel(CoreWebView2Environment environment, SearchService searchService, Services.DownloadService? downloadService = null, Services.AdBlockService? adBlockService = null, Services.AutoFillService? autoFillService = null, string? initialUrl = null)
+        public TabViewModel(CoreWebView2Environment environment, SearchService searchService, Services.DownloadService? downloadService = null, string? initialUrl = null)
         {
             _environment = environment;
             _searchService = searchService;
             _downloadService = downloadService;
-            _adBlockService = adBlockService;
-            _autoFillService = autoFillService;
 
             if (!string.IsNullOrEmpty(initialUrl))
             {
@@ -124,22 +121,14 @@ namespace GhostBrowser.ViewModels
         {
             try
             {
+                // Дожидаемся инициализации CoreWebView2 — это обязательный шаг
+                // перед любой навигацией. Без этого WebView не работает.
                 await webView.EnsureCoreWebView2Async(_environment);
 
                 if (webView.CoreWebView2 != null)
                 {
                     // Устанавливаем тёмную тему для всех сайтов
                     webView.CoreWebView2.Profile.PreferredColorScheme = CoreWebView2PreferredColorScheme.Dark;
-
-                    // ═══ AdBlock — подписка на WebResourceRequested ═══
-                    // Перехватываем ВСЕ запросы ресурсов. AdBlockService решает, блокировать или нет.
-                    // Без AddWebResourceRequestedFilter событие не вызывается — это обязательный шаг.
-                    if (_adBlockService != null && _adBlockService.IsEnabled)
-                    {
-                        webView.CoreWebView2.AddWebResourceRequestedFilter("*", CoreWebView2WebResourceContext.All);
-                        webView.CoreWebView2.WebResourceRequested += WebView_WebResourceRequested;
-                        System.Diagnostics.Debug.WriteLine($"AdBlock enabled for tab: {_title}");
-                    }
                 }
 
                 // Навигация после успешной инициализации
@@ -232,7 +221,7 @@ namespace GhostBrowser.ViewModels
                     WebView.NavigateToString(
                         "<html><body style=\"background:#06080d;color:#f0f6fc;font-family:sans-serif;" +
                         "display:flex;align-items:center;justify-content:center;height:100vh;margin:0;\">" +
-                        "<h1>KING</h1></body></html>");
+                        "<h1>GhostBrowser</h1></body></html>");
                 }
                 catch { /* игнорируем */ }
             }
@@ -307,12 +296,6 @@ namespace GhostBrowser.ViewModels
             var navTitle = WebView?.CoreWebView2?.DocumentTitle ?? "";
             var navUrl = WebView?.Source?.ToString() ?? "";
             NavigationCompleted?.Invoke(this, new TabNavigationCompletedEventArgs(navTitle, navUrl));
-
-            // Автозаполнение форм (если включено и есть активный профиль)
-            if (_autoFillService?.IsEnabled == true && _autoFillService.GetActiveProfile() != null)
-            {
-                _ = AutoFillFormsAsync();
-            }
         }
 
         /// <summary>
@@ -342,34 +325,11 @@ namespace GhostBrowser.ViewModels
             }
         }
 
-        /// <summary>
-        /// Выполняет автозаполнение форм на текущей странице.
-        /// Генерирует JavaScript из AutoFillService и выполняет его через ExecuteScriptAsync.
-        /// </summary>
-        private async Task AutoFillFormsAsync()
-        {
-            if (_autoFillService == null || WebView?.CoreWebView2 == null) return;
-
-            try
-            {
-                var script = _autoFillService.GenerateFillScript();
-                await WebView.CoreWebView2.ExecuteScriptAsync(script);
-                System.Diagnostics.Debug.WriteLine("AutoFill: script executed");
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"AutoFill error: {ex.Message}");
-            }
-        }
-
         private void WebView_SourceChanged(object? sender, CoreWebView2SourceChangedEventArgs e)
         {
             if (WebView != null)
             {
                 var url = WebView.Source?.ToString() ?? "";
-                // Фильтруем data: URI (NewTabPage) — показываем ghost://newtab вместо base64
-                if (url.StartsWith("data:text/html"))
-                    url = "ghost://newtab";
                 Url = url;
                 CanGoBack = WebView.CanGoBack;
                 CanGoForward = WebView.CanGoForward;
@@ -391,7 +351,7 @@ namespace GhostBrowser.ViewModels
 
             return "<html><body style=\"background:#06080d;color:#f0f6fc;font-family:Segoe UI,sans-serif;" +
                    "display:flex;align-items:center;justify-content:center;height:100vh;margin:0;\">" +
-                   "<h1>KING</h1></body></html>";
+                   "<h1>GhostBrowser</h1></body></html>";
         }
 
         // ==================== Download Interception ====================
@@ -452,44 +412,11 @@ namespace GhostBrowser.ViewModels
                 WebView.SourceChanged -= WebView_SourceChanged;
                 WebView.ContentLoading -= WebView_ContentLoading;
                 if (WebView.CoreWebView2 != null)
-                {
                     WebView.CoreWebView2.DownloadStarting -= CoreWebView2_DownloadStarting;
-                    // Отписка от AdBlock
-                    WebView.CoreWebView2.WebResourceRequested -= WebView_WebResourceRequested;
-                }
 
                 // Затем уничтожаем WebView
                 WebView.Dispose();
                 _webView = null;
-            }
-        }
-
-        /// <summary>
-        /// Обработчик WebResourceRequested — блокировка рекламы через AdBlockService.
-        /// Если URL совпадает с правилом фильтрации — возвращаем 204 No Content,
-        /// что предотвращает загрузку ресурса.
-        /// </summary>
-        private void WebView_WebResourceRequested(object sender, CoreWebView2WebResourceRequestedEventArgs e)
-        {
-            if (_adBlockService == null || !_adBlockService.IsEnabled) return;
-
-            try
-            {
-                var uri = e.Request.Uri;
-                if (_adBlockService.ShouldBlockUrl(uri))
-                {
-                    // Блокируем запрос — возвращаем пустой ответ 204
-                    using var emptyStream = new System.IO.MemoryStream();
-                    e.Response = ((CoreWebView2)sender).Environment.CreateWebResourceResponse(
-                        emptyStream,
-                        204,
-                        "No Content",
-                        "");
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"AdBlock WebResourceRequested error: {ex.Message}");
             }
         }
     }

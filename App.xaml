@@ -9,46 +9,39 @@
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
 
             <!-- ═══════════════════════════════════════════ -->
-            <!-- COLORS — KING Chess Royal Palette            -->
+            <!-- COLORS — Premium Dark Graphite Palette     -->
             <!-- ═══════════════════════════════════════════ -->
-            <!-- Dark Wood & Gold — королевская шахматная тема -->
-            <Color x:Key="BgDeepest">#1a1208</Color>
-            <Color x:Key="BgDeep">#2d1f0e</Color>
-            <Color x:Key="BgPrimary">#231709</Color>
-            <Color x:Key="BgSurface">#3d2b14</Color>
-            <Color x:Key="BgElevated">#4a3520</Color>
-            <Color x:Key="BgOverlay">#5a4228</Color>
+            <Color x:Key="BgDeepest">#030508</Color>
+            <Color x:Key="BgDeep">#080b12</Color>
+            <Color x:Key="BgPrimary">#0c1017</Color>
+            <Color x:Key="BgSurface">#131820</Color>
+            <Color x:Key="BgElevated">#1a2030</Color>
+            <Color x:Key="BgOverlay">#222a3a</Color>
 
-            <Color x:Key="Accent">#d4a017</Color>
-            <Color x:Key="AccentSoft">#f0c040</Color>
-            <Color x:Key="AccentGlow">#e8b830</Color>
-            <Color x:Key="AccentDeep">#a07818</Color>
+            <Color x:Key="Accent">#7c5cfc</Color>
+            <Color x:Key="AccentSoft">#9b80fc</Color>
+            <Color x:Key="AccentGlow">#a78bfa</Color>
+            <Color x:Key="AccentDeep">#5b3fd4</Color>
 
-            <Color x:Key="Cyan">#d4a017</Color>
-            <Color x:Key="CyanSoft">#f0c040</Color>
-            <Color x:Key="CyanDeep">#a07818</Color>
+            <Color x:Key="Cyan">#00d4aa</Color>
+            <Color x:Key="CyanSoft">#33e0be</Color>
+            <Color x:Key="CyanDeep">#00b894</Color>
 
-            <Color x:Key="TextPrimary">#f5e6c8</Color>
-            <Color x:Key="TextSecondary">#c4a882</Color>
-            <Color x:Key="TextTertiary">#8b7355</Color>
-            <Color x:Key="TextDisabled">#5a4a38</Color>
+            <Color x:Key="TextPrimary">#eaeef6</Color>
+            <Color x:Key="TextSecondary">#8a93a6</Color>
+            <Color x:Key="TextTertiary">#525b6e</Color>
+            <Color x:Key="TextDisabled">#3a4155</Color>
 
-            <Color x:Key="BorderSubtle">#5a4228</Color>
-            <Color x:Key="BorderDefault">#6b5535</Color>
-            <Color x:Key="BorderStrong">#7d6642</Color>
+            <Color x:Key="BorderSubtle">#1c2233</Color>
+            <Color x:Key="BorderDefault">#262e42</Color>
+            <Color x:Key="BorderStrong">#353d54</Color>
 
-            <Color x:Key="Success">#2d5a1e</Color>
-            <Color x:Key="SuccessDeep">#1e4410</Color>
-            <Color x:Key="Warning">#d4a017</Color>
-            <Color x:Key="WarningDeep">#a07818</Color>
-            <Color x:Key="Danger">#8b1a1a</Color>
-            <Color x:Key="DangerDeep">#6b1212</Color>
-
-            <!-- Board colors (chess board) -->
-            <Color x:Key="BoardLight">#d4a574</Color>
-            <Color x:Key="BoardDark">#8b6914</Color>
-            <Color x:Key="KingPurple">#6b3fa0</Color>
-            <Color x:Key="KingPurpleLight">#8b5fbf</Color>
+            <Color x:Key="Success">#2dd4a0</Color>
+            <Color x:Key="SuccessDeep">#1fb888</Color>
+            <Color x:Key="Warning">#f0b429</Color>
+            <Color x:Key="WarningDeep">#d49a1e</Color>
+            <Color x:Key="Danger">#ef4444</Color>
+            <Color x:Key="DangerDeep">#dc2626</Color>
 
             <!-- ═══════════════════════════════════════════ -->
             <!-- BRUSHES                                     -->
@@ -81,18 +74,47 @@
             <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource Success}"/>
             <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource Warning}"/>
             <SolidColorBrush x:Key="DangerBrush" Color="{StaticResource Danger}"/>
-            <SolidColorBrush x:Key="DangerDeepBrush" Color="{StaticResource DangerDeep}"/>
 
             <!-- ═══════════════════════════════════════════ -->
-            <!-- GRADIENTS — Solid brushes for stability    -->
+            <!-- GRADIENTS                                   -->
             <!-- ═══════════════════════════════════════════ -->
-            <SolidColorBrush x:Key="AccentGradient" Color="#d4a017"/>
-            <SolidColorBrush x:Key="AccentGradientHoriz" Color="#d4a017"/>
-            <SolidColorBrush x:Key="SurfaceGradient" Color="#2d1f0e"/>
-            <SolidColorBrush x:Key="TabBarGradient" Color="#1a1208"/>
-            <SolidColorBrush x:Key="NavBarGradient" Color="#2d1f0e"/>
-            <SolidColorBrush x:Key="StatusBarGradient" Color="#1a1208"/>
-            <SolidColorBrush x:Key="ProgressGradient" Color="#d4a017"/>
+            <LinearGradientBrush x:Key="AccentGradient" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="{StaticResource AccentDeep}" Offset="0"/>
+                <GradientStop Color="{StaticResource Accent}" Offset="0.5"/>
+                <GradientStop Color="{StaticResource Cyan}" Offset="1"/>
+            </LinearGradientBrush>
+
+            <LinearGradientBrush x:Key="AccentGradientHoriz" StartPoint="0,0" EndPoint="1,0">
+                <GradientStop Color="{StaticResource AccentDeep}" Offset="0"/>
+                <GradientStop Color="{StaticResource Accent}" Offset="0.4"/>
+                <GradientStop Color="{StaticResource Cyan}" Offset="1"/>
+            </LinearGradientBrush>
+
+            <LinearGradientBrush x:Key="SurfaceGradient" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="{StaticResource BgDeep}" Offset="0"/>
+                <GradientStop Color="{StaticResource BgPrimary}" Offset="1"/>
+            </LinearGradientBrush>
+
+            <LinearGradientBrush x:Key="TabBarGradient" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="{StaticResource BgDeepest}" Offset="0"/>
+                <GradientStop Color="{StaticResource BgDeep}" Offset="1"/>
+            </LinearGradientBrush>
+
+            <LinearGradientBrush x:Key="NavBarGradient" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="{StaticResource BgDeep}" Offset="0"/>
+                <GradientStop Color="{StaticResource BgPrimary}" Offset="1"/>
+            </LinearGradientBrush>
+
+            <LinearGradientBrush x:Key="StatusBarGradient" StartPoint="0,0" EndPoint="1,0">
+                <GradientStop Color="{StaticResource BgDeepest}" Offset="0"/>
+                <GradientStop Color="{StaticResource BgDeep}" Offset="1"/>
+            </LinearGradientBrush>
+
+            <LinearGradientBrush x:Key="ProgressGradient" StartPoint="0,0" EndPoint="1,0">
+                <GradientStop Color="{StaticResource AccentDeep}" Offset="0"/>
+                <GradientStop Color="{StaticResource Accent}" Offset="0.5"/>
+                <GradientStop Color="{StaticResource Cyan}" Offset="1"/>
+            </LinearGradientBrush>
 
             <!-- ═══════════════════════════════════════════ -->
             <!-- SHADOWS & GLOWS                             -->
@@ -102,10 +124,10 @@
             <DropShadowEffect x:Key="ShadowLg" BlurRadius="16" ShadowDepth="4" Opacity="0.3" Color="#000000"/>
             <DropShadowEffect x:Key="ShadowXl" BlurRadius="24" ShadowDepth="6" Opacity="0.35" Color="#000000"/>
 
-            <DropShadowEffect x:Key="GlowAccent" BlurRadius="16" ShadowDepth="0" Opacity="0.4" Color="#d4a017"/>
-            <DropShadowEffect x:Key="GlowCyan" BlurRadius="16" ShadowDepth="0" Opacity="0.4" Color="#d4a017"/>
-            <DropShadowEffect x:Key="GlowAccentSoft" BlurRadius="20" ShadowDepth="0" Opacity="0.25" Color="#d4a017"/>
-            <DropShadowEffect x:Key="GlowSuccess" BlurRadius="12" ShadowDepth="0" Opacity="0.5" Color="#2d5a1e"/>
+            <DropShadowEffect x:Key="GlowAccent" BlurRadius="16" ShadowDepth="0" Opacity="0.4" Color="{StaticResource Accent}"/>
+            <DropShadowEffect x:Key="GlowCyan" BlurRadius="16" ShadowDepth="0" Opacity="0.4" Color="{StaticResource Cyan}"/>
+            <DropShadowEffect x:Key="GlowAccentSoft" BlurRadius="20" ShadowDepth="0" Opacity="0.25" Color="{StaticResource Accent}"/>
+            <DropShadowEffect x:Key="GlowSuccess" BlurRadius="12" ShadowDepth="0" Opacity="0.5" Color="{StaticResource Success}"/>
 
             <!-- ═══════════════════════════════════════════ -->
             <!-- CONTROL TEMPLATES                           -->
@@ -114,7 +136,7 @@
             <!-- ── Icon Button (nav arrows, menu, etc) ── -->
             <Style x:Key="IconBtn" TargetType="Button">
                 <Setter Property="Background" Value="Transparent"/>
-                <Setter Property="Foreground" Value="#c4a882"/>
+                <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
                 <Setter Property="BorderThickness" Value="0"/>
                 <Setter Property="Width" Value="36"/>
                 <Setter Property="Height" Value="36"/>
@@ -135,8 +157,8 @@
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#3d2b14"/>
-                                    <Setter Property="Foreground" Value="#f5e6c8"/>
+                                    <Setter Property="Background" Value="{StaticResource BgSurfaceBrush}"/>
+                                    <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
                                 </Trigger>
                                 <Trigger Property="IsPressed" Value="True">
                                     <Setter TargetName="Bg" Property="RenderTransform">
@@ -144,102 +166,7 @@
                                             <ScaleTransform ScaleX="0.92" ScaleY="0.92" CenterX="18" CenterY="18"/>
                                         </Setter.Value>
                                     </Setter>
-                                    <Setter Property="Background" Value="#4a3520"/>
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-            </Style>
-
-            <!-- ── Window Control Button (minimize) ── -->
-            <Style x:Key="WindowControlBtn" TargetType="Button">
-                <Setter Property="Background" Value="Transparent"/>
-                <Setter Property="Foreground" Value="#8b7355"/>
-                <Setter Property="BorderThickness" Value="0"/>
-                <Setter Property="Width" Value="46"/>
-                <Setter Property="Height" Value="34"/>
-                <Setter Property="Cursor" Value="Hand"/>
-                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="Button">
-                            <Border x:Name="Bg" Background="{TemplateBinding Background}" CornerRadius="8">
-                                <Path x:Name="Icon" Width="12" Height="12" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                      Stroke="#8b7355" StrokeThickness="1.2" StrokeLineJoin="Round"
-                                      Data="M2,6 L10,6"/>
-                            </Border>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="Bg" Property="Background" Value="#3d2b14"/>
-                                    <Setter TargetName="Icon" Property="Stroke" Value="#f0c040"/>
-                                </Trigger>
-                                <Trigger Property="IsPressed" Value="True">
-                                    <Setter TargetName="Bg" Property="Background" Value="#4a3520"/>
-                                    <Setter TargetName="Icon" Property="Stroke" Value="#d4a017"/>
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-            </Style>
-
-            <!-- ── Window Maximize Button ── -->
-            <Style x:Key="WindowMaximizeBtn" TargetType="Button">
-                <Setter Property="Background" Value="Transparent"/>
-                <Setter Property="Foreground" Value="#8b7355"/>
-                <Setter Property="BorderThickness" Value="0"/>
-                <Setter Property="Width" Value="46"/>
-                <Setter Property="Height" Value="34"/>
-                <Setter Property="Cursor" Value="Hand"/>
-                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="Button">
-                            <Border x:Name="Bg" Background="{TemplateBinding Background}" CornerRadius="8">
-                                <Path x:Name="Icon" Width="12" Height="12" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                      Stroke="#8b7355" StrokeThickness="1.2" Fill="None" StrokeLineJoin="Round"
-                                      Data="M2,2 L10,2 L10,10 L2,10 Z"/>
-                            </Border>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="Bg" Property="Background" Value="#3d2b14"/>
-                                    <Setter TargetName="Icon" Property="Stroke" Value="#f0c040"/>
-                                </Trigger>
-                                <Trigger Property="IsPressed" Value="True">
-                                    <Setter TargetName="Bg" Property="Background" Value="#4a3520"/>
-                                    <Setter TargetName="Icon" Property="Stroke" Value="#d4a017"/>
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-            </Style>
-
-            <!-- ── Window Close Button — red on hover ── -->
-            <Style x:Key="WindowCloseBtn" TargetType="Button">
-                <Setter Property="Background" Value="Transparent"/>
-                <Setter Property="Foreground" Value="#8b7355"/>
-                <Setter Property="BorderThickness" Value="0"/>
-                <Setter Property="Width" Value="46"/>
-                <Setter Property="Height" Value="34"/>
-                <Setter Property="Cursor" Value="Hand"/>
-                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="Button">
-                            <Border x:Name="Bg" Background="{TemplateBinding Background}" CornerRadius="8">
-                                <Path x:Name="Icon" Width="12" Height="12" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                      Stroke="#8b7355" StrokeThickness="1.3"
-                                      Data="M2,2 L10,10 M10,2 L2,10"/>
-                            </Border>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="Bg" Property="Background" Value="#8b1a1a"/>
-                                    <Setter TargetName="Icon" Property="Stroke" Value="White"/>
-                                </Trigger>
-                                <Trigger Property="IsPressed" Value="True">
-                                    <Setter TargetName="Bg" Property="Background" Value="#6b1212"/>
+                                    <Setter Property="Background" Value="{StaticResource BgElevatedBrush}"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -249,9 +176,9 @@
 
             <!-- ── URL Bar — Pill with Glow ── -->
             <Style x:Key="UrlBar" TargetType="TextBox">
-                <Setter Property="Background" Value="#3d2b14"/>
-                <Setter Property="Foreground" Value="#f5e6c8"/>
-                <Setter Property="BorderBrush" Value="#6b5535"/>
+                <Setter Property="Background" Value="{StaticResource BgSurfaceBrush}"/>
+                <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource BorderDefaultBrush}"/>
                 <Setter Property="BorderThickness" Value="1"/>
                 <Setter Property="Padding" Value="18,11"/>
                 <Setter Property="FontSize" Value="13.5"/>
@@ -273,13 +200,13 @@
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="BorderBrush" Value="#7d6642"/>
+                                    <Setter Property="BorderBrush" Value="{StaticResource BorderStrongBrush}"/>
                                 </Trigger>
                                 <Trigger Property="IsFocused" Value="True">
-                                    <Setter Property="BorderBrush" Value="#d4a017"/>
+                                    <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
                                     <Setter Property="Effect">
                                         <Setter.Value>
-                                            <DropShadowEffect BlurRadius="14" ShadowDepth="0" Opacity="0.35" Color="#d4a017"/>
+                                            <DropShadowEffect BlurRadius="14" ShadowDepth="0" Opacity="0.35" Color="{StaticResource Accent}"/>
                                         </Setter.Value>
                                     </Setter>
                                 </Trigger>
@@ -294,13 +221,13 @@
                 <Setter Property="Background">
                     <Setter.Value>
                         <LinearGradientBrush StartPoint="0,0" EndPoint="1,1" Opacity="0.12">
-                            <GradientStop Color="#d4a017" Offset="0"/>
-                            <GradientStop Color="#f0c040" Offset="1"/>
+                            <GradientStop Color="#7c5cfc" Offset="0"/>
+                            <GradientStop Color="#00d4aa" Offset="1"/>
                         </LinearGradientBrush>
                     </Setter.Value>
                 </Setter>
-                <Setter Property="Foreground" Value="#f5e6c8"/>
-                <Setter Property="BorderBrush" Value="#6b5535"/>
+                <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource BorderDefaultBrush}"/>
                 <Setter Property="BorderThickness" Value="1"/>
                 <Setter Property="Padding" Value="16,10"/>
                 <Setter Property="Cursor" Value="Hand"/>
@@ -319,12 +246,8 @@
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="BorderBrush" Value="#f0c040"/>
-                                    <Setter Property="Effect">
-                                        <Setter.Value>
-                                            <DropShadowEffect BlurRadius="20" ShadowDepth="0" Opacity="0.25" Color="#d4a017"/>
-                                        </Setter.Value>
-                                    </Setter>
+                                    <Setter Property="BorderBrush" Value="{StaticResource AccentSoftBrush}"/>
+                                    <Setter Property="Effect" Value="{StaticResource GlowAccentSoft}"/>
                                 </Trigger>
                                 <Trigger Property="IsPressed" Value="True">
                                     <Setter TargetName="RootBorder" Property="RenderTransform">
@@ -341,7 +264,7 @@
 
             <!-- ── Toggle Switch ── -->
             <Style x:Key="ToggleSwitch" TargetType="ToggleButton">
-                <Setter Property="Background" Value="#4a3520"/>
+                <Setter Property="Background" Value="{StaticResource BgElevatedBrush}"/>
                 <Setter Property="BorderThickness" Value="0"/>
                 <Setter Property="Width" Value="46"/>
                 <Setter Property="Height" Value="26"/>
@@ -351,10 +274,10 @@
                         <ControlTemplate TargetType="ToggleButton">
                             <Grid>
                                 <Border x:Name="Track" CornerRadius="13"
-                                        Background="#4a3520"
-                                        BorderThickness="1" BorderBrush="#6b5535"/>
+                                        Background="{StaticResource BgElevatedBrush}"
+                                        BorderThickness="1" BorderBrush="{StaticResource BorderDefaultBrush}"/>
                                 <Ellipse x:Name="Thumb" Width="20" Height="20"
-                                         Fill="#8b7355"
+                                         Fill="{StaticResource TextTertiaryBrush}"
                                          HorizontalAlignment="Left" Margin="3,0,0,0">
                                     <Ellipse.Effect>
                                         <DropShadowEffect BlurRadius="4" ShadowDepth="1" Opacity="0.3" Color="#000000"/>
@@ -363,8 +286,8 @@
                             </Grid>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsChecked" Value="True">
-                                    <Setter TargetName="Track" Property="Background" Value="#d4a017"/>
-                                    <Setter TargetName="Track" Property="BorderBrush" Value="#d4a017"/>
+                                    <Setter TargetName="Track" Property="Background" Value="{StaticResource AccentBrush}"/>
+                                    <Setter TargetName="Track" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
                                     <Setter TargetName="Thumb" Property="Fill" Value="White"/>
                                     <Setter TargetName="Thumb" Property="HorizontalAlignment" Value="Right"/>
                                     <Setter TargetName="Thumb" Property="Margin" Value="0,0,3,0"/>
@@ -377,9 +300,9 @@
 
             <!-- ── Settings ComboBox ── -->
             <Style x:Key="SettingsCombo" TargetType="ComboBox">
-                <Setter Property="Background" Value="#3d2b14"/>
-                <Setter Property="Foreground" Value="#f5e6c8"/>
-                <Setter Property="BorderBrush" Value="#6b5535"/>
+                <Setter Property="Background" Value="{StaticResource BgSurfaceBrush}"/>
+                <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource BorderDefaultBrush}"/>
                 <Setter Property="BorderThickness" Value="1"/>
                 <Setter Property="Padding" Value="14,10"/>
                 <Setter Property="FontSize" Value="13"/>
@@ -401,17 +324,14 @@
                                     <ToggleButton Grid.Column="1" Background="Transparent" BorderThickness="0"
                                                   IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
                                                   Width="32" Height="32" Cursor="Hand">
-                                        <Path Data="M0,0 L5,5 L10,0" Stroke="#c4a882"
+                                        <Path Data="M0,0 L5,5 L10,0" Stroke="{StaticResource TextSecondaryBrush}"
                                               StrokeThickness="1.5" Margin="10,0" VerticalAlignment="Center"/>
                                     </ToggleButton>
                                     <Popup IsOpen="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
                                            Placement="Bottom" StaysOpen="False">
-                                        <Border Background="#3d2b14"
-                                                BorderBrush="#6b5535" BorderThickness="1"
-                                                CornerRadius="10" Padding="4">
-                                            <Border.Effect>
-                                                <DropShadowEffect BlurRadius="16" ShadowDepth="4" Opacity="0.3" Color="#000000"/>
-                                            </Border.Effect>
+                                        <Border Background="{StaticResource BgSurfaceBrush}"
+                                                BorderBrush="{StaticResource BorderDefaultBrush}" BorderThickness="1"
+                                                CornerRadius="10" Padding="4" Effect="{StaticResource ShadowLg}">
                                             <StackPanel IsItemsHost="True"/>
                                         </Border>
                                     </Popup>
@@ -424,9 +344,9 @@
 
             <!-- ── Settings TextBox ── -->
             <Style x:Key="SettingsTextBox" TargetType="TextBox">
-                <Setter Property="Background" Value="#3d2b14"/>
-                <Setter Property="Foreground" Value="#f5e6c8"/>
-                <Setter Property="BorderBrush" Value="#6b5535"/>
+                <Setter Property="Background" Value="{StaticResource BgSurfaceBrush}"/>
+                <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource BorderDefaultBrush}"/>
                 <Setter Property="BorderThickness" Value="1"/>
                 <Setter Property="Padding" Value="14,10"/>
                 <Setter Property="FontSize" Value="13"/>
@@ -444,12 +364,8 @@
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsFocused" Value="True">
-                                    <Setter Property="BorderBrush" Value="#d4a017"/>
-                                    <Setter Property="Effect">
-                                        <Setter.Value>
-                                            <DropShadowEffect BlurRadius="20" ShadowDepth="0" Opacity="0.25" Color="#d4a017"/>
-                                        </Setter.Value>
-                                    </Setter>
+                                    <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                                    <Setter Property="Effect" Value="{StaticResource GlowAccentSoft}"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -463,8 +379,8 @@
                 <Setter Property="Maximum" Value="24"/>
                 <Setter Property="TickFrequency" Value="1"/>
                 <Setter Property="IsSnapToTickEnabled" Value="True"/>
-                <Setter Property="Foreground" Value="#d4a017"/>
-                <Setter Property="Background" Value="#4a3520"/>
+                <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
+                <Setter Property="Background" Value="{StaticResource BgElevatedBrush}"/>
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Slider">
@@ -476,9 +392,9 @@
                                         <Thumb>
                                             <Thumb.Template>
                                                 <ControlTemplate>
-                                                    <Ellipse Width="20" Height="20" Fill="#d4a017">
+                                                    <Ellipse Width="20" Height="20" Fill="{StaticResource AccentBrush}">
                                                         <Ellipse.Effect>
-                                                            <DropShadowEffect BlurRadius="8" ShadowDepth="0" Opacity="0.4" Color="#d4a017"/>
+                                                            <DropShadowEffect BlurRadius="8" ShadowDepth="0" Opacity="0.4" Color="{StaticResource Accent}"/>
                                                         </Ellipse.Effect>
                                                     </Ellipse>
                                                 </ControlTemplate>
@@ -495,7 +411,7 @@
             <!-- ── Menu Nav Item Button ── -->
             <Style x:Key="MenuNavItemBtn" TargetType="Button">
                 <Setter Property="Background" Value="Transparent"/>
-                <Setter Property="Foreground" Value="#c4a882"/>
+                <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
                 <Setter Property="BorderThickness" Value="0"/>
                 <Setter Property="Padding" Value="14,10"/>
                 <Setter Property="HorizontalAlignment" Value="Stretch"/>
@@ -514,8 +430,8 @@
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#3d2b14"/>
-                                    <Setter Property="Foreground" Value="#f5e6c8"/>
+                                    <Setter Property="Background" Value="{StaticResource BgSurfaceBrush}"/>
+                                    <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -526,7 +442,7 @@
             <!-- ── Browser TabItem ── -->
             <Style x:Key="BrowserTabItemStyle" TargetType="TabItem">
                 <Setter Property="Background" Value="Transparent"/>
-                <Setter Property="Foreground" Value="#c4a882"/>
+                <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
                 <Setter Property="BorderThickness" Value="0"/>
                 <Setter Property="Padding" Value="20,10"/>
                 <Setter Property="Margin" Value="2,0,2,0"/>
@@ -552,7 +468,7 @@
                                                MaxWidth="160" TextTrimming="CharacterEllipsis"
                                                VerticalAlignment="Center"/>
                                     <Button x:Name="CloseBtn" Content="✕" Background="Transparent"
-                                            BorderThickness="0" Foreground="#8b7355"
+                                            BorderThickness="0" Foreground="{StaticResource TextTertiaryBrush}"
                                             Width="22" Height="22" Margin="10,0,0,0" FontSize="13"
                                             Cursor="Hand" Opacity="0"
                                             Command="{Binding DataContext.CloseTabCommand, RelativeSource={RelativeSource AncestorType=Window}}"
@@ -567,7 +483,7 @@
                                                             </Border>
                                                             <ControlTemplate.Triggers>
                                                                 <Trigger Property="IsMouseOver" Value="True">
-                                                                    <Setter Property="Background" Value="#8b1a1a"/>
+                                                                    <Setter Property="Background" Value="{StaticResource DangerBrush}"/>
                                                                     <Setter Property="Foreground" Value="White"/>
                                                                 </Trigger>
                                                             </ControlTemplate.Triggers>
@@ -581,15 +497,15 @@
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsSelected" Value="True">
-                                    <Setter Property="Background" Value="#3d2b14"/>
-                                    <Setter Property="Foreground" Value="#f5e6c8"/>
-                                    <Setter TargetName="TabBorder" Property="BorderBrush" Value="#d4a017"/>
+                                    <Setter Property="Background" Value="{StaticResource BgSurfaceBrush}"/>
+                                    <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                                    <Setter TargetName="TabBorder" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
                                     <Setter TargetName="CloseBtn" Property="Opacity" Value="0.6"/>
                                     <Setter TargetName="Favicon" Property="Opacity" Value="1"/>
                                 </Trigger>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#3d2b14"/>
-                                    <Setter Property="Foreground" Value="#f5e6c8"/>
+                                    <Setter Property="Background" Value="{StaticResource BgSurfaceBrush}"/>
+                                    <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
                                     <Setter TargetName="CloseBtn" Property="Opacity" Value="0.6"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>

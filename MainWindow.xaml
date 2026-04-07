@@ -4,27 +4,40 @@
         xmlns:local="clr-namespace:GhostBrowser"
         xmlns:vm="clr-namespace:GhostBrowser.ViewModels"
         xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
-        Title="KING"
+        Title="GhostBrowser"
         Height="720" Width="1280"
-        Left="100" Top="100"
         WindowStyle="None"
         AllowsTransparency="True"
-        Background="#1a1208"
-        WindowStartupLocation="Manual"
-        WindowState="Normal"
-        ShowActivated="True"
-        Topmost="False"
+        Background="Transparent"
+        WindowStartupLocation="CenterScreen"
         MinWidth="860" MinHeight="520"
         MouseLeftButtonDown="Window_MouseLeftButtonDown"
         SnapsToDevicePixels="True"
         UseLayoutRounding="True"
         SizeChanged="Window_SizeChanged">
 
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="8" GlassFrameThickness="0"/>
+    </WindowChrome.WindowChrome>
+
     <Window.Resources>
+        <Storyboard x:Key="WindowFadeIn">
+            <DoubleAnimation Storyboard.TargetName="WindowRoot"
+                             Storyboard.TargetProperty="Opacity"
+                             From="0" To="1" Duration="0:0:0.4">
+                <DoubleAnimation.EasingFunction>
+                    <PowerEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+
+        <DataTemplate DataType="{x:Type vm:TabViewModel}">
+            <ContentControl Content="{Binding WebView}" />
+        </DataTemplate>
     </Window.Resources>
 
     <!-- Outer glow -->
-    <Border x:Name="WindowRoot"
+    <Border x:Name="WindowRoot" Opacity="0"
             SnapsToDevicePixels="True"
             UseLayoutRounding="True">
         <Border.Effect>
@@ -53,8 +66,14 @@
                 </Grid.RowDefinitions>
 
                 <!-- ════════════ TITLE BAR ════════════ -->
-                <Border Grid.Row="0" BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="0,0,0,1"
-                        Background="{StaticResource BgDeepestBrush}">
+                <Border Grid.Row="0" BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="0,0,0,1">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                            <GradientStop Color="{StaticResource BgDeepest}" Offset="0"/>
+                            <GradientStop Color="#06090f" Offset="0.5"/>
+                            <GradientStop Color="{StaticResource BgDeep}" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -63,41 +82,25 @@
                         </Grid.ColumnDefinitions>
 
                         <!-- Logo -->
-                        <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="16,0,0,0"
-                                    MouseLeftButtonDown="TitleBar_MouseDown">
-                            <!-- KING Logo -->
-                            <Image Source="KING.png" Width="28" Height="28" VerticalAlignment="Center"
-                                   RenderOptions.BitmapScalingMode="HighQuality"/>
-                            <TextBlock Text="KING" FontSize="15" FontWeight="Bold"
-                                       Foreground="{StaticResource AccentSoftBrush}"
-                                       VerticalAlignment="Center" Margin="8,0,0,0"
-                                       FontFamily="Georgia, 'Times New Roman', serif"/>
-                            <!-- Profile Selector -->
-                            <Button x:Name="BtnProfile" Content="👤"
-                                    Style="{StaticResource IconBtn}"
-                                    Margin="12,0,0,0" FontSize="14"
-                                    Click="BtnProfile_Click"
-                                    ToolTip="Профиль пользователя"/>
-                            <TextBlock x:Name="ProfileNameText" Text="Основной"
-                                       FontSize="11" FontWeight="Medium"
-                                       Foreground="{StaticResource TextSecondaryBrush}"
-                                       VerticalAlignment="Center" Margin="6,0,0,0"
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="16,0,0,0">
+                            <Border CornerRadius="8" Width="28" Height="28" VerticalAlignment="Center">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="{StaticResource AccentDeep}" Offset="0"/>
+                                        <GradientStop Color="{StaticResource Accent}" Offset="0.5"/>
+                                        <GradientStop Color="{StaticResource Cyan}" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <TextBlock Text="👻" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <TextBlock Text="GhostBrowser" FontSize="13" FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       VerticalAlignment="Center" Margin="10,0,0,0"
                                        FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
                         </StackPanel>
 
-                        <!-- Profile Popup -->
-                        <Popup x:Name="ProfilePopup" PlacementTarget="{Binding ElementName=BtnProfile}"
-                               Placement="Bottom" StaysOpen="False" AllowsTransparency="True">
-                            <Border Background="{StaticResource BgSurfaceBrush}"
-                                    BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1"
-                                    CornerRadius="12" Padding="8" MinWidth="200">
-                                <StackPanel x:Name="ProfileList"/>
-                            </Border>
-                        </Popup>
-
                         <!-- Stealth Indicator -->
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center"
-                                    MouseLeftButtonDown="TitleBar_MouseDown">
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
                             <Border x:Name="StealthIndicatorBorder"
                                     Width="8" Height="8" CornerRadius="4"
                                     Background="{StaticResource TextTertiaryBrush}"
@@ -113,18 +116,86 @@
                                        FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
                         </StackPanel>
 
-                        <!-- Window Controls — Elegant SVG Icons -->
-                        <StackPanel Grid.Column="2" Orientation="Horizontal"
-                                    MouseLeftButtonDown="TitleBar_MouseDown">
-                            <!-- Minimize -->
-                            <Button x:Name="BtnMinimize" Style="{StaticResource WindowControlBtn}" Click="BtnMinimize_Click"
-                                    ToolTip="Свернуть"/>
-                            <!-- Maximize/Restore -->
-                            <Button x:Name="BtnMaximize" Style="{StaticResource WindowMaximizeBtn}" Click="BtnMaximize_Click"
-                                    ToolTip="Развернуть"/>
-                            <!-- Close -->
-                            <Button x:Name="BtnClose" Style="{StaticResource WindowCloseBtn}" Click="BtnClose_Click"
-                                    ToolTip="Закрыть"/>
+                        <!-- Window Controls -->
+                        <StackPanel Grid.Column="2" Orientation="Horizontal">
+                            <Button x:Name="BtnMinimize" Width="46" Height="34"
+                                    Background="Transparent" BorderThickness="0"
+                                    Foreground="{StaticResource TextSecondaryBrush}"
+                                    FontSize="12" Cursor="Hand" Click="BtnMinimize_Click">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border x:Name="Bg" Background="Transparent" CornerRadius="6">
+                                                        <TextBlock Text="─" Foreground="{TemplateBinding Foreground}"
+                                                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                   FontSize="13" FontFamily="Consolas"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="Bg" Property="Background" Value="{StaticResource BgSurfaceBrush}"/>
+                                                            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                            <Button x:Name="BtnMaximize" Width="46" Height="34"
+                                    Background="Transparent" BorderThickness="0"
+                                    Foreground="{StaticResource TextSecondaryBrush}"
+                                    FontSize="11" Cursor="Hand" Click="BtnMaximize_Click">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border x:Name="Bg" Background="Transparent" CornerRadius="6">
+                                                        <TextBlock Text="□" Foreground="{TemplateBinding Foreground}"
+                                                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                   FontSize="12" FontFamily="Consolas"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="Bg" Property="Background" Value="{StaticResource BgSurfaceBrush}"/>
+                                                            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                            <Button x:Name="BtnClose" Width="46" Height="34"
+                                    Background="Transparent" BorderThickness="0"
+                                    Foreground="{StaticResource TextSecondaryBrush}"
+                                    FontSize="10" Cursor="Hand" Click="BtnClose_Click">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border x:Name="Bg" Background="Transparent" CornerRadius="6">
+                                                        <TextBlock Text="✕" Foreground="{TemplateBinding Foreground}"
+                                                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                   FontSize="11" FontFamily="Consolas"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="Bg" Property="Background" Value="{StaticResource DangerBrush}"/>
+                                                            <Setter Property="Foreground" Value="White"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
                         </StackPanel>
                     </Grid>
                 </Border>
@@ -212,7 +283,6 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
                         <Button Grid.Column="0" Content="←" Style="{StaticResource IconBtn}"
@@ -275,13 +345,13 @@
                         </Button>
 
                         <!-- Stealth -->
-                        <Button Grid.Column="7" Content="🕶️" Style="{StaticResource IconBtn}"
+                        <Button Grid.Column="7" Content="👻" Style="{StaticResource IconBtn}"
                                 Margin="6,0,0,0" Command="{Binding ToggleStealthCommand}"
                                 x:Name="BtnStealth" FontSize="15"
                                 ToolTip="Скрыть от OBS/Discord (Ctrl+Shift+H)"/>
 
                         <!-- Incognito -->
-                        <Button Grid.Column="8" Content="♛" Style="{StaticResource IconBtn}"
+                        <Button Grid.Column="8" Content="🕶️" Style="{StaticResource IconBtn}"
                                 Margin="6,0,0,0" Click="BtnIncognito_Click"
                                 x:Name="BtnIncognito" FontSize="15"
                                 ToolTip="Открыть инкогнито (Ctrl+Shift+N)"/>
@@ -290,12 +360,6 @@
                         <Button Grid.Column="9" Content="⋮" Style="{StaticResource IconBtn}"
                                 Margin="6,0,0,0" Click="BtnMenu_Click" x:Name="BtnMenu"
                                 FontSize="18" ToolTip="Меню"/>
-
-                        <!-- Screenshot -->
-                        <Button Grid.Column="10" Content="📸" Style="{StaticResource IconBtn}"
-                                Margin="6,0,0,0" Command="{Binding TakeScreenshotCommand}"
-                                x:Name="BtnScreenshot" FontSize="15"
-                                ToolTip="Скриншот (Ctrl+Shift+S)"/>
                     </Grid>
                 </Border>
 
@@ -448,7 +512,5 @@
         <KeyBinding Key="Right" Modifiers="Alt" Command="{Binding GoForwardCommand}"/>
         <KeyBinding Key="R" Modifiers="Control" Command="{Binding RefreshCommand}"/>
         <KeyBinding Key="D" Modifiers="Control" Command="{Binding ToggleBookmarkCommand}"/>
-        <KeyBinding Key="S" Modifiers="Control+Shift" Command="{Binding TakeScreenshotCommand}"/>
-        <KeyBinding Key="F" Modifiers="Control+Shift" Command="{Binding FillFormsCommand}"/>
     </Window.InputBindings>
 </Window>

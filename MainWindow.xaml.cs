@@ -10,7 +10,7 @@ using GhostBrowser.ViewModels;
 namespace GhostBrowser
 {
     /// <summary>
-    /// Главное окно браузера KING.
+    /// Главное окно браузера GhostBrowser.
     /// Управляет UI-элементами и связывает их с MainViewModel через MVVM.
     /// Вся бизнес-логика находится в ViewModel; code-behind используется
     /// только для обработки событий WPF-контролов, которые нельзя выразить через команды.
@@ -39,48 +39,25 @@ namespace GhostBrowser
 
         public MainWindow()
         {
-            try
+            InitializeComponent();
+            var vm = new MainViewModel();
+            DataContext = vm;
+
+            // Инициализируем сервис stealth mode после создания оконного хэндла
+            vm.StealthService.Initialize(this);
+
+            // Анимация появления окна
+            Loaded += (s, e) =>
             {
-                InitializeComponent();
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"[FATAL] InitializeComponent failed: {ex}");
-                System.Windows.MessageBox.Show($"XAML Error:\n{ex.Message}", "KING Browser", MessageBoxButton.OK, MessageBoxImage.Error);
-                Application.Current.Shutdown(1);
-                return;
-            }
+                if (FindResource("WindowFadeIn") is Storyboard fadeIn)
+                    fadeIn.Begin(this);
 
-            try
-            {
-                var vm = new MainViewModel();
-                DataContext = vm;
+                // При смене выбранной вкладки обновляем отображение контента
+                vm.PropertyChanged += ViewModel_PropertyChanged;
+            };
 
-                // Инициализируем сервис stealth mode после создания оконного хэндла
-                vm.StealthService.Initialize(this);
-
-                // Анимация появления окна + Clip для скруглённых углов
-                Loaded += (s, e) =>
-                {
-                    // При смене выбранной вкладки обновляем отображение контента
-                    vm.PropertyChanged += ViewModel_PropertyChanged;
-
-                    // Clip для скруглённых углов — вызываем после Layout
-                    Dispatcher.InvokeAsync(() => ApplyClip(), System.Windows.Threading.DispatcherPriority.Loaded);
-                };
-
-                vm.StealthService.StealthModeChanged += OnStealthModeChanged;
-                UpdateUrlPlaceholder();
-
-                // Обновляем Clip при изменении размера окна
-                SizeChanged += (s, e) => Dispatcher.InvokeAsync(() => ApplyClip(), System.Windows.Threading.DispatcherPriority.Render);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"[FATAL] MainWindow constructor failed: {ex}");
-                System.Windows.MessageBox.Show($"Initialization Error:\n{ex.Message}", "KING Browser", MessageBoxButton.OK, MessageBoxImage.Error);
-                Application.Current.Shutdown(1);
-            }
+            vm.StealthService.StealthModeChanged += OnStealthModeChanged;
+            UpdateUrlPlaceholder();
         }
 
         /// <summary>
@@ -98,27 +75,6 @@ namespace GhostBrowser
             UrlPlaceholder.Visibility = string.IsNullOrEmpty(UrlBox.Text)
                 ? Visibility.Visible
                 : Visibility.Collapsed;
-        }
-
-        /// <summary>
-        /// Применяет Clip с CornerRadius=14 к WindowRoot — скругляет углы окна,
-        /// чтобы элементы внутри (Title Bar, Tab Bar) не перекрывали скругление.
-        /// </summary>
-        private void ApplyClip()
-        {
-            var radius = 14.0;
-            var rect = new System.Windows.Rect(0, 0, WindowRoot.ActualWidth, WindowRoot.ActualHeight);
-            var geometry = new System.Windows.Media.RectangleGeometry(rect, radius, radius);
-            WindowRoot.Clip = geometry;
-        }
-
-        /// <summary>
-        /// Перетаскивание окна за title bar (когда цепляемся мышкой за верхнюю панель).
-        /// </summary>
-        private void TitleBar_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            if (e.LeftButton == System.Windows.Input.MouseButtonState.Pressed)
-                DragMove();
         }
 
         // ==================== Адресная строка ====================
@@ -168,22 +124,15 @@ namespace GhostBrowser
         /// </summary>
         private void BtnMenu_Click(object sender, RoutedEventArgs e)
         {
-            try
+            if (ViewModel.IsSettingsOpen)
             {
-                if (ViewModel.IsSettingsOpen)
-                {
-                    ViewModel.CloseSettings();
-                }
-                else
-                {
-                    _settingsPage ??= new Views.SettingsPage { DataContext = ViewModel };
-                    ViewModel.OpenSettings(_settingsPage);
-                }
+                ViewModel.CloseSettings();
             }
-            catch (Exception ex)
+            else
             {
-                System.Diagnostics.Debug.WriteLine($"BtnMenu_Click error: {ex}");
-                MessageBox.Show($"Ошибка открытия меню: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                // Создаём SettingsPage один раз и переиспользуем
+                _settingsPage ??= new Views.SettingsPage { DataContext = ViewModel };
+                ViewModel.OpenSettings(_settingsPage);
             }
         }
 
@@ -195,67 +144,6 @@ namespace GhostBrowser
         {
             var incognitoWindow = new IncognitoWindow();
             incognitoWindow.Show();
-        }
-
-        /// <summary>
-        /// Показывает popup со списком профилей для переключения.
-        /// </summary>
-        private void BtnProfile_Click(object sender, RoutedEventArgs e)
-        {
-            if (DataContext is not MainViewModel vm) return;
-
-            ProfileList.Children.Clear();
-
-            foreach (var profile in vm.ProfileService.Profiles)
-            {
-                var btn = new System.Windows.Controls.Button
-                {
-                    Content = $"{(profile.IsActive ? "● " : "○ ")}{profile.Name}",
-                    Background = System.Windows.Media.Brushes.Transparent,
-                    BorderThickness = new System.Windows.Thickness(0),
-                    Foreground = FindResource("TextPrimaryBrush") as System.Windows.Media.Brush,
-                    Padding = new System.Windows.Thickness(10, 8, 10, 8),
-                    HorizontalContentAlignment = System.Windows.HorizontalAlignment.Left,
-                    Cursor = System.Windows.Input.Cursors.Hand,
-                    FontSize = 13,
-                    FontFamily = new System.Windows.Media.FontFamily("Segoe UI Variable")
-                };
-
-                var p = profile;
-                btn.Click += (s, args) =>
-                {
-                    vm.ProfileService.SetActiveProfile(p.Id);
-                    ProfileNameText.Text = vm.ProfileService.GetActiveProfile()!.Name;
-                    ProfilePopup.IsOpen = false;
-                    vm.StatusText = $"Профиль: {p.Name}";
-                };
-
-                ProfileList.Children.Add(btn);
-            }
-
-            // Кнопка "Управление профилями"
-            var manageBtn = new System.Windows.Controls.Button
-            {
-                Content = "⚙️ Управление профилями",
-                Background = System.Windows.Media.Brushes.Transparent,
-                BorderThickness = new System.Windows.Thickness(0),
-                Foreground = FindResource("TextSecondaryBrush") as System.Windows.Media.Brush,
-                Padding = new System.Windows.Thickness(10, 8, 10, 8),
-                HorizontalContentAlignment = System.Windows.HorizontalAlignment.Left,
-                Cursor = System.Windows.Input.Cursors.Hand,
-                FontSize = 12,
-                FontFamily = new System.Windows.Media.FontFamily("Segoe UI Variable")
-            };
-            manageBtn.Click += (s, args) =>
-            {
-                ProfilePopup.IsOpen = false;
-                _settingsPage ??= new Views.SettingsPage { DataContext = ViewModel };
-                vm.OpenSettings(_settingsPage);
-                Dispatcher.InvokeAsync(() => _settingsPage!.ActivateProfiles());
-            };
-            ProfileList.Children.Add(manageBtn);
-
-            ProfilePopup.IsOpen = true;
         }
 
         private void Menu_History_Click(object sender, RoutedEventArgs e)
@@ -295,7 +183,7 @@ namespace GhostBrowser
 
         private void Menu_About_Click(object sender, RoutedEventArgs e)
             => MessageBox.Show(
-                "KING v1.0\n\nШахматный браузер нового поколения",
+                "GhostBrowser v1.0\n\nПриватный браузер нового поколения",
                 "О программе",
                 MessageBoxButton.OK,
                 MessageBoxImage.Information);

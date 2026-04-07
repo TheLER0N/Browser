@@ -1,7 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -29,6 +28,7 @@ namespace GhostBrowser.ViewModels
         private object? _displayedContent;
         private bool _isSettingsOpen;
 
+        private CoreWebView2Environment? _environment;
         private readonly System.Windows.Threading.DispatcherTimer _clockTimer;
 
         // Services
@@ -38,10 +38,6 @@ namespace GhostBrowser.ViewModels
         public SearchService SearchService { get; }
         public SettingsService SettingsService { get; }
         public Services.DownloadService DownloadService { get; }
-        public Services.AdBlockService AdBlockService { get; }
-        public ScreenshotService ScreenshotService { get; } = new();
-        public AutoFillService AutoFillService { get; }
-        public ProfileService ProfileService { get; }
 
         // ==================== Collections ====================
 
@@ -157,33 +153,6 @@ namespace GhostBrowser.ViewModels
         public ICommand ToggleBookmarkCommand { get; }
         public ICommand CycleSearchEngineCommand { get; }
         public ICommand FocusUrlCommand { get; }
-        public ICommand TakeScreenshotCommand { get; }
-        public ICommand FillFormsCommand { get; }
-
-        // AutoFill binding properties
-        private string _autoFillFirstName = "";
-        public string AutoFillFirstName { get => _autoFillFirstName; set => Set(ref _autoFillFirstName, value); }
-        private string _autoFillLastName = "";
-        public string AutoFillLastName { get => _autoFillLastName; set => Set(ref _autoFillLastName, value); }
-        private string _autoFillMiddleName = "";
-        public string AutoFillMiddleName { get => _autoFillMiddleName; set => Set(ref _autoFillMiddleName, value); }
-        private string _autoFillEmail = "";
-        public string AutoFillEmail { get => _autoFillEmail; set => Set(ref _autoFillEmail, value); }
-        private string _autoFillPhone = "";
-        public string AutoFillPhone { get => _autoFillPhone; set => Set(ref _autoFillPhone, value); }
-        private string _autoFillStreet = "";
-        public string AutoFillStreet { get => _autoFillStreet; set => Set(ref _autoFillStreet, value); }
-        private string _autoFillCity = "";
-        public string AutoFillCity { get => _autoFillCity; set => Set(ref _autoFillCity, value); }
-        private string _autoFillState = "";
-        public string AutoFillState { get => _autoFillState; set => Set(ref _autoFillState, value); }
-        private string _autoFillZipCode = "";
-        public string AutoFillZipCode { get => _autoFillZipCode; set => Set(ref _autoFillZipCode, value); }
-        private string _autoFillCountry = "";
-        public string AutoFillCountry { get => _autoFillCountry; set => Set(ref _autoFillCountry, value); }
-
-        private string _newProfileName = "";
-        public string NewProfileName { get => _newProfileName; set => Set(ref _newProfileName, value); }
 
         /// <summary>
         /// Асинхронная команда создания вкладки.
@@ -211,9 +180,6 @@ namespace GhostBrowser.ViewModels
             SearchService = new SearchService();
             SettingsService = new SettingsService();
             DownloadService = new Services.DownloadService();
-            AdBlockService = new Services.AdBlockService();
-            AutoFillService = new AutoFillService();
-            ProfileService = new ProfileService();
 
             // Загружаем папку загрузок из настроек
             DownloadService.LoadDownloadFolder(SettingsService);
@@ -231,11 +197,6 @@ namespace GhostBrowser.ViewModels
             ToggleBookmarkCommand = new RelayCommand(_ => ToggleBookmark());
             CycleSearchEngineCommand = new RelayCommand(_ => CycleSearchEngine());
             FocusUrlCommand = new RelayCommand(_ => UrlInput = SelectedTab?.Url ?? "");
-            TakeScreenshotCommand = new RelayCommand(async _ => await TakeScreenshotAsync(), _ => SelectedTab?.WebView != null);
-            FillFormsCommand = new RelayCommand(async _ => await FillFormsManuallyAsync(), _ => SelectedTab?.WebView != null);
-
-            // Загрузка данных автозаполнения из активного профиля
-            LoadAutoFillProfileToUI();
 
             // Clock timer
             _clockTimer = new System.Windows.Threading.DispatcherTimer
@@ -316,8 +277,13 @@ namespace GhostBrowser.ViewModels
 
         private async Task<CoreWebView2Environment> GetEnvironmentAsync()
         {
-            var userDataFolder = ProfileService.GetActiveProfileUserDataFolder();
-            return await CoreWebView2Environment.CreateAsync(null, userDataFolder);
+            if (_environment == null)
+            {
+                var userDataFolder = System.IO.Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "GhostBrowser");
+                _environment = await CoreWebView2Environment.CreateAsync(null, userDataFolder);
+            }
+            return _environment;
         }
 
         // ==================== Tab Management ====================
@@ -338,7 +304,7 @@ namespace GhostBrowser.ViewModels
             // поэтому нам не нужно await'ить что-то здесь — просто создаём и добавляем.
             await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
             {
-                var tab = new TabViewModel(env, SearchService, DownloadService, AdBlockService, AutoFillService, url);
+                var tab = new TabViewModel(env, SearchService, DownloadService, url);
                 Tabs.Add(tab);
                 SelectedTab = tab;
                 UpdateCloseTabCanExecute();
@@ -437,11 +403,7 @@ namespace GhostBrowser.ViewModels
                     SelectedTab.PropertyChanged += OnSelectedTabPropertyChanged;
                     SelectedTab.NavigationCompleted += OnSelectedTabNavigationCompleted;
 
-                    // Фильтруем data: URI (NewTabPage) — показываем пустую строку вместо base64
-                    var tabUrl = SelectedTab.Url;
-                    if (tabUrl == "ghost://newtab" || tabUrl.StartsWith("data:text/html"))
-                        tabUrl = "";
-                    UrlInput = tabUrl;
+                    UrlInput = SelectedTab.Url == "ghost://newtab" ? "" : SelectedTab.Url;
                     CanGoBack = SelectedTab.CanGoBack;
                     CanGoForward = SelectedTab.CanGoForward;
                     IsLoading = SelectedTab.IsLoading;
@@ -557,139 +519,6 @@ namespace GhostBrowser.ViewModels
             StatusText = IsStealthMode ? "Защита от захвата экрана активна" : "Готово";
         }
 
-        // ==================== Screenshot ====================
-
-        /// <summary>
-        /// Делает скриншот текущей страницы через ScreenshotService.
-        /// Использует SaveFileDialog (или автоматическое имя если включено).
-        /// </summary>
-        private async Task TakeScreenshotAsync()
-        {
-            if (SelectedTab?.WebView == null)
-            {
-                StatusText = "Нет активной вкладки";
-                return;
-            }
-
-            try
-            {
-                var format = SettingsService.ScreenshotFormat;
-                string filePath;
-
-                // Определяем путь сохранения
-                if (SettingsService.ScreenshotAutoName && !string.IsNullOrEmpty(SettingsService.ScreenshotFolder))
-                {
-                    // Автоматическое имя: скриншот_ГГГГ-ММ-ДД_ЧЧ-ММ-СС.png
-                    if (!Directory.Exists(SettingsService.ScreenshotFolder))
-                        Directory.CreateDirectory(SettingsService.ScreenshotFolder);
-
-                    var fileName = $"screenshot_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.{format}";
-                    filePath = Path.Combine(SettingsService.ScreenshotFolder, fileName);
-                }
-                else
-                {
-                    // Диалог сохранения
-                    var dialog = new Microsoft.Win32.SaveFileDialog
-                    {
-                        Filter = format == "jpeg" ? "JPEG images|*.jpg" : "PNG images|*.png",
-                        DefaultExt = format,
-                        FileName = $"screenshot_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.{format}",
-                        Title = "Сохранить скриншот"
-                    };
-
-                    if (dialog.ShowDialog() != true)
-                    {
-                        StatusText = "Скриншот отменён";
-                        return;
-                    }
-
-                    filePath = dialog.FileName;
-                }
-
-                StatusText = "Создание скриншота...";
-                await ScreenshotService.CapturePageAsync(SelectedTab.WebView, filePath, format);
-                StatusText = $"Скриншот сохранён: {Path.GetFileName(filePath)}";
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Screenshot error: {ex.Message}");
-                StatusText = $"Ошибка скриншота: {ex.Message}";
-            }
-        }
-
-        // ==================== AutoFill ====================
-
-        /// <summary>
-        /// Загружает данные активного профиля в UI-свойства.
-        /// </summary>
-        private void LoadAutoFillProfileToUI()
-        {
-            var profile = AutoFillService.GetActiveProfile();
-            if (profile == null) return;
-
-            AutoFillFirstName = profile.FirstName;
-            AutoFillLastName = profile.LastName;
-            AutoFillMiddleName = profile.MiddleName;
-            AutoFillEmail = profile.Email;
-            AutoFillPhone = profile.Phone;
-            AutoFillStreet = profile.Street;
-            AutoFillCity = profile.City;
-            AutoFillState = profile.State;
-            AutoFillZipCode = profile.ZipCode;
-            AutoFillCountry = profile.Country;
-        }
-
-        /// <summary>
-        /// Сохраняет данные из UI в активный профиль.
-        /// Если профиля нет — создаёт новый.
-        /// </summary>
-        private void SaveAutoFillProfileFromUI()
-        {
-            var profile = AutoFillService.GetActiveProfile();
-            if (profile == null)
-            {
-                profile = new Models.AutoFillProfile { IsActive = true };
-                AutoFillService.AddProfile(profile);
-            }
-
-            profile.FirstName = AutoFillFirstName;
-            profile.LastName = AutoFillLastName;
-            profile.MiddleName = AutoFillMiddleName;
-            profile.Email = AutoFillEmail;
-            profile.Phone = AutoFillPhone;
-            profile.Street = AutoFillStreet;
-            profile.City = AutoFillCity;
-            profile.State = AutoFillState;
-            profile.ZipCode = AutoFillZipCode;
-            profile.Country = AutoFillCountry;
-
-            AutoFillService.SaveProfiles();
-        }
-
-        /// <summary>
-        /// Ручное автозаполнение форм на текущей странице (по хоткею).
-        /// Сначала сохраняет данные из UI в профиль.
-        /// </summary>
-        private async Task FillFormsManuallyAsync()
-        {
-            if (SelectedTab?.WebView == null) return;
-
-            try
-            {
-                // Сохраняем текущие данные из UI в профиль
-                SaveAutoFillProfileFromUI();
-
-                var script = AutoFillService.GenerateFillScript();
-                await SelectedTab.WebView.CoreWebView2.ExecuteScriptAsync(script);
-                StatusText = "Формы заполнены";
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"FillForms error: {ex.Message}");
-                StatusText = $"Ошибка автозаполнения: {ex.Message}";
-            }
-        }
-
         // ==================== Search Engine ====================
 
         /// <summary>
@@ -734,12 +563,7 @@ namespace GhostBrowser.ViewModels
             if (modifiers == ModifierKeys.Control && key == Key.L)
             {
                 if (SelectedTab != null)
-                {
-                    var tabUrl = SelectedTab.Url;
-                    if (tabUrl == "ghost://newtab" || tabUrl.StartsWith("data:text/html"))
-                        tabUrl = "";
-                    UrlInput = tabUrl;
-                }
+                    UrlInput = SelectedTab.Url == "ghost://newtab" ? "" : SelectedTab.Url;
                 // Signal to focus (handled in view)
                 FocusUrlRequested?.Invoke(this, EventArgs.Empty);
                 return;
@@ -832,7 +656,6 @@ namespace GhostBrowser.ViewModels
             StealthService.Dispose();
             SettingsService.Dispose(); // Освобождает HttpClient
             DownloadService.Dispose(); // Останавливает таймер и отменяет загрузки
-            AdBlockService.Dispose(); // Сохраняет состояние фильтров
 
             foreach (var tab in Tabs)
             {

@@ -35,8 +35,6 @@ namespace GhostBrowser.Services
         public bool BlockThirdPartyCookies { get; set; } = false;
         /// <summary>Папка для сохранения загруженных файлов.</summary>
         public string DownloadFolder { get; set; } = "";
-        /// <summary>Расширенные настройки браузера.</summary>
-        public Models.AdvancedSettings AdvancedSettings { get; set; } = new();
     }
 
     /// <summary>
@@ -96,72 +94,7 @@ namespace GhostBrowser.Services
         public string DefaultSearchEngine { get => _settings.DefaultSearchEngine; set { if (_settings.DefaultSearchEngine != value) { _settings.DefaultSearchEngine = value; OnPropertyChanged(); SaveSettings(); } } }
         public bool BlockTrackers { get => _settings.BlockTrackers; set { if (_settings.BlockTrackers != value) { _settings.BlockTrackers = value; OnPropertyChanged(); SaveSettings(); } } }
         public bool BlockThirdPartyCookies { get => _settings.BlockThirdPartyCookies; set { if (_settings.BlockThirdPartyCookies != value) { _settings.BlockThirdPartyCookies = value; OnPropertyChanged(); SaveSettings(); } } }
-
-        /// <summary>
-        /// Расширенные настройки браузера.
-        /// Доступ через свойство для удобства.
-        /// </summary>
-        public Models.AdvancedSettings AdvancedSettings
-        {
-            get => _settings.AdvancedSettings;
-            set { if (_settings.AdvancedSettings != value) { _settings.AdvancedSettings = value; OnPropertyChanged(); SaveSettings(); } }
-        }
-
-        // ═══ INPC-обёртки для часто используемых AdvancedSettings ═══
-
-        public string UILanguage { get => _settings.AdvancedSettings.UILanguage; set { if (_settings.AdvancedSettings.UILanguage != value) { _settings.AdvancedSettings.UILanguage = value; OnPropertyChanged(); SaveSettings(); } } }
-        public string Theme { get => _settings.AdvancedSettings.Theme; set { if (_settings.AdvancedSettings.Theme != value) { _settings.AdvancedSettings.Theme = value; OnPropertyChanged(); SaveSettings(); } } }
-        public string AccentColor { get => _settings.AdvancedSettings.AccentColor; set { if (_settings.AdvancedSettings.AccentColor != value) { _settings.AdvancedSettings.AccentColor = value; OnPropertyChanged(); SaveSettings(); } } }
-        public string CustomAccentColor { get => _settings.AdvancedSettings.CustomAccentColor; set { if (_settings.AdvancedSettings.CustomAccentColor != value) { _settings.AdvancedSettings.CustomAccentColor = value; OnPropertyChanged(); SaveSettings(); } } }
-        public double DefaultZoomLevel { get => _settings.AdvancedSettings.DefaultZoomLevel; set { if (_settings.AdvancedSettings.DefaultZoomLevel != value) { _settings.AdvancedSettings.DefaultZoomLevel = value; OnPropertyChanged(); SaveSettings(); } } }
-        public bool ShowBookmarksBar { get => _settings.AdvancedSettings.ShowBookmarksBar; set { if (_settings.AdvancedSettings.ShowBookmarksBar != value) { _settings.AdvancedSettings.ShowBookmarksBar = value; OnPropertyChanged(); SaveSettings(); } } }
-        public bool ShowStatusBar { get => _settings.AdvancedSettings.ShowStatusBar; set { if (_settings.AdvancedSettings.ShowStatusBar != value) { _settings.AdvancedSettings.ShowStatusBar = value; OnPropertyChanged(); SaveSettings(); } } }
-        public bool RoundedTabs { get => _settings.AdvancedSettings.RoundedTabs; set { if (_settings.AdvancedSettings.RoundedTabs != value) { _settings.AdvancedSettings.RoundedTabs = value; OnPropertyChanged(); SaveSettings(); } } }
-        public bool HardwareAcceleration { get => _settings.AdvancedSettings.HardwareAcceleration; set { if (_settings.AdvancedSettings.HardwareAcceleration != value) { _settings.AdvancedSettings.HardwareAcceleration = value; OnPropertyChanged(); SaveSettings(); } } }
-        public int MemoryLimitMB { get => _settings.AdvancedSettings.MemoryLimitMB; set { if (_settings.AdvancedSettings.MemoryLimitMB != value) { _settings.AdvancedSettings.MemoryLimitMB = value; OnPropertyChanged(); SaveSettings(); } } }
-        public bool AutoClearCacheOnExit { get => _settings.AdvancedSettings.AutoClearCacheOnExit; set { if (_settings.AdvancedSettings.AutoClearCacheOnExit != value) { _settings.AdvancedSettings.AutoClearCacheOnExit = value; OnPropertyChanged(); SaveSettings(); } } }
-        public int DownloadThreads { get => _settings.AdvancedSettings.DownloadThreads; set { if (_settings.AdvancedSettings.DownloadThreads != value) { _settings.AdvancedSettings.DownloadThreads = value; OnPropertyChanged(); SaveSettings(); } } }
-        public bool PagePrefetch { get => _settings.AdvancedSettings.PagePrefetch; set { if (_settings.AdvancedSettings.PagePrefetch != value) { _settings.AdvancedSettings.PagePrefetch = value; OnPropertyChanged(); SaveSettings(); } } }
-        public bool PopupBlocker { get => _settings.AdvancedSettings.PopupBlocker; set { if (_settings.AdvancedSettings.PopupBlocker != value) { _settings.AdvancedSettings.PopupBlocker = value; OnPropertyChanged(); SaveSettings(); } } }
-        public bool BlockNotifications { get => _settings.AdvancedSettings.BlockNotifications; set { if (_settings.AdvancedSettings.BlockNotifications != value) { _settings.AdvancedSettings.BlockNotifications = value; OnPropertyChanged(); SaveSettings(); } } }
-        public bool BlockGeolocation { get => _settings.AdvancedSettings.BlockGeolocation; set { if (_settings.AdvancedSettings.BlockGeolocation != value) { _settings.AdvancedSettings.BlockGeolocation = value; OnPropertyChanged(); SaveSettings(); } } }
-        public bool BlockCameraMicrophone { get => _settings.AdvancedSettings.BlockCameraMicrophone; set { if (_settings.AdvancedSettings.BlockCameraMicrophone != value) { _settings.AdvancedSettings.BlockCameraMicrophone = value; OnPropertyChanged(); SaveSettings(); } } }
-        public string BypassMode { get => _settings.AdvancedSettings.BypassMode; set { if (_settings.AdvancedSettings.BypassMode != value) { _settings.AdvancedSettings.BypassMode = value; OnPropertyChanged(); SaveSettings(); } } }
-        public string ProxyType { get => _settings.AdvancedSettings.ProxyType; set { if (_settings.AdvancedSettings.ProxyType != value) { _settings.AdvancedSettings.ProxyType = value; OnPropertyChanged(); SaveSettings(); } } }
-        public string ProxyServer { get => _settings.AdvancedSettings.ProxyServer; set { if (_settings.AdvancedSettings.ProxyServer != value) { _settings.AdvancedSettings.ProxyServer = value; OnPropertyChanged(); SaveSettings(); } } }
-        public int ProxyServerPort { get => _settings.AdvancedSettings.ProxyServerPort; set { if (_settings.AdvancedSettings.ProxyServerPort != value) { _settings.AdvancedSettings.ProxyServerPort = value; OnPropertyChanged(); SaveSettings(); } } }
-        public string ProxyUsername { get => _settings.AdvancedSettings.ProxyUsername; set { if (_settings.AdvancedSettings.ProxyUsername != value) { _settings.AdvancedSettings.ProxyUsername = value; OnPropertyChanged(); SaveSettings(); } } }
-        public string ProxyPassword { get => _settings.AdvancedSettings.ProxyPassword; set { if (_settings.AdvancedSettings.ProxyPassword != value) { _settings.AdvancedSettings.ProxyPassword = value; OnPropertyChanged(); SaveSettings(); } } }
-        public bool DoHEnabled { get => _settings.AdvancedSettings.DoHEnabled; set { if (_settings.AdvancedSettings.DoHEnabled != value) { _settings.AdvancedSettings.DoHEnabled = value; OnPropertyChanged(); SaveSettings(); } } }
-        public string DoHProvider { get => _settings.AdvancedSettings.DoHProvider; set { if (_settings.AdvancedSettings.DoHProvider != value) { _settings.AdvancedSettings.DoHProvider = value; OnPropertyChanged(); SaveSettings(); } } }
-        public string ProxyMode { get => _settings.AdvancedSettings.ProxyMode; set { if (_settings.AdvancedSettings.ProxyMode != value) { _settings.AdvancedSettings.ProxyMode = value; OnPropertyChanged(); SaveSettings(); } } }
-        public string ProxyAddress { get => _settings.AdvancedSettings.ProxyAddress; set { if (_settings.AdvancedSettings.ProxyAddress != value) { _settings.AdvancedSettings.ProxyAddress = value; OnPropertyChanged(); SaveSettings(); } } }
-        public int ProxyPort { get => _settings.AdvancedSettings.ProxyPort; set { if (_settings.AdvancedSettings.ProxyPort != value) { _settings.AdvancedSettings.ProxyPort = value; OnPropertyChanged(); SaveSettings(); } } }
-        public int ConnectionTimeoutSeconds { get => _settings.AdvancedSettings.ConnectionTimeoutSeconds; set { if (_settings.AdvancedSettings.ConnectionTimeoutSeconds != value) { _settings.AdvancedSettings.ConnectionTimeoutSeconds = value; OnPropertyChanged(); SaveSettings(); } } }
-        public int MaxConnectionsPerHost { get => _settings.AdvancedSettings.MaxConnectionsPerHost; set { if (_settings.AdvancedSettings.MaxConnectionsPerHost != value) { _settings.AdvancedSettings.MaxConnectionsPerHost = value; OnPropertyChanged(); SaveSettings(); } } }
-        public bool AskForDownloadFolder { get => _settings.AdvancedSettings.AskForDownloadFolder; set { if (_settings.AdvancedSettings.AskForDownloadFolder != value) { _settings.AdvancedSettings.AskForDownloadFolder = value; OnPropertyChanged(); SaveSettings(); } } }
-        public bool OpenFolderOnDownloadComplete { get => _settings.AdvancedSettings.OpenFolderOnDownloadComplete; set { if (_settings.AdvancedSettings.OpenFolderOnDownloadComplete != value) { _settings.AdvancedSettings.OpenFolderOnDownloadComplete = value; OnPropertyChanged(); SaveSettings(); } } }
-        public int MaxConcurrentDownloads { get => _settings.AdvancedSettings.MaxConcurrentDownloads; set { if (_settings.AdvancedSettings.MaxConcurrentDownloads != value) { _settings.AdvancedSettings.MaxConcurrentDownloads = value; OnPropertyChanged(); SaveSettings(); } } }
-        public bool WarnOnExecutableDownloads { get => _settings.AdvancedSettings.WarnOnExecutableDownloads; set { if (_settings.AdvancedSettings.WarnOnExecutableDownloads != value) { _settings.AdvancedSettings.WarnOnExecutableDownloads = value; OnPropertyChanged(); SaveSettings(); } } }
-        public string StartupMode { get => _settings.AdvancedSettings.StartupMode; set { if (_settings.AdvancedSettings.StartupMode != value) { _settings.AdvancedSettings.StartupMode = value; OnPropertyChanged(); SaveSettings(); } } }
-        public bool RestoreSessionOnCrash { get => _settings.AdvancedSettings.RestoreSessionOnCrash; set { if (_settings.AdvancedSettings.RestoreSessionOnCrash != value) { _settings.AdvancedSettings.RestoreSessionOnCrash = value; OnPropertyChanged(); SaveSettings(); } } }
-        public int MaxSavedSessions { get => _settings.AdvancedSettings.MaxSavedSessions; set { if (_settings.AdvancedSettings.MaxSavedSessions != value) { _settings.AdvancedSettings.MaxSavedSessions = value; OnPropertyChanged(); SaveSettings(); } } }
-        public bool SearchSuggestions { get => _settings.AdvancedSettings.SearchSuggestions; set { if (_settings.AdvancedSettings.SearchSuggestions != value) { _settings.AdvancedSettings.SearchSuggestions = value; OnPropertyChanged(); SaveSettings(); } } }
-        public bool OpenSearchInNewTab { get => _settings.AdvancedSettings.OpenSearchInNewTab; set { if (_settings.AdvancedSettings.OpenSearchInNewTab != value) { _settings.AdvancedSettings.OpenSearchInNewTab = value; OnPropertyChanged(); SaveSettings(); } } }
-        public bool DownloadCompleteSound { get => _settings.AdvancedSettings.DownloadCompleteSound; set { if (_settings.AdvancedSettings.DownloadCompleteSound != value) { _settings.AdvancedSettings.DownloadCompleteSound = value; OnPropertyChanged(); SaveSettings(); } } }
-        public bool DownloadCompleteNotification { get => _settings.AdvancedSettings.DownloadCompleteNotification; set { if (_settings.AdvancedSettings.DownloadCompleteNotification != value) { _settings.AdvancedSettings.DownloadCompleteNotification = value; OnPropertyChanged(); SaveSettings(); } } }
-        public bool EnableDevTools { get => _settings.AdvancedSettings.EnableDevTools; set { if (_settings.AdvancedSettings.EnableDevTools != value) { _settings.AdvancedSettings.EnableDevTools = value; OnPropertyChanged(); SaveSettings(); } } }
-        public string CustomUserAgent { get => _settings.AdvancedSettings.CustomUserAgent; set { if (_settings.AdvancedSettings.CustomUserAgent != value) { _settings.AdvancedSettings.CustomUserAgent = value; OnPropertyChanged(); SaveSettings(); } } }
-        public bool BlockWebGL { get => _settings.AdvancedSettings.BlockWebGL; set { if (_settings.AdvancedSettings.BlockWebGL != value) { _settings.AdvancedSettings.BlockWebGL = value; OnPropertyChanged(); SaveSettings(); } } }
-        public bool BlockCanvas { get => _settings.AdvancedSettings.BlockCanvas; set { if (_settings.AdvancedSettings.BlockCanvas != value) { _settings.AdvancedSettings.BlockCanvas = value; OnPropertyChanged(); SaveSettings(); } } }
-        public bool TextOnlyMode { get => _settings.AdvancedSettings.TextOnlyMode; set { if (_settings.AdvancedSettings.TextOnlyMode != value) { _settings.AdvancedSettings.TextOnlyMode = value; OnPropertyChanged(); SaveSettings(); } } }
-        public bool AutoPlayMedia { get => _settings.AdvancedSettings.AutoPlayMedia; set { if (_settings.AdvancedSettings.AutoPlayMedia != value) { _settings.AdvancedSettings.AutoPlayMedia = value; OnPropertyChanged(); SaveSettings(); } } }
-
-        // ═══ Скриншоты ═══
-        public string ScreenshotFormat { get => _settings.AdvancedSettings.ScreenshotFormat; set { if (_settings.AdvancedSettings.ScreenshotFormat != value) { _settings.AdvancedSettings.ScreenshotFormat = value; OnPropertyChanged(); SaveSettings(); } } }
-        public string ScreenshotFolder { get => _settings.AdvancedSettings.ScreenshotFolder; set { if (_settings.AdvancedSettings.ScreenshotFolder != value) { _settings.AdvancedSettings.ScreenshotFolder = value; OnPropertyChanged(); SaveSettings(); } } }
-        public bool ScreenshotAutoName { get => _settings.AdvancedSettings.ScreenshotAutoName; set { if (_settings.AdvancedSettings.ScreenshotAutoName != value) { _settings.AdvancedSettings.ScreenshotAutoName = value; OnPropertyChanged(); SaveSettings(); } } }
-
+        
         /// <summary>
         /// Папка загрузок по умолчанию.
         /// Если пуста — возвращает %USERPROFILE%\Downloads.
