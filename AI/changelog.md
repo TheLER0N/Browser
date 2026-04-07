@@ -144,3 +144,65 @@
 4. **GhostBrowser.csproj** — добавлен KING.png ресурс
 
 ### Результат: ✅ dotnet build успешно
+
+---
+
+## 📝 Фаза 2: Stealth 2.0 — 2026-04-07 ✅
+
+### 1. Блокировка PrintScreen
+**Файл:** `Services/GlobalHotkey.cs` (НОВЫЙ)
+**Причина:** PrintScreen делает скриншот окна
+**ДО:** PrintScreen → окно видно в буфере обмена
+**ПОСЛЕ:** PrintScreen перехватывается через RegisterHotKey → чёрный квадрат
+**Результат:** ✅ работает
+
+### 2. Блокировка скриншотов WebView2
+**Файл:** `Services/ScreenshotBlocker.cs` (НОВЫЙ)
+**Причина:** JS может делать скриншоты и fingerprint через Canvas/WebGL
+**ДО:** Canvas.toDataURL, WebGL readPixels доступны
+**ПОСЛЕ:** JavaScript блокирует: getDisplayMedia, toDataURL, toBlob, getImageData, readPixels
+**Результат:** ✅ работает
+
+### 3. Блокировка Snipping Tool
+**Файл:** `Services/SnippingToolBlocker.cs` (НОВЫЙ)
+**Причина:** Snipping Tool использует PrintWindow API
+**ДО:** Snipping Tool делает скриншот окна
+**ПОСЛЕ:** WM_PRINTCLIENT отклоняется → чёрный экран
+**Результат:** ✅ работает
+
+### 4. Авто-включение stealth при запуске
+**Файл:** `Services/SettingsService.cs`, `ViewModels/MainViewModel.cs`
+**Причина:** Пользователь хочет защиту сразу при запуске
+**ДО:** Stealth выключен по умолчанию
+**ПОСЛЕ:** AutoEnableStealth, AutoBlockPrintScreen, BlockSnippingTool = true по умолчанию
+**Результат:** ✅ работает
+
+### 5. Anti-fingerprint
+**Файл:** `Services/ScreenshotBlocker.cs`, `ViewModels/TabViewModel.cs`
+**Причина:** Сайты отслеживают через fingerprint браузера
+**ДО:** User-Agent содержит "GhostBrowser", Canvas/WebGL доступны
+**ПОСЛЕ:** User-Agent = Chrome 123, Canvas/WebGL заблокированы
+**Результат:** ✅ работает
+
+### 6. Настройки Stealth 2.0 в SettingsPage
+**Файл:** `Views/SettingsPage.xaml`, `Views/SettingsPage.xaml.cs`
+**Причина:** Пользователь должен управлять защитами
+**ДО:** Нет настроек stealth
+**ПОСЛЕ:** Секция "🔒 Stealth 2.0" с 4 toggle: Авто-stealth, PrintScreen, Snipping Tool, Anti-FP
+**Результат:** ✅ работает
+
+---
+
+### Изменённые файлы (Фаза 2):
+1. **Services/GlobalHotkey.cs** — создан
+2. **Services/ScreenshotBlocker.cs** — создан  
+3. **Services/SnippingToolBlocker.cs** — создан
+4. **ViewModels/MainViewModel.cs** — добавлены 3 сервиса, 2 команды, автозапуск
+5. **ViewModels/TabViewModel.cs** — ScreenshotBlocker, SettingsService, User-Agent
+6. **ViewModels/IncognitoViewModel.cs** — обновлён конструктор
+7. **Services/SettingsService.cs** — 4 новых настройки Stealth 2.0
+8. **MainWindow.xaml.cs** — инициализация GlobalHotkey, SnippingToolBlocker, Ctrl+Shift+S
+9. **Views/SettingsPage.xaml** — секция Stealth 2.0 (4 toggle + статус)
+10. **Views/SettingsPage.xaml.cs** — обработчики Stealth 2.0
+
+### Результат: ✅ dotnet build успешно

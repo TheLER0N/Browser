@@ -18,7 +18,7 @@
 
 | ID из ideas.md | Идея | Статус в tasks.md | Связь с task.md |
 |----------------|------|-------------------|-----------------|
-| `STEALTH-001` | Призрачный режим | ⏳ Запланировано | Фаза 2: Stealth 2.0 |
+| `STEALTH-001` | Призрачный режим | ✅ ЗАВЕРШЕНО | Фаза 2: Stealth 2.0 |
 | `STEALTH-002` | Паник-кнопка | ⏳ Запланировано | Фаза 2: Stealth 2.0 |
 | `STEALTH-003` | Туннельный режим | ⏳ Запланировано | Фаза 3: Обход блокировок |
 | `BYPASS-001` | Авто-обход блокировок | ⏳ Запланировано | Фаза 3: Обход блокировок |
@@ -300,6 +300,13 @@ GhostBrowser/
 
 - **OS:** Windows 11 (пользователь подтвердил)
 - **Stealth mode:** Работает (WDA_EXCLUDEFROMCAPTURE)
+- **Stealth 2.0:** ✅ ЗАВЕРШЕНО (7 апреля 2026)
+  - Блокировка PrintScreen: GlobalHotkey.cs (RegisterHotKey API)
+  - Блокировка скриншотов WebView2: ScreenshotBlocker.cs (JS injection)
+  - Блокировка Snipping Tool: SnippingToolBlocker.cs (WM_PRINTCLIENT)
+  - Авто-включение stealth: SettingsService.AutoEnableStealth
+  - Anti-fingerprint: User-Agent + Canvas + WebGL блокировка
+  - Настройки: SettingsPage → секция "🔒 Stealth 2.0"
 - **Хранилище:** `%APPDATA%\GhostBrowser\{settings,bookmarks,history}.json`
 - **UserDataFolder WebView2:** `%APPDATA%\GhostBrowser`
 

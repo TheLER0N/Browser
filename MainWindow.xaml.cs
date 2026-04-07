@@ -46,6 +46,12 @@ namespace GhostBrowser
             // Инициализируем сервис stealth mode после создания оконного хэндла
             vm.StealthService.Initialize(this);
 
+            // Инициализируем сервис блокировки PrintScreen
+            vm.GlobalHotkeyService.Initialize(this);
+
+            // Инициализируем сервис блокировки Snipping Tool
+            vm.SnippingToolBlockerService.Initialize(this);
+
             // Анимация появления окна
             Loaded += (s, e) =>
             {
@@ -233,6 +239,14 @@ namespace GhostBrowser
                 return;
             }
 
+            // Ctrl+Shift+S — блокировка PrintScreen
+            if (e.KeyboardDevice.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift) && e.Key == Key.S)
+            {
+                ViewModel.TogglePrintScreenBlockCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
             ViewModel.HandleKeyboardShortcut(e.Key, e.KeyboardDevice.Modifiers);
             base.OnKeyDown(e);
         }
@@ -338,7 +352,7 @@ namespace GhostBrowser
             {
                 var brush = isStealth
                     ? FindResource("SuccessBrush") as System.Windows.Media.Brush
-                    : FindResource("TextMutedBrush") as System.Windows.Media.Brush;
+                    : FindResource("TextTertiaryBrush") as System.Windows.Media.Brush;
                 StealthIndicatorBorder.Background = brush;
                 StealthStatusText.Text = isStealth ? "Stealth: ON" : "Stealth: OFF";
                 ViewModel.StatusText = isStealth

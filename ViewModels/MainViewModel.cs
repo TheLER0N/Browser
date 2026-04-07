@@ -38,6 +38,8 @@ namespace GhostBrowser.ViewModels
         public SearchService SearchService { get; }
         public SettingsService SettingsService { get; }
         public Services.DownloadService DownloadService { get; }
+        public Services.GlobalHotkey GlobalHotkeyService { get; }
+        public Services.SnippingToolBlocker SnippingToolBlockerService { get; }
 
         // ==================== Collections ====================
 
@@ -153,6 +155,8 @@ namespace GhostBrowser.ViewModels
         public ICommand ToggleBookmarkCommand { get; }
         public ICommand CycleSearchEngineCommand { get; }
         public ICommand FocusUrlCommand { get; }
+        public ICommand TogglePrintScreenBlockCommand { get; }
+        public ICommand ToggleSnippingToolBlockCommand { get; }
 
         /// <summary>
         /// Асинхронная команда создания вкладки.
@@ -180,6 +184,8 @@ namespace GhostBrowser.ViewModels
             SearchService = new SearchService();
             SettingsService = new SettingsService();
             DownloadService = new Services.DownloadService();
+            GlobalHotkeyService = new Services.GlobalHotkey();
+            SnippingToolBlockerService = new Services.SnippingToolBlocker();
 
             // Загружаем папку загрузок из настроек
             DownloadService.LoadDownloadFolder(SettingsService);
@@ -197,6 +203,8 @@ namespace GhostBrowser.ViewModels
             ToggleBookmarkCommand = new RelayCommand(_ => ToggleBookmark());
             CycleSearchEngineCommand = new RelayCommand(_ => CycleSearchEngine());
             FocusUrlCommand = new RelayCommand(_ => UrlInput = SelectedTab?.Url ?? "");
+            TogglePrintScreenBlockCommand = new RelayCommand(_ => TogglePrintScreenBlock());
+            ToggleSnippingToolBlockCommand = new RelayCommand(_ => ToggleSnippingToolBlock());
 
             // Clock timer
             _clockTimer = new System.Windows.Threading.DispatcherTimer
@@ -217,6 +225,26 @@ namespace GhostBrowser.ViewModels
             {
                 SearchService.CurrentEngine = savedEngine;
                 SearchEngineIcon = SearchService.GetEngineIcon(savedEngine);
+            }
+
+            // === Stealth 2.0: Применяем настройки автозапуска ===
+            // Если пользователь включил авто-включение stealth — активируем сразу
+            if (SettingsService.AutoEnableStealth)
+            {
+                StealthService.SetStealthMode(true);
+                IsStealthMode = true;
+            }
+
+            // Если включена авто-блокировка PrintScreen — активируем
+            if (SettingsService.AutoBlockPrintScreen)
+            {
+                GlobalHotkeyService.EnableBlocking();
+            }
+
+            // Если включена блокировка Snipping Tool — активируем
+            if (SettingsService.BlockSnippingTool)
+            {
+                SnippingToolBlockerService.EnableBlocking();
             }
 
             // Subscribe to bookmark changes
@@ -304,7 +332,7 @@ namespace GhostBrowser.ViewModels
             // поэтому нам не нужно await'ить что-то здесь — просто создаём и добавляем.
             await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
             {
-                var tab = new TabViewModel(env, SearchService, DownloadService, url);
+                var tab = new TabViewModel(env, SearchService, DownloadService, SettingsService, url);
                 Tabs.Add(tab);
                 SelectedTab = tab;
                 UpdateCloseTabCanExecute();
@@ -519,6 +547,31 @@ namespace GhostBrowser.ViewModels
             StatusText = IsStealthMode ? "Защита от захвата экрана активна" : "Готово";
         }
 
+        /// <summary>
+        /// Переключает блокировку PrintScreen.
+        /// При включении — PrintScreen, Ctrl+PrintScreen, Alt+PrintScreen перехватываются
+        /// и не попадают в буфер обмена (чёрный квадрат или пусто).
+        /// </summary>
+        private void TogglePrintScreenBlock()
+        {
+            GlobalHotkeyService.ToggleBlocking();
+            StatusText = GlobalHotkeyService.IsBlockingEnabled
+                ? "Блокировка PrintScreen включена"
+                : "Блокировка PrintScreen выключена";
+        }
+
+        /// <summary>
+        /// Переключает блокировку Snipping Tool.
+        /// При включении — WM_PRINTCLIENT отклоняется, Snipping Tool получает чёрный экран.
+        /// </summary>
+        private void ToggleSnippingToolBlock()
+        {
+            SnippingToolBlockerService.ToggleBlocking();
+            StatusText = SnippingToolBlockerService.IsEnabled
+                ? "Блокировка Snipping Tool включена"
+                : "Блокировка Snipping Tool выключена";
+        }
+
         // ==================== Search Engine ====================
 
         /// <summary>
@@ -654,6 +707,8 @@ namespace GhostBrowser.ViewModels
         {
             _clockTimer.Stop();
             StealthService.Dispose();
+            GlobalHotkeyService.Dispose(); // Снимает глобальные хуки PrintScreen
+            SnippingToolBlockerService.Dispose(); // Снимает хук WM_PRINTCLIENT
             SettingsService.Dispose(); // Освобождает HttpClient
             DownloadService.Dispose(); // Останавливает таймер и отменяет загрузки
 

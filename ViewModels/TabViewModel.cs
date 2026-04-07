@@ -34,6 +34,8 @@ namespace GhostBrowser.ViewModels
         private readonly CoreWebView2Environment _environment;
         private readonly SearchService _searchService;
         private readonly Services.DownloadService? _downloadService;
+        private readonly Services.ScreenshotBlocker _screenshotBlocker;
+        private readonly SettingsService? _settingsService;
 
         /// <summary>
         /// Событие завершения навигации. Вызывается из WebView_NavigationCompleted
@@ -41,11 +43,13 @@ namespace GhostBrowser.ViewModels
         /// </summary>
         public event EventHandler<TabNavigationCompletedEventArgs>? NavigationCompleted;
 
-        public TabViewModel(CoreWebView2Environment environment, SearchService searchService, Services.DownloadService? downloadService = null, string? initialUrl = null)
+        public TabViewModel(CoreWebView2Environment environment, SearchService searchService, Services.DownloadService? downloadService = null, SettingsService? settingsService = null, string? initialUrl = null)
         {
             _environment = environment;
             _searchService = searchService;
             _downloadService = downloadService;
+            _settingsService = settingsService;
+            _screenshotBlocker = new Services.ScreenshotBlocker();
 
             if (!string.IsNullOrEmpty(initialUrl))
             {
@@ -129,6 +133,17 @@ namespace GhostBrowser.ViewModels
                 {
                     // Устанавливаем тёмную тему для всех сайтов
                     webView.CoreWebView2.Profile.PreferredColorScheme = CoreWebView2PreferredColorScheme.Dark;
+
+                    // Отключаем autofill для защиты приватности
+                    _screenshotBlocker.DisableAutofill(webView.CoreWebView2);
+                    
+                    // Устанавливаем кастомный User-Agent — маскировка под обычный Chrome
+                    _screenshotBlocker.SetCustomUserAgent(webView.CoreWebView2);
+
+                    // Внедряем скрипты блокировки скриншотов и fingerprinting
+                    // Проверяем настройку AntiFingerprint — если выключена, скрипты не внедряются
+                    bool enableAntiFp = _settingsService?.AntiFingerprint ?? true;
+                    await _screenshotBlocker.InjectProtectionScriptAsync(webView.CoreWebView2, enableAntiFp);
                 }
 
                 // Навигация после успешной инициализации

@@ -44,6 +44,9 @@
                 <Button x:Name="NavPrivacyBtn" Content="🛡️  Приватность"
                         Style="{StaticResource MenuNavItemBtn}" Margin="8,2"
                         Click="NavPrivacy_Click" FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                <Button x:Name="NavStealthBtn" Content="🔒  Stealth 2.0"
+                        Style="{StaticResource MenuNavItemBtn}" Margin="8,2"
+                        Click="NavStealth_Click" FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
                 <Button x:Name="NavHistoryBtn" Content="📜  История"
                         Style="{StaticResource MenuNavItemBtn}" Margin="8,2"
                         Click="NavHistory_Click" FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
@@ -256,6 +259,139 @@
                                           Grid.Column="1"
                                           Style="{StaticResource ToggleSwitch}"/>
                         </Grid>
+                    </Border>
+                </StackPanel>
+
+                <!-- ─── Stealth 2.0 Section ─── -->
+                <StackPanel x:Name="StealthSection" Visibility="Collapsed">
+                    <TextBlock Text="🔒 Stealth 2.0" FontSize="22" FontWeight="SemiBold"
+                               Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,4"
+                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                    <TextBlock Text="Полная невидимость и защита от скриншотов"
+                               Foreground="{StaticResource TextTertiaryBrush}" FontSize="12.5"
+                               Margin="0,0,0,28"
+                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+
+                    <!-- Auto-Enable Stealth -->
+                    <Border Background="{StaticResource BgSurfaceBrush}"
+                            BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1"
+                            CornerRadius="14" Padding="18" Margin="0,0,0,12">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="Авто-включение Stealth" FontSize="14" FontWeight="Medium"
+                                           Foreground="{StaticResource TextPrimaryBrush}"
+                                           VerticalAlignment="Center"
+                                           FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                                <TextBlock Text="Включать защиту при запуске" FontSize="11"
+                                           Foreground="{StaticResource TextTertiaryBrush}"
+                                           Margin="0,2,0,0"
+                                           FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                            </StackPanel>
+                            <ToggleButton x:Name="AutoStealthToggle"
+                                          Grid.Column="1"
+                                          Style="{StaticResource ToggleSwitch}"
+                                          Checked="AutoStealthToggle_Changed"
+                                          Unchecked="AutoStealthToggle_Changed"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Block PrintScreen -->
+                    <Border Background="{StaticResource BgSurfaceBrush}"
+                            BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1"
+                            CornerRadius="14" Padding="18" Margin="0,0,0,12">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="Блокировка PrintScreen" FontSize="14" FontWeight="Medium"
+                                           Foreground="{StaticResource TextPrimaryBrush}"
+                                           VerticalAlignment="Center"
+                                           FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                                <TextBlock Text="Перехват PrintScreen, Ctrl+PrintScreen, Alt+PrintScreen" FontSize="11"
+                                           Foreground="{StaticResource TextTertiaryBrush}"
+                                           Margin="0,2,0,0"
+                                           FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                            </StackPanel>
+                            <ToggleButton x:Name="BlockPrintScreenToggle"
+                                          Grid.Column="1"
+                                          Style="{StaticResource ToggleSwitch}"
+                                          Checked="BlockPrintScreenToggle_Changed"
+                                          Unchecked="BlockPrintScreenToggle_Changed"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Block Snipping Tool -->
+                    <Border Background="{StaticResource BgSurfaceBrush}"
+                            BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1"
+                            CornerRadius="14" Padding="18" Margin="0,0,0,12">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="Блокировка Snipping Tool" FontSize="14" FontWeight="Medium"
+                                           Foreground="{StaticResource TextPrimaryBrush}"
+                                           VerticalAlignment="Center"
+                                           FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                                <TextBlock Text="Защита от скриншотов через PrintWindow API" FontSize="11"
+                                           Foreground="{StaticResource TextTertiaryBrush}"
+                                           Margin="0,2,0,0"
+                                           FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                            </StackPanel>
+                            <ToggleButton x:Name="BlockSnippingToolToggle"
+                                          Grid.Column="1"
+                                          Style="{StaticResource ToggleSwitch}"
+                                          Checked="BlockSnippingToolToggle_Changed"
+                                          Unchecked="BlockSnippingToolToggle_Changed"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Anti-Fingerprint -->
+                    <Border Background="{StaticResource BgSurfaceBrush}"
+                            BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1"
+                            CornerRadius="14" Padding="18" Margin="0,0,0,12">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="Анти-Fingerprint" FontSize="14" FontWeight="Medium"
+                                           Foreground="{StaticResource TextPrimaryBrush}"
+                                           VerticalAlignment="Center"
+                                           FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                                <TextBlock Text="Блокировка Canvas, WebGL, Screencast API" FontSize="11"
+                                           Foreground="{StaticResource TextTertiaryBrush}"
+                                           Margin="0,2,0,0"
+                                           FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                            </StackPanel>
+                            <ToggleButton x:Name="AntiFingerprintToggle"
+                                          Grid.Column="1"
+                                          Style="{StaticResource ToggleSwitch}"
+                                          Checked="AntiFingerprintToggle_Changed"
+                                          Unchecked="AntiFingerprintToggle_Changed"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Status Card -->
+                    <Border Background="{StaticResource BgSurfaceBrush}"
+                            BorderBrush="{StaticResource SuccessBrush}" BorderThickness="2"
+                            CornerRadius="14" Padding="18" Margin="0,16,0,0">
+                        <StackPanel>
+                            <TextBlock Text="✅ Статус защиты" FontSize="14" FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,8"
+                                       FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                            <TextBlock x:Name="StealthStatusText" Text="Все защиты активны" FontSize="12"
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                        </StackPanel>
                     </Border>
                 </StackPanel>
 

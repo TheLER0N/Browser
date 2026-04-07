@@ -9,7 +9,7 @@
 > **Дата последнего обновления:** 7 апреля 2026
 > **Базовая версия:** ✅ Работает (GhostBrowser v1.0, commit 2e390fb)
 > **KING редизайн:** ✅ ЗАВЕРШЕНО (Фаза 1)
-> **Stealth 2.0:** ⏳ В процессе
+> **Stealth 2.0:** ✅ ЗАВЕРШЕНО
 > **Обход блокировок:** ⏳ В процессе
 > **Расширенные настройки:** ⏳ В процессе
 
@@ -17,19 +17,23 @@
 
 ## [моя просьба]
 
-Моя задача:
-1. Подгототовься к работе
+Моя задача: 
+1. при нажатии на выключение Stealth у меня выводится это Заголовок окна: GhostBrowser — Ошибка
+Текст сообщения:
+Необработанное исключение:
+Ресурс "TextMutedBrush" не найден.
+Stack Trace:
+at
+MS.Internal.Helper.FindResourceHelper.DoTryCatchWhen(Obj
+ect arg)
+at
+System.Windows.Threading.ExceptionWrapper.InternalRealCal
+l(Delegate callback, Object args, Int32 numArgs)
+at
+System.Windows.Threading.ExceptionWrapper.TryCatchWhen(
+Object source, Delegate callback, Object args, Int32 numArgs,
+Delegate catchHandler)
 
---- Построй план к ### Фаза 1: KING Дизайн (шахматная тема)
-
-## 💡 Связь с `ideas.md` и `tasks.md`
-
-> **Поток задач:** `ideas.md` → `tasks.md` → `task.md`
->
-> **Как это работает:**
-> 1. В `ideas.md` хранятся ВСЕ возможные фичи с ID (например `STEALTH-001`)
-> 2. В `tasks.md` записаны задачи которые ИИ уже распланировал
-> 3. В `task.md` пользователь пишет что хочет — ИИ ищет похожую идею в `ideas.md`
 
 | ID из ideas.md | Идея | Статус | Связь с планом в task.md |
 |----------------|------|--------|--------------------------|

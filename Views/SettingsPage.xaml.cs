@@ -52,10 +52,17 @@ namespace GhostBrowser.Views
             if (DnsSection != null) DnsSection.Visibility = section == "DNS" ? Visibility.Visible : Visibility.Collapsed;
             if (GeneralSection != null) GeneralSection.Visibility = section == "Общие" ? Visibility.Visible : Visibility.Collapsed;
             if (PrivacySection != null) PrivacySection.Visibility = section == "Приватность" ? Visibility.Visible : Visibility.Collapsed;
+            if (StealthSection != null) StealthSection.Visibility = section == "Stealth 2.0" ? Visibility.Visible : Visibility.Collapsed;
             if (HistorySection != null) HistorySection.Visibility = section == "История" ? Visibility.Visible : Visibility.Collapsed;
             if (BookmarksSection != null) BookmarksSection.Visibility = section == "Закладки" ? Visibility.Visible : Visibility.Collapsed;
             if (DownloadsSection != null) DownloadsSection.Visibility = section == "Загрузки" ? Visibility.Visible : Visibility.Collapsed;
             if (AboutSection != null) AboutSection.Visibility = section == "О программе" ? Visibility.Visible : Visibility.Collapsed;
+
+            // При открытии Stealth 2.0 — обновляем toggle из настроек
+            if (section == "Stealth 2.0" && SS != null && VM != null)
+            {
+                UpdateStealthToggles();
+            }
 
             if (section == "История" && VM != null) HistoryList.ItemsSource = VM.HistoryService.History;
             if (section == "Закладки" && VM != null) BookmarksList.ItemsSource = VM.BookmarkService.Bookmarks;
@@ -84,6 +91,7 @@ namespace GhostBrowser.Views
             if (NavDnsBtn != null) NavDnsBtn.Background = _currentSection == "DNS" ? active : inactive;
             if (NavGeneralBtn != null) NavGeneralBtn.Background = _currentSection == "Общие" ? active : inactive;
             if (NavPrivacyBtn != null) NavPrivacyBtn.Background = _currentSection == "Приватность" ? active : inactive;
+            if (NavStealthBtn != null) NavStealthBtn.Background = _currentSection == "Stealth 2.0" ? active : inactive;
             if (NavHistoryBtn != null) NavHistoryBtn.Background = _currentSection == "История" ? active : inactive;
             if (NavBookmarksBtn != null) NavBookmarksBtn.Background = _currentSection == "Закладки" ? active : inactive;
             if (NavDownloadsBtn != null) NavDownloadsBtn.Background = _currentSection == "Загрузки" ? active : inactive;
@@ -249,6 +257,97 @@ namespace GhostBrowser.Views
                 {
                     DownloadFolderInput.Text = dialog.SelectedPath;
                 }
+            }
+        }
+
+        // ==================== Stealth 2.0 ====================
+
+        /// <summary>
+        /// Навигация к секции Stealth 2.0.
+        /// </summary>
+        private void NavStealth_Click(object sender, RoutedEventArgs e) => ShowSection("Stealth 2.0");
+
+        /// <summary>
+        /// Обновляет Toggle-кнопки Stealth 2.0 из текущих настроек.
+        /// Вызывается при открытии секции.
+        /// </summary>
+        private void UpdateStealthToggles()
+        {
+            if (SS == null) return;
+
+            if (AutoStealthToggle != null) AutoStealthToggle.IsChecked = SS.AutoEnableStealth;
+            if (BlockPrintScreenToggle != null) BlockPrintScreenToggle.IsChecked = SS.AutoBlockPrintScreen;
+            if (BlockSnippingToolToggle != null) BlockSnippingToolToggle.IsChecked = SS.BlockSnippingTool;
+            if (AntiFingerprintToggle != null) AntiFingerprintToggle.IsChecked = SS.AntiFingerprint;
+
+            UpdateStealthStatus();
+        }
+
+        /// <summary>
+        /// Обновляет текст статуса защиты.
+        /// </summary>
+        private void UpdateStealthStatus()
+        {
+            if (SS == null || StealthStatusText == null || VM == null) return;
+
+            var parts = new List<string>();
+            if (SS.AutoEnableStealth) parts.Add("Stealth: ✅");
+            if (SS.AutoBlockPrintScreen) parts.Add("PrintScreen: ✅");
+            if (SS.BlockSnippingTool) parts.Add("Snipping: ✅");
+            if (SS.AntiFingerprint) parts.Add("Anti-FP: ✅");
+
+            StealthStatusText.Text = parts.Count > 0
+                ? $"Активны: {string.Join(", ", parts)}"
+                : "⚠️ Все защиты отключены";
+        }
+
+        private void AutoStealthToggle_Changed(object sender, RoutedEventArgs e)
+        {
+            if (SS != null)
+            {
+                SS.AutoEnableStealth = AutoStealthToggle.IsChecked == true;
+                UpdateStealthStatus();
+            }
+        }
+
+        private void BlockPrintScreenToggle_Changed(object sender, RoutedEventArgs e)
+        {
+            if (SS != null && VM != null)
+            {
+                SS.AutoBlockPrintScreen = BlockPrintScreenToggle.IsChecked == true;
+                
+                // Сразу применяем к сервису
+                if (SS.AutoBlockPrintScreen)
+                    VM.GlobalHotkeyService.EnableBlocking();
+                else
+                    VM.GlobalHotkeyService.DisableBlocking();
+                
+                UpdateStealthStatus();
+            }
+        }
+
+        private void BlockSnippingToolToggle_Changed(object sender, RoutedEventArgs e)
+        {
+            if (SS != null && VM != null)
+            {
+                SS.BlockSnippingTool = BlockSnippingToolToggle.IsChecked == true;
+                
+                // Сразу применяем к сервису
+                if (SS.BlockSnippingTool)
+                    VM.SnippingToolBlockerService.EnableBlocking();
+                else
+                    VM.SnippingToolBlockerService.DisableBlocking();
+                
+                UpdateStealthStatus();
+            }
+        }
+
+        private void AntiFingerprintToggle_Changed(object sender, RoutedEventArgs e)
+        {
+            if (SS != null)
+            {
+                SS.AntiFingerprint = AntiFingerprintToggle.IsChecked == true;
+                UpdateStealthStatus();
             }
         }
     }

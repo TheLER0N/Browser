@@ -35,6 +35,16 @@ namespace GhostBrowser.Services
         public bool BlockThirdPartyCookies { get; set; } = false;
         /// <summary>Папка для сохранения загруженных файлов.</summary>
         public string DownloadFolder { get; set; } = "";
+        
+        // === Stealth 2.0 настройки ===
+        /// <summary>Автоматически включать stealth mode при запуске.</summary>
+        public bool AutoEnableStealth { get; set; } = true;
+        /// <summary>Автоматически блокировать PrintScreen при запуске.</summary>
+        public bool AutoBlockPrintScreen { get; set; } = true;
+        /// <summary>Блокировать Snipping Tool через WM_PRINTCLIENT.</summary>
+        public bool BlockSnippingTool { get; set; } = true;
+        /// <summary>Включить защиту от fingerprinting (canvas, WebGL).</summary>
+        public bool AntiFingerprint { get; set; } = true;
     }
 
     /// <summary>
@@ -94,6 +104,12 @@ namespace GhostBrowser.Services
         public string DefaultSearchEngine { get => _settings.DefaultSearchEngine; set { if (_settings.DefaultSearchEngine != value) { _settings.DefaultSearchEngine = value; OnPropertyChanged(); SaveSettings(); } } }
         public bool BlockTrackers { get => _settings.BlockTrackers; set { if (_settings.BlockTrackers != value) { _settings.BlockTrackers = value; OnPropertyChanged(); SaveSettings(); } } }
         public bool BlockThirdPartyCookies { get => _settings.BlockThirdPartyCookies; set { if (_settings.BlockThirdPartyCookies != value) { _settings.BlockThirdPartyCookies = value; OnPropertyChanged(); SaveSettings(); } } }
+
+        // === Stealth 2.0 свойства ===
+        public bool AutoEnableStealth { get => _settings.AutoEnableStealth; set { if (_settings.AutoEnableStealth != value) { _settings.AutoEnableStealth = value; OnPropertyChanged(); SaveSettings(); } } }
+        public bool AutoBlockPrintScreen { get => _settings.AutoBlockPrintScreen; set { if (_settings.AutoBlockPrintScreen != value) { _settings.AutoBlockPrintScreen = value; OnPropertyChanged(); SaveSettings(); } } }
+        public bool BlockSnippingTool { get => _settings.BlockSnippingTool; set { if (_settings.BlockSnippingTool != value) { _settings.BlockSnippingTool = value; OnPropertyChanged(); SaveSettings(); } } }
+        public bool AntiFingerprint { get => _settings.AntiFingerprint; set { if (_settings.AntiFingerprint != value) { _settings.AntiFingerprint = value; OnPropertyChanged(); SaveSettings(); } } }
         
         /// <summary>
         /// Папка загрузок по умолчанию.
