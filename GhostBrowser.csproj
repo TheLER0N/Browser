@@ -18,4 +18,8 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Resource Include="PNG\KING.png" />
+  </ItemGroup>
+
 </Project>

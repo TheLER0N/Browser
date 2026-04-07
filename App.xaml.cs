@@ -12,8 +12,12 @@ namespace GhostBrowser
             // Глобальный обработчик необработанных исключений UI-потока
             DispatcherUnhandledException += (s, args) =>
             {
-                System.Diagnostics.Debug.WriteLine($"Unhandled UI exception: {args.Exception}");
-                args.Handled = true; // Предотвращаем краш приложения
+                MessageBox.Show(
+                    $"Необработанное исключение:\n\n{args.Exception.Message}\n\nStack Trace:\n{args.Exception.StackTrace}",
+                    "GhostBrowser — Ошибка",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+                args.Handled = true;
             };
 
             // Глобальный обработчик необработанных исключений в других потоках
@@ -21,7 +25,11 @@ namespace GhostBrowser
             {
                 if (args.ExceptionObject is Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Unhandled domain exception: {ex}");
+                    MessageBox.Show(
+                        $"Критическая ошибка:\n\n{ex.GetType().Name}: {ex.Message}\n\nStack Trace:\n{ex.StackTrace}",
+                        "GhostBrowser — Критическая ошибка",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
                 }
             };
         }

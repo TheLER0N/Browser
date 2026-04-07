@@ -127,3 +127,20 @@
 **Что случилось:** Убрал Storyboard и DataTemplate → краш
 **Причина:** Storyboard нужен для анимации появления, DataTemplate для отображения TabViewModel
 **Вывод:** НЕ удалять Window.Resources
+
+### ❌ StackPanel Spacing в .NET 7
+**Что случилось:** Использовал `Spacing="3"` в StackPanel → error MC3072
+**Причина:** Свойство Spacing доступно только в .NET 8+
+**Вывод:** Использовать Canvas с позиционированием или Margin для .NET 7
+
+---
+
+## 📝 Фаза 1: KING Дизайн — 2026-04-07 ✅
+
+### Изменённые файлы:
+1. **NewTabPage.html** — полностью переписан с KING дизайном
+2. **MainWindow.xaml** — Title Bar, навигация с SVG Path
+3. **App.xaml** — стиль вкладок с KING темой
+4. **GhostBrowser.csproj** — добавлен KING.png ресурс
+
+### Результат: ✅ dotnet build успешно

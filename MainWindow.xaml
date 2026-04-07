@@ -70,7 +70,6 @@
                     <Border.Background>
                         <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                             <GradientStop Color="{StaticResource BgDeepest}" Offset="0"/>
-                            <GradientStop Color="#06090f" Offset="0.5"/>
                             <GradientStop Color="{StaticResource BgDeep}" Offset="1"/>
                         </LinearGradientBrush>
                     </Border.Background>
@@ -83,20 +82,13 @@
 
                         <!-- Logo -->
                         <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="16,0,0,0">
-                            <Border CornerRadius="8" Width="28" Height="28" VerticalAlignment="Center">
-                                <Border.Background>
-                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                        <GradientStop Color="{StaticResource AccentDeep}" Offset="0"/>
-                                        <GradientStop Color="{StaticResource Accent}" Offset="0.5"/>
-                                        <GradientStop Color="{StaticResource Cyan}" Offset="1"/>
-                                    </LinearGradientBrush>
-                                </Border.Background>
-                                <TextBlock Text="👻" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <TextBlock Text="GhostBrowser" FontSize="13" FontWeight="SemiBold"
-                                       Foreground="{StaticResource TextPrimaryBrush}"
+                            <TextBlock Text="♚" FontSize="20" Foreground="{StaticResource AccentBrush}"
+                                       VerticalAlignment="Center" HorizontalAlignment="Center"
+                                       FontFamily="Segoe UI Emoji, sans-serif"/>
+                            <TextBlock Text="KING" FontSize="15" FontWeight="Bold"
+                                       Foreground="{StaticResource AccentBrush}"
                                        VerticalAlignment="Center" Margin="10,0,0,0"
-                                       FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                                       FontFamily="Georgia, 'Playfair Display', serif"/>
                         </StackPanel>
 
                         <!-- Stealth Indicator -->
@@ -322,9 +314,11 @@
                             <Button.Style>
                                 <Style TargetType="Button" BasedOn="{StaticResource IconBtn}">
                                     <Setter Property="Content" Value="☆"/>
+                                    <Setter Property="FontSize" Value="16"/>
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsBookmarked}" Value="True">
                                             <Setter Property="Content" Value="★"/>
+                                            <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -340,18 +334,19 @@
                                     <Setter Property="Content" Value="{Binding SearchEngineIcon}"/>
                                     <Setter Property="FontSize" Value="14"/>
                                     <Setter Property="FontWeight" Value="Bold"/>
+                                    <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
                                 </Style>
                             </Button.Style>
                         </Button>
 
                         <!-- Stealth -->
-                        <Button Grid.Column="7" Content="👻" Style="{StaticResource IconBtn}"
+                        <Button Grid.Column="7" Content="🕶️" Style="{StaticResource IconBtn}"
                                 Margin="6,0,0,0" Command="{Binding ToggleStealthCommand}"
                                 x:Name="BtnStealth" FontSize="15"
                                 ToolTip="Скрыть от OBS/Discord (Ctrl+Shift+H)"/>
 
                         <!-- Incognito -->
-                        <Button Grid.Column="8" Content="🕶️" Style="{StaticResource IconBtn}"
+                        <Button Grid.Column="8" Content="♛" Style="{StaticResource IconBtn}"
                                 Margin="6,0,0,0" Click="BtnIncognito_Click"
                                 x:Name="BtnIncognito" FontSize="15"
                                 ToolTip="Открыть инкогнито (Ctrl+Shift+N)"/>
@@ -405,7 +400,7 @@
                             <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                                 <GradientStop Color="{StaticResource AccentDeep}" Offset="0"/>
                                 <GradientStop Color="{StaticResource Accent}" Offset="0.4"/>
-                                <GradientStop Color="{StaticResource Cyan}" Offset="1"/>
+                                <GradientStop Color="{StaticResource AccentSoft}" Offset="1"/>
                             </LinearGradientBrush>
                         </ProgressBar.Foreground>
                         <ProgressBar.Style>
@@ -422,12 +417,12 @@
                                                             <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                                                                 <GradientStop Color="{StaticResource AccentDeep}" Offset="0"/>
                                                                 <GradientStop Color="{StaticResource Accent}" Offset="0.4"/>
-                                                                <GradientStop Color="{StaticResource Cyan}" Offset="1"/>
+                                                                <GradientStop Color="{StaticResource AccentSoft}" Offset="1"/>
                                                             </LinearGradientBrush>
                                                         </Border.Background>
                                                         <Border.Effect>
-                                                            <DropShadowEffect BlurRadius="6" ShadowDepth="0"
-                                                                              Opacity="0.6" Color="{StaticResource Cyan}"/>
+                                                            <DropShadowEffect BlurRadius="8" ShadowDepth="0"
+                                                                              Opacity="0.7" Color="{StaticResource Accent}"/>
                                                         </Border.Effect>
                                                     </Border>
                                                 </Decorator>

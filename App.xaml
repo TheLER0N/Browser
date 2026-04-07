@@ -446,16 +446,17 @@
                 </Setter>
             </Style>
 
-            <!-- ── Browser TabItem ── -->
+            <!-- ── Browser TabItem — KING Style ── -->
             <Style x:Key="BrowserTabItemStyle" TargetType="TabItem">
                 <Setter Property="Background" Value="Transparent"/>
                 <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
                 <Setter Property="BorderThickness" Value="0"/>
-                <Setter Property="Padding" Value="20,10"/>
+                <Setter Property="Padding" Value="18,9"/>
                 <Setter Property="Margin" Value="2,0,2,0"/>
                 <Setter Property="Cursor" Value="Hand"/>
                 <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-                <Setter Property="FontSize" Value="12.5"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="FontFamily" Value="Segoe UI, system-ui, sans-serif"/>
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="TabItem">
@@ -466,17 +467,20 @@
                                     BorderThickness="0,0,0,2"
                                     BorderBrush="Transparent">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <TextBlock x:Name="Favicon" Text="🌐" FontSize="11"
-                                               Margin="0,0,8,0" VerticalAlignment="Center" Opacity="0.7"/>
+                                    <!-- Tab favicon -->
+                                    <TextBlock x:Name="Favicon" Text="♚" FontSize="11"
+                                               Margin="0,0,7,0" VerticalAlignment="Center" 
+                                               Foreground="{StaticResource TextTertiaryBrush}" Opacity="0.6"/>
                                     <TextBlock x:Name="TabTitle"
                                                Text="{TemplateBinding Header}"
                                                Foreground="{TemplateBinding Foreground}"
                                                FontSize="{TemplateBinding FontSize}"
-                                               MaxWidth="160" TextTrimming="CharacterEllipsis"
+                                               FontFamily="{TemplateBinding FontFamily}"
+                                               MaxWidth="150" TextTrimming="CharacterEllipsis"
                                                VerticalAlignment="Center"/>
                                     <Button x:Name="CloseBtn" Content="✕" Background="Transparent"
                                             BorderThickness="0" Foreground="{StaticResource TextTertiaryBrush}"
-                                            Width="22" Height="22" Margin="10,0,0,0" FontSize="13"
+                                            Width="20" Height="20" Margin="8,0,0,0" FontSize="12"
                                             Cursor="Hand" Opacity="0"
                                             Command="{Binding DataContext.CloseTabCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                             CommandParameter="{Binding}">
@@ -491,7 +495,7 @@
                                                             <ControlTemplate.Triggers>
                                                                 <Trigger Property="IsMouseOver" Value="True">
                                                                     <Setter Property="Background" Value="{StaticResource DangerBrush}"/>
-                                                                    <Setter Property="Foreground" Value="White"/>
+                                                                    <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
                                                                 </Trigger>
                                                             </ControlTemplate.Triggers>
                                                         </ControlTemplate>
@@ -507,13 +511,15 @@
                                     <Setter Property="Background" Value="{StaticResource BgSurfaceBrush}"/>
                                     <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
                                     <Setter TargetName="TabBorder" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
-                                    <Setter TargetName="CloseBtn" Property="Opacity" Value="0.6"/>
                                     <Setter TargetName="Favicon" Property="Opacity" Value="1"/>
+                                    <Setter TargetName="Favicon" Property="Foreground" Value="{StaticResource AccentBrush}"/>
+                                    <Setter TargetName="CloseBtn" Property="Opacity" Value="0.6"/>
                                 </Trigger>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="{StaticResource BgSurfaceBrush}"/>
+                                    <Setter Property="Background" Value="{StaticResource BgElevatedBrush}"/>
                                     <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
-                                    <Setter TargetName="CloseBtn" Property="Opacity" Value="0.6"/>
+                                    <Setter TargetName="Favicon" Property="Opacity" Value="0.8"/>
+                                    <Setter TargetName="CloseBtn" Property="Opacity" Value="0.5"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
