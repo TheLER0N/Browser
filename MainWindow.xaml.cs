@@ -1,9 +1,12 @@
 using System;
 using System.ComponentModel;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Media.Imaging;
 using GhostBrowser.Services;
 using GhostBrowser.ViewModels;
 
@@ -40,6 +43,10 @@ namespace GhostBrowser
         public MainWindow()
         {
             InitializeComponent();
+            
+            // Загружаем логотип KING11.png с проверкой существования файла
+            LoadLogoImage();
+            
             var vm = new MainViewModel();
             DataContext = vm;
 
@@ -368,6 +375,53 @@ namespace GhostBrowser
 
             ViewModel.Cleanup();
             base.OnClosed(e);
+        }
+
+        /// <summary>
+        /// Загружает изображение логотипа KING11.png с проверкой существования файла.
+        /// Если файл не найден, использует заглушку — прозрачный 1x1 пиксель.
+        /// </summary>
+        private void LoadLogoImage()
+        {
+            try
+            {
+                // Проверяем несколько возможных путей
+                string[] possiblePaths = new[]
+                {
+                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "KING11.png"),
+                    Path.Combine(Directory.GetCurrentDirectory(), "KING11.png"),
+                    "KING11.png"
+                };
+
+                string? foundPath = null;
+                foreach (var path in possiblePaths)
+                {
+                    if (File.Exists(path))
+                    {
+                        foundPath = path;
+                        break;
+                    }
+                }
+
+                if (foundPath != null)
+                {
+                    var bitmap = new BitmapImage();
+                    bitmap.BeginInit();
+                    bitmap.UriSource = new Uri(Path.GetFullPath(foundPath));
+                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmap.EndInit();
+                    bitmap.Freeze(); // Делаем потокобезопасным
+                    LogoImage.Source = bitmap;
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("KING11.png not found in any of the expected paths");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to load KING11.png: {ex.Message}");
+            }
         }
     }
 }

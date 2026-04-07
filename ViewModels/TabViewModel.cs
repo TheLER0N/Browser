@@ -206,37 +206,50 @@ namespace GhostBrowser.ViewModels
         /// Показывает встроенную страницу новой вкладки (NewTabPage.html).
         /// Вызывается при создании вкладки, нажатии кнопки "Домой" или закрытии настроек.
         ///
-        /// Использует Navigate с data: URI вместо NavigateToString, потому что
-        /// NavigateToString ненадёжен: не всегда генерирует NavigationCompleted,
-        /// не устанавливает BaseUri, и могут не работать CSS animations и JS.
+        /// Использует Navigate с file:// URI вместо data: URI — это позволяет
+        /// загружать относительные ресурсы (изображения, шрифты) из той же директории.
+        /// Data URI не поддерживает загрузку внешних ресурсов из-за политики безопасности Chromium.
         /// </summary>
         public void ShowNewTabPage()
         {
             if (WebView == null) return;
 
-            var html = GetNewTabPageHtml();
-            // Кодируем HTML в base64 и используем data: URI — это надёжнее NavigateToString
-            var base64 = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(html));
-            var dataUri = $"data:text/html;base64,{base64}";
+            // Получаем путь к NewTabPage.html в директории сборки
+            var assemblyPath = System.IO.Path.GetDirectoryName(
+                System.Reflection.Assembly.GetExecutingAssembly().Location) ?? "";
+            var htmlPath = System.IO.Path.Combine(assemblyPath, "NewTabPage.html");
 
             try
             {
-                WebView.Source = new Uri(dataUri);
-                Url = "ghost://newtab";
-                Title = "Новая вкладка";
-                IsLoading = false;
-                Progress = 0;
+                if (System.IO.File.Exists(htmlPath))
+                {
+                    // Загружаем через file:// URI — относительные пути (KING11.png) будут работать
+                    var fileUri = new Uri(System.IO.Path.GetFullPath(htmlPath));
+                    WebView.Source = fileUri;
+                    Url = "ghost://newtab";
+                    Title = "Новая вкладка";
+                    IsLoading = false;
+                    Progress = 0;
+                }
+                else
+                {
+                    // Фоллбэк: минимальная страница если файл не найден
+                    System.Diagnostics.Debug.WriteLine($"NewTabPage.html not found at {htmlPath}");
+                    WebView.NavigateToString(
+                        "<html><body style=\"background:#000;color:#fff;font-family:sans-serif;" +
+                        "display:flex;align-items:center;justify-content:center;height:100vh;margin:0;\">" +
+                        "<h1>KING Browser</h1></body></html>");
+                }
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"ShowNewTabPage error: {ex.Message}");
-                // Фоллбэк: минимальная страница
                 try
                 {
                     WebView.NavigateToString(
-                        "<html><body style=\"background:#06080d;color:#f0f6fc;font-family:sans-serif;" +
+                        "<html><body style=\"background:#000;color:#fff;font-family:sans-serif;" +
                         "display:flex;align-items:center;justify-content:center;height:100vh;margin:0;\">" +
-                        "<h1>GhostBrowser</h1></body></html>");
+                        "<h1>KING Browser</h1></body></html>");
                 }
                 catch { /* игнорируем */ }
             }

@@ -26,6 +26,106 @@
 
 ## История изменений
 
+### 2026-04-07 — KING11.png inline base64 в NewTabPage.html
+**Файл:** `NewTabPage.html`
+**Причина:** NewTabPage.html загружается через `data:text/html;base64,...` URI (TabViewModel.ShowNewTabPage()), поэтому относительный путь `src="KING11.png"` не работает — у страницы нет базового URL для резолвинга. При открытии файла напрямую через другой браузер — работает, потому что используется `file://` протокол.
+**ДО:**
+```html
+<img class="logo" src="KING11.png" alt="KING"/>
+```
+**ПОСЛЕ:**
+```html
+<img class="logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUg..." alt="KING"/>
+```
+**Результат:** ✅ dotnet build успешно, логотип отображается внутри WebView2
+
+### 2026-04-07 — Исправление отображения KING11.png в Title Bar (финальное решение)
+**Файлы:** `GhostBrowser.csproj`, `MainWindow.xaml`, `MainWindow.xaml.cs`
+**Причина:** Pack URI `pack://application:,,,/KING11.png` вызывал XamlParseException при загрузке. Относительный путь `Source="KING11.png"` тоже не работал стабильно.
+**ДО:**
+```xml
+<!-- MainWindow.xaml -->
+<Image Source="pack://application:,,,/KING11.png" .../>
+<!-- GhostBrowser.csproj -->
+<Content Include="KING11.png"><CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory></Content>
+```
+**ПОСЛЕ:**
+```xml
+<!-- MainWindow.xaml -->
+<Image x:Name="LogoImage" .../> <!-- без Source -->
+```
+```csharp
+// MainWindow.xaml.cs — LoadLogoImage()
+// Загружает KING11.png через code-behind с проверкой 3 путей:
+// 1. AppDomain.CurrentDomain.BaseDirectory + KING11.png
+// 2. Directory.GetCurrentDirectory() + KING11.png
+// 3. KING11.png (relative)
+// BitmapImage.Freeze() для потокобезопасности
+```
+**Результат:** ✅ Приложение запускается, MainWindowHandle != 0, окно видимо
+
+---
+
+### 2026-04-07 — Исправление отображения KING11.png в Title Bar
+**Файл:** `GhostBrowser.csproj`
+**Причина:** KING11.png не отображался в Title Bar главного окна, так как файл был добавлен как `<Content>` вместо `<Resource>`. Pack URI `pack://application:,,,/KING11.png` требует встройки ресурса в сборку.
+**ДО:**
+```xml
+  <ItemGroup>
+    <Content Include="KING11.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+```
+**ПОСЛЕ:**
+```xml
+  <ItemGroup>
+    <Resource Include="KING11.png">
+    </Resource>
+  </ItemGroup>
+```
+**Результат:** ✅ dotnet build успешно, KING11.png теперь встраивается в сборку и доступен через pack://application URI
+
+---
+
+### 2026-04-07 — Чёрно-белая тема (BW Monochrome)
+**Файл:** `App.xaml`
+**Причина:** Пользователь просил чёрно-белую тему вместо шахматной с золотом
+**ДО:**
+```xml
+<!-- Шахматная тема: тёмное дерево + золото -->
+<Color x:Key="BgDeepest">#1a1208</Color>
+<Color x:Key="Accent">#d4a017</Color>
+<Color x:Key="TextPrimary">#f5e6c8</Color>
+```
+**ПОСЛЕ:**
+```xml
+<!-- Чёрно-белая монохромная тема -->
+<Color x:Key="BgDeepest">#000000</Color>
+<Color x:Key="Accent">#ffffff</Color>
+<Color x:Key="TextPrimary">#f0f0f0</Color>
+```
+**Результат:** ✅ dotnet build успешно
+
+---
+
+### 2026-04-07 — NewTabPage.html: KING дизайн чёрно-белый
+**Файл:** `NewTabPage.html`
+**Причина:** Синхронизация с чёрно-белой темой App.xaml
+**ДО:**
+```css
+--gold:#d4a017; --cream:#f5e6c8; --bg:#1a1208;
+h1 .gold { background:linear-gradient(gold); }
+```
+**ПОСЛЕ:**
+```css
+--white:#ffffff; --text:#f0f0f0; --bg:#000000;
+h1 .white { color:var(--white); }
+```
+**Результат:** ✅ работает
+
+---
+
 ### 2026-04-07 03:30 — Восстановление рабочей версии из git
 **Файл:** Весь проект
 **Причина:** После изменений в App.xaml (замена StaticResource на HEX) проект перестал запускаться
@@ -108,6 +208,65 @@
         Background="{StaticResource BgDeepestBrush}">
 ```
 **Результат:** ✅ работает (проверено 2026-04-07 03:29)
+
+---
+
+### 2026-04-07 — NewTabPage.html: KING дизайн + персонализация KING11
+**Файл:** `NewTabPage.html`
+**Причина:** Пользователь просил сделать главную страницу красивее, KING11 — его имя (шахматный король 1:1)
+**ДО:**
+```html
+/* Фиолетовая/голубая тема */
+--accent:#6c63ff; --cyan:#00d4aa; --bg:#0d0d0d;
+/* Простой логотип без персонализации */
+<h1><span>KING11</span></h1>
+```
+**ПОСЛЕ:**
+```html
+/* KING шахматная тема: тёмное дерево + золото + крем */
+--bg:#1a1208; --gold:#d4a017; --cream:#f5e6c8;
+/* Персонализация */
+<p class="greeting" id="greet">Доброе утро</p>
+<h1><span class="crown">♔</span><span class="gold">KING11</span></h1>
+<p class="date-display" id="date">Вторник, 7 апреля 2026</p>
+/* Шахматный паттерн на фоне */
+.board-bg { chessboard pattern }
+/* Золотое свечение логотипа */
+.logo { filter:drop-shadow(0 0 40px rgba(212,160,23,.3)) }
+/* Декоративные шахматные фигуры */
+.crown-deco { ♚ ♛ }
+/* Вращающееся кольцо */
+.ring::after { border:1px dashed; animation:spin 20s }
+```
+**Результат:** ✅ dotnet build успешно
+
+---
+
+### 2026-04-07 — Tech Dashboard редизайн NewTabPage.html
+**Файл:** `NewTabPage.html`
+**Причина:** Пользователь просил обновить дизайн главной страницы — Tech Dashboard стиль
+**ДО:**
+```html
+/* Шахматная тема с частицами, эмодзи, вращающимися кольцами */
+--gold:#d4a017; .board-bg { chessboard pattern }
+.crown-deco { ♚ ♛ } .particles { 25 floating dots }
+.ring::after { animation:spin 20s }
+/* Карточки с эмодзи: 👑🔍▶️💻📱✈️💬🤖 */
+```
+**ПОСЛЕ:**
+```html
+/* Tech Dashboard: scanlines, grid overlay, corner brackets */
+--mono:'Cascadia Code','Consolas',monospace;
+.scanlines { repeating-linear-gradient }
+.grid-overlay { 40x40px grid lines }
+.corner { TL/TR/BL/BR brackets }
+/* System bar: SYSTEM READY, clock, date */
+/* Command line: "> " prompt, terminal-style input */
+/* Quick links: терминальные блоки с ASCII символами */
+/* Stealth status: строка статуса как в терминале */
+/* Status line: hotkeys + версия внизу экрана */
+```
+**Результат:** ✅ dotnet build успешно
 
 ---
 

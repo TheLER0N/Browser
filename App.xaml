@@ -9,51 +9,51 @@
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
 
             <!-- ═══════════════════════════════════════════ -->
-            <!-- COLORS — KING v3.0 Dark Modern 2026         -->
+            <!-- COLORS — KING BW Monochrome 2026            -->
             <!-- ═══════════════════════════════════════════ -->
-            <!-- Ultra dark — минималистичная тема как у Arc/Zen -->
-            <Color x:Key="BgDeepest">#0d0d0d</Color>
-            <Color x:Key="BgDeep">#141414</Color>
-            <Color x:Key="BgPrimary">#1a1a1a</Color>
-            <Color x:Key="BgSurface">#1e1e1e</Color>
-            <Color x:Key="BgElevated">#2a2a2a</Color>
-            <Color x:Key="BgOverlay">#333333</Color>
+            <!-- Чёрный фон — монохромная тема -->
+            <Color x:Key="BgDeepest">#000000</Color>
+            <Color x:Key="BgDeep">#0a0a0a</Color>
+            <Color x:Key="BgPrimary">#111111</Color>
+            <Color x:Key="BgSurface">#1a1a1a</Color>
+            <Color x:Key="BgElevated">#222222</Color>
+            <Color x:Key="BgOverlay">#2a2a2a</Color>
 
-            <!-- Purple accent — тренд 2026 -->
-            <Color x:Key="Accent">#6c63ff</Color>
-            <Color x:Key="AccentSoft">#8b83ff</Color>
-            <Color x:Key="AccentGlow">#a89bff</Color>
-            <Color x:Key="AccentDeep">#5046e5</Color>
+            <!-- White accent — белый акцент -->
+            <Color x:Key="Accent">#ffffff</Color>
+            <Color x:Key="AccentSoft">#e0e0e0</Color>
+            <Color x:Key="AccentGlow">#ffffff</Color>
+            <Color x:Key="AccentDeep">#cccccc</Color>
 
-            <!-- Cyan для дополнительной палитры -->
-            <Color x:Key="Cyan">#00d4aa</Color>
-            <Color x:Key="CyanSoft">#33e0bc</Color>
-            <Color x:Key="CyanDeep">#00a888</Color>
+            <!-- White текст -->
+            <Color x:Key="Cyan">#ffffff</Color>
+            <Color x:Key="CyanSoft">#d0d0d0</Color>
+            <Color x:Key="CyanDeep">#999999</Color>
 
-            <!-- Text — серый на тёмном -->
-            <Color x:Key="TextPrimary">#e8e8e8</Color>
-            <Color x:Key="TextSecondary">#a0a0a0</Color>
+            <!-- Text — белый/серый на чёрном -->
+            <Color x:Key="TextPrimary">#f0f0f0</Color>
+            <Color x:Key="TextSecondary">#999999</Color>
             <Color x:Key="TextTertiary">#666666</Color>
-            <Color x:Key="TextDisabled">#404040</Color>
+            <Color x:Key="TextDisabled">#444444</Color>
 
-            <!-- Borders — тонкие, едва заметные -->
-            <Color x:Key="BorderSubtle">#1f1f1f</Color>
-            <Color x:Key="BorderDefault">#2a2a2a</Color>
-            <Color x:Key="BorderStrong">#3a3a3a</Color>
+            <!-- Borders — оттенки серого -->
+            <Color x:Key="BorderSubtle">#1a1a1a</Color>
+            <Color x:Key="BorderDefault">#222222</Color>
+            <Color x:Key="BorderStrong">#333333</Color>
 
-            <!-- Status colors -->
-            <Color x:Key="Success">#22c55e</Color>
-            <Color x:Key="SuccessDeep">#16a34a</Color>
-            <Color x:Key="Warning">#f59e0b</Color>
-            <Color x:Key="WarningDeep">#d97706</Color>
-            <Color x:Key="Danger">#ef4444</Color>
-            <Color x:Key="DangerDeep">#dc2626</Color>
+            <!-- Status colors — монохром -->
+            <Color x:Key="Success">#cccccc</Color>
+            <Color x:Key="SuccessDeep">#aaaaaa</Color>
+            <Color x:Key="Warning">#999999</Color>
+            <Color x:Key="WarningDeep">#777777</Color>
+            <Color x:Key="Danger">#ff3333</Color>
+            <Color x:Key="DangerDeep">#cc0000</Color>
 
-            <!-- Board colors (для шахматных элементов) -->
-            <Color x:Key="BoardLight">#2a2a2a</Color>
-            <Color x:Key="BoardDark">#1a1a1a</Color>
-            <Color x:Key="KingPurple">#6c63ff</Color>
-            <Color x:Key="KingPurpleLight">#8b83ff</Color>
+            <!-- Board colors (чёрно-белая шахматная доска) -->
+            <Color x:Key="BoardLight">#333333</Color>
+            <Color x:Key="BoardDark">#111111</Color>
+            <Color x:Key="KingPurple">#ffffff</Color>
+            <Color x:Key="KingPurpleLight">#e0e0e0</Color>
 
             <!-- ═══════════════════════════════════════════ -->
             <!-- BRUSHES                                     -->
@@ -93,13 +93,13 @@
             <LinearGradientBrush x:Key="AccentGradient" StartPoint="0,0" EndPoint="1,1">
                 <GradientStop Color="{StaticResource AccentDeep}" Offset="0"/>
                 <GradientStop Color="{StaticResource Accent}" Offset="0.5"/>
-                <GradientStop Color="{StaticResource Cyan}" Offset="1"/>
+                <GradientStop Color="{StaticResource AccentSoft}" Offset="1"/>
             </LinearGradientBrush>
 
             <LinearGradientBrush x:Key="AccentGradientHoriz" StartPoint="0,0" EndPoint="1,0">
                 <GradientStop Color="{StaticResource AccentDeep}" Offset="0"/>
                 <GradientStop Color="{StaticResource Accent}" Offset="0.4"/>
-                <GradientStop Color="{StaticResource Cyan}" Offset="1"/>
+                <GradientStop Color="{StaticResource AccentSoft}" Offset="1"/>
             </LinearGradientBrush>
 
             <LinearGradientBrush x:Key="SurfaceGradient" StartPoint="0,0" EndPoint="0,1">
@@ -125,7 +125,7 @@
             <LinearGradientBrush x:Key="ProgressGradient" StartPoint="0,0" EndPoint="1,0">
                 <GradientStop Color="{StaticResource AccentDeep}" Offset="0"/>
                 <GradientStop Color="{StaticResource Accent}" Offset="0.5"/>
-                <GradientStop Color="{StaticResource Cyan}" Offset="1"/>
+                <GradientStop Color="{StaticResource AccentSoft}" Offset="1"/>
             </LinearGradientBrush>
 
             <!-- ═══════════════════════════════════════════ -->
@@ -228,13 +228,13 @@
                 </Setter>
             </Style>
 
-            <!-- ── Glass Button — frosted modern ── -->
+            <!-- ── Glass Button — frosted monochrome ── -->
             <Style x:Key="GlassBtn" TargetType="Button">
                 <Setter Property="Background">
                     <Setter.Value>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1" Opacity="0.12">
-                            <GradientStop Color="#7c5cfc" Offset="0"/>
-                            <GradientStop Color="#00d4aa" Offset="1"/>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1" Opacity="0.08">
+                            <GradientStop Color="#ffffff" Offset="0"/>
+                            <GradientStop Color="#cccccc" Offset="1"/>
                         </LinearGradientBrush>
                     </Setter.Value>
                 </Setter>

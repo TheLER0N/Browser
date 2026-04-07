@@ -18,7 +18,7 @@
 
 | ID из ideas.md | Идея | Статус в tasks.md | Связь с task.md |
 |----------------|------|-------------------|-----------------|
-| `STEALTH-001` | Призрачный режим | ✅ ЗАВЕРШЕНО | Фаза 2: Stealth 2.0 |
+| `STEALTH-001` | Призрачный режим | ✅ ЗАВЕРШЕНО (Stealth 2.0) | Фаза 2: Stealth 2.0 |
 | `STEALTH-002` | Паник-кнопка | ⏳ Запланировано | Фаза 2: Stealth 2.0 |
 | `STEALTH-003` | Туннельный режим | ⏳ Запланировано | Фаза 3: Обход блокировок |
 | `BYPASS-001` | Авто-обход блокировок | ⏳ Запланировано | Фаза 3: Обход блокировок |
@@ -244,11 +244,10 @@
 ## 🆕 Новые фичи
 
 ### ✅ Режим инкогнито (05.04.2026)
-- [x] IncognitoWindow.xaml(.cs) — отдельное окно с фиолетовым индикатором
+- [x] IncognitoWindow.xaml(.cs) — отдельное окно с индикатором
 - [x] IncognitoViewModel.cs — без истории/закладок, изолированный UserDataFolder
 - [x] Кнопка 🕶️ в MainWindow + горячая клавиша Ctrl+Shift+N
 - [x] Очистка cookies, кэша и папки профиля при закрытии
-- [x] Фиолетовый прогресс-бар и индикатор "INCOGNITO"
 
 ### ✅ Менеджер загрузок (05.04.2026)
 - [x] Models/DownloadItem.cs — модель загрузки с прогрессом и скоростью
@@ -260,39 +259,90 @@
 - [x] Папка загрузок по умолчанию (настраивается)
 - [x] История загрузок → downloads.json
 
+### ✅ Stealth 2.0 (07.04.2026)
+- [x] Services/GlobalHotkey.cs — блокировка PrintScreen
+- [x] Services/ScreenshotBlocker.cs — блокировка скриншотов WebView2
+- [x] Services/SnippingToolBlocker.cs — блокировка Snipping Tool
+- [x] Auto-включение stealth при запуске
+- [x] Anti-fingerprint (User-Agent + Canvas + WebGL)
+- [x] Настройки Stealth 2.0 в SettingsPage
+
+### ✅ Чёрно-белая тема (07.04.2026)
+- [x] App.xaml — монохромная палитра (чёрный, белый, серый)
+- [x] NewTabPage.html — BW дизайн с белыми акцентами
+- [x] Все UI компоненты обновлены
+
+---
+
+## 📌 ШАБЛОН для будущих задач
+
+> **КАЖДЫЙ раз** когда пользователь даёт задачу, ИИ создаёт секцию ниже:
+
+### 🆕 Текущая задача: Отображение KING11.png в Title Bar
+- **Запрос из task.md:** "В главном меню не показывается фото KING11.png"
+- **Дата:** 2026-04-07
+- **Статус:** ✅ completed
+
+#### Подплан 1: Исправить загрузку KING11.png через code-behind
+- **Файлы:** GhostBrowser.csproj, MainWindow.xaml, MainWindow.xaml.cs
+- **Что сделать:** Убрать pack URI из XAML, добавить метод LoadLogoImage() в MainWindow.xaml.cs с проверкой существования файла по 3 путям
+- **Как проверить:** dotnet build → dotnet run → MainWindowHandle != 0
+- **Статус:** ✅ completed
+
 ---
 
 ## 🗂️ Структура проекта (для справки)
 
 ```
-GhostBrowser/
-├── App.xaml / App.xaml.cs          # Точка входа, глобальные стили
+KingBrowser/
+├── App.xaml / App.xaml.cs          # Точка входа, глобальные стили (BW тема)
 ├── MainWindow.xaml / .cs           # Главное окно
 ├── GhostBrowser.csproj             # .NET 10, WPF, WebView2
-├── NewTabPage.html                 # HTML новой вкладки
+├── NewTabPage.html                 # HTML новой вкладки (BW дизайн)
+├── KING11.png                      # Логотип — шахматный король
 │
 ├── ViewModels/
 │   ├── MainViewModel.cs            # Главный VM: вкладки, навигация, сервисы
 │   ├── TabViewModel.cs             # VM вкладки: WebView2, URL, заголовок
 │   ├── ViewModelBase.cs            # INotifyPropertyChanged
 │   ├── RelayCommand.cs             # ICommand реализация
-│   └── AsyncRelayCommand.cs        # Async ICommand
+│   ├── AsyncRelayCommand.cs        # Async ICommand
+│   └── IncognitoViewModel.cs       # VM режима инкогнито
 │
 ├── Models/
 │   ├── Bookmark.cs                 # Модель закладки
-│   └── HistoryEntry.cs             # Модель истории
+│   ├── HistoryEntry.cs             # Модель истории
+│   ├── DownloadItem.cs             # Модель загрузки
+│   └── DownloadItemStatus.cs       # Enum статусов загрузки
 │
 ├── Services/
-│   ├── StealthService.cs           # Режим невидимости (Win32 API) ✅ Работает
+│   ├── StealthService.cs           # Режим невидимости (Win32 API) ✅
+│   ├── GlobalHotkey.cs             # Блокировка PrintScreen ✅
+│   ├── ScreenshotBlocker.cs        # Блокировка скриншотов WebView2 ✅
+│   ├── SnippingToolBlocker.cs      # Блокировка Snipping Tool ✅
 │   ├── HistoryService.cs           # История → JSON
 │   ├── BookmarkService.cs          # Закладки → JSON
 │   ├── SearchService.cs            # Поисковики
-│   └── SettingsService.cs          # Настройки (INPC — вынести в VM)
+│   ├── SettingsService.cs          # Настройки (INPC — вынести в VM)
+│   └── DownloadService.cs          # Менеджер загрузок
 │
 └── Views/
     ├── SettingsPage.xaml / .cs     # Страница настроек
     └── DnsTestWindow.xaml / .cs    # Модалка теста DNS
 ```
+
+---
+
+## 🆕 Текущая задача: KING11.png — inline base64 в NewTabPage.html
+- **Запрос из task.md:** "NewTabPage.html не показывает в моём браузере логотип, а вот если через другой открыть то это да"
+- **Дата:** 2026-04-07
+- **Статус:** ✅ completed
+
+#### Подплан 1: Встроить KING11.png как base64 data URI в NewTabPage.html
+- **Файлы:** NewTabPage.html
+- **Что сделать:** Заменить `<img src="KING11.png">` на `<img src="data:image/png;base64,...">` потому что NewTabPage.html загружается через data URI и относительные пути не работают
+- **Как проверить:** dotnet build → dotnet run → логотип виден на новой вкладке
+- **Статус:** ✅ completed
 
 ---
 
