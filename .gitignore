@@ -32,10 +32,3 @@ Thumbs.db
 
 ## App Data (user-specific, not tracked)
 # *.json - removed: too aggressive, breaks config files
-bin/  
-obj/  
-*.dll  
-*.exe  
-*.pdb  
-*.json  
-runtimes/  
