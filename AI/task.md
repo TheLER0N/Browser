@@ -21,11 +21,23 @@
 ## [моя просьба]
 
 Моя задача:
-     - Сделай STEALTH-002 → паник-кнопка
-     <!-- "Обнови дизайн браузера" → Полный редизайн -->
-<!-- "Добавь фавиконки на вкладки" -->
-<!-- "Почини баг: ..." -->
-<!-- "Предложи что делать дальше" -->
+      - Почини баг: Текст сообщения:
+Заголовок: GhostBrowser — Ошибка
+Текст сообщения:
+Необработанное исключение:
+"Предоставление значения для «System.Windows.Baml2006.DeferredBinaryDeserializerExtension» вызвало исключение.": номер строки "329" и позиция в строке "92".
+Stack Trace:
+at System.Windows.Markup.XamlReader.RewrapException(Exception e, IXmlLineInfo lineInfo, Uri baseUri)
+at System.Windows.Markup.WpfXamlLoader.Load(XamlReader xamlReader, IXamlObjectWriterFactory writerFactory, Boolean skipJournaledProperties, Object rootObject, XamlObjectWriterSettings settings, Uri baseUri)
+at System.Windows.Markup.WpfXamlLoader.LoadBaml(XamlReader xamlReader, Boolean skipJournaledProperties, Object rootObject, XamlAccessLevel accessLevel, Uri baseUri)
+at System.Windows.Markup.XamlReader.LoadBaml(Stream stream, ParserContext parserContext, Object parent, Boolean closeStream)
+at System.Windows.Application.LoadBamlStreamWithSyncInfo(Stream stream, ParserContext pc)
+at System.Windows.Application.DoStartup()
+at System.Windows.Application.<.ctor>b__1_0(Object unused)
+at System.Windows.Threading.ExceptionWrapper.InternalRealCall(Delegate callback, Object args, Int32 numArgs)
+at System.Windows.Threading.ExceptionWrapper.TryCatchWhen(Object source, Delegate callback, Object args, Int32 numArgs, Delegate catchHandler)
+
+
 
 Составь план
 📋 План обновления дизайна KING Browser v2.0

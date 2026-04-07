@@ -7,13 +7,12 @@
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg:#0d0d0d;--bg-surface:#1e1e1e;--bg-elevated:#2a2a2a;--bg-overlay:#333;
-  --accent:#6c63ff;--accent-light:#8b83ff;--accent-deep:#5046e5;
-  --cyan:#00d4aa;
-  --text:#e8e8e8;--text-secondary:#a0a0a0;--text-muted:#666;
-  --border:#1f1f1f;--border-strong:#2a2a2a;
-  --danger:#ef4444;--success:#22c55e;
-  --radius:16px;--radius-sm:12px;--radius-xs:8px;
+  /* BW Monochrome palette — строго из design.md */
+  --bg:#000000;--bg-surface:#1a1a1a;--bg-elevated:#222222;--bg-overlay:#2a2a2a;
+  --accent:#ffffff;--accent-soft:#e0e0e0;--accent-deep:#cccccc;
+  --text:#f0f0f0;--text-secondary:#999999;--text-muted:#666666;--text-disabled:#444444;
+  --border:#1a1a1a;--border-strong:#333333;
+  --danger:#ff3333;
 }
 html{height:100%;overflow:hidden}
 body{
@@ -23,12 +22,12 @@ body{
   -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
 }
 
-/* ── Ambient Background (Purple Glow) ── */
+/* ── Ambient Background (White Glow вместо Purple) ── */
 .ambient{
   position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;
 }
 .ambient::before,.ambient::after{
-  content:'';position:absolute;border-radius:50%;filter:blur(160px);opacity:.07;
+  content:'';position:absolute;border-radius:50%;filter:blur(160px);opacity:.04;
 }
 .ambient::before{
   width:700px;height:700px;top:-20%;left:-15%;
@@ -37,7 +36,7 @@ body{
 }
 .ambient::after{
   width:600px;height:600px;bottom:-15%;right:-10%;
-  background:radial-gradient(circle,var(--cyan),transparent 70%);
+  background:radial-gradient(circle,var(--accent-deep),transparent 70%);
   animation:drift2 16s ease-in-out infinite alternate;
 }
 @keyframes drift1{0%{transform:translate(0,0) scale(1)}100%{transform:translate(70px,50px) scale(1.15)}}
@@ -45,14 +44,14 @@ body{
 
 /* ── Grid Pattern Overlay ── */
 .grid-pattern{
-  position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.03;
+  position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.025;
   background-image:
-    linear-gradient(var(--border) 1px,transparent 1px),
-    linear-gradient(90deg,var(--border) 1px,transparent 1px);
+    linear-gradient(var(--text-muted) 1px,transparent 1px),
+    linear-gradient(90deg,var(--text-muted) 1px,transparent 1px);
   background-size:80px 80px;
 }
 
-/* ── Particles ── */
+/* ── Particles — белые вместо фиолетовых ── */
 .particles{position:fixed;inset:0;z-index:0;pointer-events:none}
 .particle{
   position:absolute;border-radius:50%;
@@ -60,8 +59,8 @@ body{
 }
 @keyframes rise{
   0%{transform:translateY(100vh) scale(0);opacity:0}
-  8%{opacity:.2}
-  92%{opacity:.2}
+  8%{opacity:.15}
+  92%{opacity:.15}
   100%{transform:translateY(-8vh) scale(1);opacity:0}
 }
 
@@ -86,7 +85,7 @@ body{
 .logo{
   width:90px;height:90px;object-fit:contain;
   border-radius:16px;
-  filter:drop-shadow(0 0 30px rgba(108,99,255,.3));
+  filter:drop-shadow(0 0 30px rgba(255,255,255,.2));
   animation:float 4.5s ease-in-out infinite;
 }
 @keyframes float{
@@ -96,12 +95,12 @@ body{
 .ring{
   position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
   width:115px;height:115px;border-radius:50%;
-  border:2px solid rgba(108,99,255,.25);
+  border:2px solid rgba(255,255,255,.15);
   animation:ring 3.5s ease-in-out infinite;
 }
 .ring::before{
   content:'';position:absolute;inset:8px;border-radius:50%;
-  border:1px solid rgba(108,99,255,.12);
+  border:1px solid rgba(255,255,255,.08);
   animation:ring 3.5s ease-in-out infinite reverse;
 }
 @keyframes ring{
@@ -117,7 +116,7 @@ h1{
   font-family:'Segoe UI',system-ui,sans-serif;
 }
 h1 span{
-  background:linear-gradient(135deg,var(--accent-light),var(--accent),var(--cyan));
+  background:linear-gradient(135deg,var(--accent-soft),var(--accent),var(--accent-deep));
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
   background-clip:text;
 }
@@ -139,7 +138,7 @@ h1 span{
   width:8px;height:8px;border-radius:50%;background:var(--text-muted);
   animation:blink 2.5s ease-in-out infinite;
 }
-.dot.active{background:var(--success);box-shadow:0 0 8px var(--success)}
+.dot.active{background:var(--accent);box-shadow:0 0 8px var(--accent)}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 
 /* ── Search Bar ── */
@@ -157,7 +156,7 @@ h1 span{
 .search input::placeholder{color:var(--text-muted)}
 .search input:focus{
   border-color:var(--accent);
-  box-shadow:0 0 0 3px rgba(108,99,255,.15),0 10px 36px rgba(0,0,0,.4);
+  box-shadow:0 0 0 3px rgba(255,255,255,.1),0 10px 36px rgba(0,0,0,.4);
 }
 .search input:hover:not(:focus){border-color:var(--border-strong)}
 .search .ico{
@@ -171,22 +170,22 @@ h1 span{
   max-width:620px;width:100%;margin-bottom:40px;
 }
 .card{
-  background:rgba(30,30,30,.7);border:1px solid var(--border);
-  border-radius:var(--radius);padding:22px 14px;text-align:center;
+  background:rgba(26,26,26,.7);border:1px solid var(--border);
+  border-radius:16px;padding:22px 14px;text-align:center;
   cursor:pointer;position:relative;overflow:hidden;
   transition:all .35s cubic-bezier(.4,0,.2,1);
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
 }
 .card::before{
   content:'';position:absolute;inset:0;
-  background:linear-gradient(135deg,rgba(108,99,255,.08),rgba(0,212,170,.05));
+  background:linear-gradient(135deg,rgba(255,255,255,.05),rgba(204,204,204,.03));
   opacity:0;transition:opacity .35s ease;
 }
 .card:hover::before{opacity:1}
 .card:hover{
   transform:translateY(-5px);
-  border-color:var(--accent);
-  box-shadow:0 12px 40px rgba(108,99,255,.15),0 0 0 1px var(--accent);
+  border-color:var(--accent-soft);
+  box-shadow:0 12px 40px rgba(255,255,255,.06),0 0 0 1px var(--accent-soft);
 }
 .card:active{transform:translateY(-2px) scale(.98)}
 .card .icon{
@@ -202,16 +201,16 @@ h1 span{
 /* ── Chips ── */
 .chips{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
 .chip{
-  padding:9px 18px;background:rgba(30,30,30,.5);
+  padding:9px 18px;background:rgba(26,26,26,.5);
   border:1px solid var(--border);border-radius:20px;
   color:var(--text-secondary);font-size:12px;cursor:pointer;
   transition:all .3s ease;text-decoration:none;
   backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
 }
 .chip:hover{
-  background:rgba(108,99,255,.1);border-color:var(--accent);
+  background:rgba(255,255,255,.06);border-color:var(--accent-deep);
   color:var(--text);transform:translateY(-2px);
-  box-shadow:0 5px 18px rgba(108,99,255,.12);
+  box-shadow:0 5px 18px rgba(255,255,255,.04);
 }
 
 /* ── Footer ── */
@@ -275,41 +274,41 @@ h1 span{
   <div class="search">
     <input type="text" id="si" placeholder="Поиск или введите URL..."
            onkeydown="if(event.key==='Enter'){var v=this.value;if(v){location.href=v.startsWith('http')?v:'https://www.google.com/search?q='+encodeURIComponent(v)}}"/>
-    <span class="ico">🔍</span>
+    <span class="ico">⌕</span>
   </div>
 
   <div class="grid">
     <div class="card" onclick="location.href='https://theler0n.github.io/Sait/'">
-      <div class="icon">👑</div><div class="label">Мой сайт</div>
+      <div class="icon">♚</div><div class="label">Мой сайт</div>
     </div>
     <div class="card" onclick="location.href='https://www.google.com'">
-      <div class="icon">🔍</div><div class="label">Google</div>
+      <div class="icon">⊙</div><div class="label">Google</div>
     </div>
     <div class="card" onclick="location.href='https://www.youtube.com'">
-      <div class="icon">▶️</div><div class="label">YouTube</div>
+      <div class="icon">▷</div><div class="label">YouTube</div>
     </div>
     <div class="card" onclick="location.href='https://github.com'">
-      <div class="icon">💻</div><div class="label">GitHub</div>
+      <div class="icon">⌘</div><div class="label">GitHub</div>
     </div>
     <div class="card" onclick="location.href='https://vk.com'">
-      <div class="icon">📱</div><div class="label">VK</div>
+      <div class="icon">◈</div><div class="label">VK</div>
     </div>
     <div class="card" onclick="location.href='https://web.telegram.org'">
-      <div class="icon">✈️</div><div class="label">Telegram</div>
+      <div class="icon">◉</div><div class="label">Telegram</div>
     </div>
     <div class="card" onclick="location.href='https://discord.com'">
-      <div class="icon">💬</div><div class="label">Discord</div>
+      <div class="icon">◇</div><div class="label">Discord</div>
     </div>
     <div class="card" onclick="location.href='https://www.reddit.com'">
-      <div class="icon">🤖</div><div class="label">Reddit</div>
+      <div class="icon">⬡</div><div class="label">Reddit</div>
     </div>
   </div>
 
   <div class="chips">
-    <a class="chip" onclick="location.href='https://www.wikipedia.org'">📚 Wikipedia</a>
-    <a class="chip" onclick="location.href='https://twitter.com'">🐦 Twitter</a>
-    <a class="chip" onclick="location.href='https://duckduckgo.com'">🦆 DuckDuckGo</a>
-    <a class="chip" onclick="location.href='https://yandex.ru'">🅰️ Yandex</a>
+    <a class="chip" onclick="location.href='https://www.wikipedia.org'">Wikipedia</a>
+    <a class="chip" onclick="location.href='https://twitter.com'">Twitter</a>
+    <a class="chip" onclick="location.href='https://duckduckgo.com'">DuckDuckGo</a>
+    <a class="chip" onclick="location.href='https://yandex.ru'">Yandex</a>
   </div>
 </div>
 
