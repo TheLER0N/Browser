@@ -9,46 +9,51 @@
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
 
             <!-- ═══════════════════════════════════════════ -->
-            <!-- COLORS — KING Chess Royal Palette           -->
+            <!-- COLORS — KING v3.0 Dark Modern 2026         -->
             <!-- ═══════════════════════════════════════════ -->
-            <!-- Dark Wood & Gold — королевская шахматная тема -->
-            <Color x:Key="BgDeepest">#1a1208</Color>
-            <Color x:Key="BgDeep">#2d1f0e</Color>
-            <Color x:Key="BgPrimary">#231709</Color>
-            <Color x:Key="BgSurface">#3d2b14</Color>
-            <Color x:Key="BgElevated">#4a3520</Color>
-            <Color x:Key="BgOverlay">#5a4228</Color>
+            <!-- Ultra dark — минималистичная тема как у Arc/Zen -->
+            <Color x:Key="BgDeepest">#0d0d0d</Color>
+            <Color x:Key="BgDeep">#141414</Color>
+            <Color x:Key="BgPrimary">#1a1a1a</Color>
+            <Color x:Key="BgSurface">#1e1e1e</Color>
+            <Color x:Key="BgElevated">#2a2a2a</Color>
+            <Color x:Key="BgOverlay">#333333</Color>
 
-            <Color x:Key="Accent">#d4a017</Color>
-            <Color x:Key="AccentSoft">#f0c040</Color>
-            <Color x:Key="AccentGlow">#e8b830</Color>
-            <Color x:Key="AccentDeep">#a07818</Color>
+            <!-- Purple accent — тренд 2026 -->
+            <Color x:Key="Accent">#6c63ff</Color>
+            <Color x:Key="AccentSoft">#8b83ff</Color>
+            <Color x:Key="AccentGlow">#a89bff</Color>
+            <Color x:Key="AccentDeep">#5046e5</Color>
 
-            <Color x:Key="Cyan">#d4a017</Color>
-            <Color x:Key="CyanSoft">#f0c040</Color>
-            <Color x:Key="CyanDeep">#a07818</Color>
+            <!-- Cyan для дополнительной палитры -->
+            <Color x:Key="Cyan">#00d4aa</Color>
+            <Color x:Key="CyanSoft">#33e0bc</Color>
+            <Color x:Key="CyanDeep">#00a888</Color>
 
-            <Color x:Key="TextPrimary">#f5e6c8</Color>
-            <Color x:Key="TextSecondary">#c4a882</Color>
-            <Color x:Key="TextTertiary">#8b7355</Color>
-            <Color x:Key="TextDisabled">#5a4a38</Color>
+            <!-- Text — серый на тёмном -->
+            <Color x:Key="TextPrimary">#e8e8e8</Color>
+            <Color x:Key="TextSecondary">#a0a0a0</Color>
+            <Color x:Key="TextTertiary">#666666</Color>
+            <Color x:Key="TextDisabled">#404040</Color>
 
-            <Color x:Key="BorderSubtle">#5a4228</Color>
-            <Color x:Key="BorderDefault">#6b5535</Color>
-            <Color x:Key="BorderStrong">#7d6642</Color>
+            <!-- Borders — тонкие, едва заметные -->
+            <Color x:Key="BorderSubtle">#1f1f1f</Color>
+            <Color x:Key="BorderDefault">#2a2a2a</Color>
+            <Color x:Key="BorderStrong">#3a3a3a</Color>
 
-            <Color x:Key="Success">#2d5a1e</Color>
-            <Color x:Key="SuccessDeep">#1e4410</Color>
-            <Color x:Key="Warning">#d4a017</Color>
-            <Color x:Key="WarningDeep">#a07818</Color>
-            <Color x:Key="Danger">#8b1a1a</Color>
-            <Color x:Key="DangerDeep">#6b1212</Color>
+            <!-- Status colors -->
+            <Color x:Key="Success">#22c55e</Color>
+            <Color x:Key="SuccessDeep">#16a34a</Color>
+            <Color x:Key="Warning">#f59e0b</Color>
+            <Color x:Key="WarningDeep">#d97706</Color>
+            <Color x:Key="Danger">#ef4444</Color>
+            <Color x:Key="DangerDeep">#dc2626</Color>
 
-            <!-- Board colors (chess board) -->
-            <Color x:Key="BoardLight">#d4a574</Color>
-            <Color x:Key="BoardDark">#8b6914</Color>
-            <Color x:Key="KingPurple">#6b3fa0</Color>
-            <Color x:Key="KingPurpleLight">#8b5fbf</Color>
+            <!-- Board colors (для шахматных элементов) -->
+            <Color x:Key="BoardLight">#2a2a2a</Color>
+            <Color x:Key="BoardDark">#1a1a1a</Color>
+            <Color x:Key="KingPurple">#6c63ff</Color>
+            <Color x:Key="KingPurpleLight">#8b83ff</Color>
 
             <!-- ═══════════════════════════════════════════ -->
             <!-- BRUSHES                                     -->

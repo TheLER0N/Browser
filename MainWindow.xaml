@@ -81,14 +81,13 @@
                         </Grid.ColumnDefinitions>
 
                         <!-- Logo -->
-                        <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="16,0,0,0">
-                            <TextBlock Text="♚" FontSize="20" Foreground="{StaticResource AccentBrush}"
-                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                       FontFamily="Segoe UI Emoji, sans-serif"/>
-                            <TextBlock Text="KING" FontSize="15" FontWeight="Bold"
-                                       Foreground="{StaticResource AccentBrush}"
-                                       VerticalAlignment="Center" Margin="10,0,0,0"
-                                       FontFamily="Georgia, 'Playfair Display', serif"/>
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="12,0,0,0">
+                            <Image Source="KING11.png" Width="28" Height="28"
+                                   VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
+                            <TextBlock Text="KING11" FontSize="14" FontWeight="Bold"
+                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       VerticalAlignment="Center" Margin="8,0,0,1"
+                                       FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
                         </StackPanel>
 
                         <!-- Stealth Indicator -->

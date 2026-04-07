@@ -18,21 +18,8 @@
 ## [моя просьба]
 
 Моя задача: 
-1. при нажатии на выключение Stealth у меня выводится это Заголовок окна: GhostBrowser — Ошибка
-Текст сообщения:
-Необработанное исключение:
-Ресурс "TextMutedBrush" не найден.
-Stack Trace:
-at
-MS.Internal.Helper.FindResourceHelper.DoTryCatchWhen(Obj
-ect arg)
-at
-System.Windows.Threading.ExceptionWrapper.InternalRealCal
-l(Delegate callback, Object args, Int32 numArgs)
-at
-System.Windows.Threading.ExceptionWrapper.TryCatchWhen(
-Object source, Delegate callback, Object args, Int32 numArgs,
-Delegate catchHandler)
+Сотсавь сперва план
+1. Обнови дизайн самого браузера и главной страницы. Браузер должен быть в темной теме так как это сейчас модно. Мой логотип KING11 выполнен в белом фоне и на фоне нарисован чёрный пиксельный кароль. 
 
 
 | ID из ideas.md | Идея | Статус | Связь с планом в task.md |
