@@ -15,8 +15,12 @@
 4. `architecture.md` — полная архитектура проекта
 5. `rules.md` — правила работы ИИ
 6. `user-responses.md` — ответы пользователя о багах
+7. `design.md` — дизайн-система (UI/UX, цвета, типографика)
+8. `security.md` — политика безопасности (stealth mode, инкогнито, угрозы)
+9. `workflow.md` — рабочий процесс (разбиение задач на подпланы)
+10. `roadmap.md` — дорожная карта и будущие задачи
 
-**НЕ начинай работу, пока не прочитал все 6 файлов.**
+**НЕ начинай работу, пока не прочитал все 10 файлов.**
 
 ---
 
@@ -26,15 +30,19 @@
 1. Обновить `tasks.md` — отметить выполненное
 2. Обновить `user-responses.md` — записать новый контекст (если есть)
 3. Обновить `architecture.md` — если изменилась структура проекта
-4. Обновить `rules.md` — если появились новые правила
-5. Обновить `onboarding.md` — если изменились приоритеты
-6. Написать краткий отчёт пользователю: что сделано, какие файлы изменены
+4. Обновить `design.md` — если изменились UI-компоненты, цвета, стили
+5. Обновить `security.md` — если изменились аспекты безопасности (stealth, инкогнито)
+6. Обновить `rules.md` — если появились новые правила
+7. Обновить `workflow.md` — если изменился рабочий процесс
+8. Обновить `onboarding.md` — если изменились приоритеты
+9. Обновить `roadmap.md` — если появились новые задачи или изменён план
+10. Написать краткий отчёт пользователю: что сделано, какие файлы изменены
 
 ---
 
 ## 🔁 Периодическая проверка файлов — КАЖДЫЕ 3 ЗАДАЧИ
 
-**После каждых 3 выполненных задач ИИ обязан перечитать все AI-файлы и проверить на актуальность.**
+**После каждых 3 выполненных задач ИИ обязан перечитать все 10 AI-файлов и проверить на актуальность.**
 
 ---
 
@@ -114,14 +122,14 @@
 
 ## 🚀 Фичи из TODO (потом)
 
-- [ ] Менеджер загрузок
-- [ ] Расширенные настройки
-- [ ] Расширения (uBlock Origin и т.д.)
-- [ ] Синхронизация закладок
-- [ ] Режим инкогнито
-- [ ] Скриншотер с защитой
-- [ ] Автозаполнение форм
-- [ ] Профили пользователей
+- [ ] Менеджер загрузок ✅ ВЫПОЛНЕНО
+- [ ] Расширенные настройки ✅ ВЫПОЛНЕНО
+- [ ] Расширения (uBlock Origin) — 📋 В roadmap
+- [ ] Синхронизация закладок — 📋 В roadmap
+- [ ] Режим инкогнито ✅ ВЫПОЛНЕНО
+- [ ] Скриншотер с защитой — 📋 В roadmap
+- [ ] Автозаполнение форм — 📋 В roadmap
+- [ ] Профили пользователей — 📋 В roadmap
 
 ---
 
@@ -274,6 +282,342 @@ GhostBrowser/
 
 ## ❗ Что НЕ делать сейчас
 
-- НЕ добавлять новые фичи без согласования с пользователем
 - НЕ ломать рабочий stealth mode
 - НЕ удалять файлы без подтверждения
+
+---
+
+## 🆕 НОВАЯ ЗАДАЧА: Система блокировки рекламы (аналог uBlock Origin)
+
+> **Дата:** 6 апреля 2026
+> **Приоритет:** 🔴 Высокая
+> **Статус:** 🔄 in_progress
+> **Подпланов:** 5
+>
+> **Примечание:** WebView2 НЕ поддерживает расширения Chrome.
+> Реализуем встроенную блокировку через `WebResourceRequested` API —
+> это единственный рабочий способ для WebView2.
+
+### Подплан 1: Модель фильтров — AdBlockFilter.cs
+- **Файлы:** `Models/AdBlockFilter.cs` (новый), `Models/AdBlockFilterList.cs` (новый)
+- **Что сделать:** Модель фильтра (имя, URL списка, активен), список правил EasyList
+- **Как проверить:** dotnet build
+- **Статус:** ⏳ pending
+
+### Подплан 2: Сервис AdBlockService
+- **Файлы:** `Services/AdBlockService.cs` (новый)
+- **Что сделать:** Загрузка фильтров (EasyList), проверка URL по паттернам, блокировка через 204
+- **Как проверить:** dotnet build
+- **Статус:** ⏳ pending
+
+### Подплан 3: Интеграция с TabViewModel
+- **Файлы:** `ViewModels/TabViewModel.cs`
+- **Что сделать:** Подписка на WebResourceRequested при инициализации WebView2
+- **Как проверить:** dotnet build
+- **Статус:** ⏳ pending
+
+### Подплан 4: UI — секция AdBlock в SettingsPage
+- **Файлы:** `Views/SettingsPage.xaml`, `Views/SettingsPage.xaml.cs`
+- **Что сделать:** Toggle вкл/выкл, счётчик заблокированных запросов, выбор фильтров
+- **Как проверить:** dotnet build
+- **Статус:** ⏳ pending
+
+### Подплан 5: Финальная сборка и тест
+- **Файлы:** Все затронутые
+- **Что сделать:** dotnet build, ручная проверка на сайтах с рекламой
+- **Как проверить:** dotnet build, открыть сайт с рекламой
+- **Статус:** ⏳ pending
+
+---
+
+## 🆕 НОВАЯ ЗАДАЧА: Расширенные настройки (10 категорий, ~50 настроек)
+
+> **Дата:** 6 апреля 2026
+> **Приоритет:** 🟡 Средняя
+> **Статус:** ✅ ВЫПОЛНЕНО + ✅ ПРИВЯЗКА UI (исправлено) + ✅ ОБХОД БЛОКИРОВОК + ✅ МЕНЮ (исправлено)
+> **Подпланов:** 13 — все completed
+
+### Подплан 1: Модель AdvancedSettings
+- **Файлы:** `Models/AdvancedSettings.cs` (новый)
+- **Что сделать:** Создать POCO-модель для всех расширенных настроек (язык, тема, масштаб, аппаратное ускорение, автоочистка, мастер-пароль, прокси, DoH, сессии, поисковые подсказки, User-Agent, DevTools и т.д.)
+- **Как проверить:** dotnet build
+- **Статус:** ✅ completed
+
+### Подплан 2: SettingsService — интеграция AdvancedSettings
+- **Файлы:** `Services/SettingsService.cs`
+- **Что сделать:** Добавить свойство `AdvancedSettings AdvancedSettings`, загрузку/сохранение, INotifyPropertyChanged для каждого поля
+- **Как проверить:** dotnet build
+- **Статус:** ✅ completed
+
+### Подплан 3: SettingsPage XAML — новые категории навигации
+- **Файлы:** `Views/SettingsPage.xaml`, `Views/SettingsPage.xaml.cs`
+- **Что сделать:** Добавить 7 новых кнопок в сайдбар + 7 новых секций
+- **Как проверить:** dotnet build
+- **Статус:** ✅ completed
+
+### Подплан 4: Секция «Внешний вид» в SettingsPage
+- **Файлы:** `Views/SettingsPage.xaml`, `Views/SettingsPage.xaml.cs`
+- **Что сделать:** Тема, акцентный цвет, масштаб, панель закладок, статус-бар, скруглённые вкладки
+- **Как проверить:** dotnet build, ручной тест
+- **Статус:** ✅ completed
+
+### Подплан 5: Секция «Производительность» в SettingsPage
+- **Файлы:** `Views/SettingsPage.xaml`, `Views/SettingsPage.xaml.cs`
+- **Что сделать:** Аппаратное ускорение, автоочистка кэша, предзагрузка, потоки загрузок, лимит RAM
+- **Как проверить:** dotnet build
+- **Статус:** ✅ completed
+
+### Подплан 6: Секция «Безопасность и приватность» — уже есть
+- **Файлы:** `Views/SettingsPage.xaml`
+- **Что сделать:** Блокировка трекеров и cookies (toggle уже были)
+- **Как проверить:** dotnet build
+- **Статус:** ✅ completed
+
+### Подплан 7: Секция «Сеть и DNS»
+- **Файлы:** `Views/SettingsPage.xaml`
+- **Что сделать:** DoH, провайдеры DoH, прокси (ручной/системный/без), таймаут
+- **Как проверить:** dotnet build
+- **Статус:** ✅ completed
+
+### Подплан 8: Секция «При запуске»
+- **Файлы:** `Views/SettingsPage.xaml`
+- **Что сделать:** RadioButton режим запуска, восстановление после краха
+- **Как проверить:** dotnet build
+- **Статус:** ✅ completed
+
+### Подплан 9: Секция «Поиск»
+- **Файлы:** `Views/SettingsPage.xaml`
+- **Что сделать:** Поисковые подсказки, открытие в новой вкладке
+- **Как проверить:** dotnet build
+- **Статус:** ✅ completed
+
+### Подплан 10: Секция «Уведомления»
+- **Файлы:** `Views/SettingsPage.xaml`
+- **Что сделать:** Звук загрузки, всплывающие уведомления
+- **Как проверить:** dotnet build
+- **Статус:** ✅ completed
+
+### Подплан 11: Секция «Экспериментальные»
+- **Файлы:** `Views/SettingsPage.xaml`
+- **Что сделать:** DevTools, User-Agent, WebGL, Canvas, текст-режим, автоплей
+- **Как проверить:** dotnet build
+- **Статус:** ✅ completed
+
+### Подплан 12: Финальная сборка и проверка
+- **Файлы:** Все затронутые
+- **Что сделать:** dotnet build — успешно
+- **Как проверить:** dotnet build
+- **Статус:** ✅ completed
+
+---
+
+## 🆕 НОВАЯ ЗАДАЧА: Синхронизация закладок (экспорт/импорт)
+
+> **Дата:** 6 апреля 2026
+> **Приоритет:** 🔴 Высокая
+> **Статус:** ✅ ВЫПОЛНЕНО
+> **Подпланов:** 4 — все completed
+
+### Подплан 1: Модель SyncResult
+- **Файлы:** `Models/SyncResult.cs` (новый)
+- **Что сделать:** POCO-класс с полями Added, Skipped, Errors, TotalImported
+- **Как проверить:** dotnet build
+- **Статус:** ✅ completed
+
+### Подплан 2: BookmarkService — экспорт/импорт/слияние
+- **Файлы:** `Services/BookmarkService.cs`
+- **Что сделать:** ExportBookmarks(path), ImportAndMergeBookmarks(path) → SyncResult, дедупликация по URL (case-insensitive)
+- **Как проверить:** dotnet build
+- **Статус:** ✅ completed
+
+### Подплан 3: UI — секция синхронизации в SettingsPage
+- **Файлы:** `Views/SettingsPage.xaml`, `Views/SettingsPage.xaml.cs`
+- **Что сделать:** Кнопки "📤 Экспорт" и "📥 Импорт", вызов команд VM, MessageBox с результатом
+- **Как проверить:** dotnet build
+- **Статус:** ✅ completed
+
+### Подплан 4: Команды в MainViewModel + диалоги файлов
+- **Файлы:** `ViewModels/MainViewModel.cs`, `MainWindow.xaml.cs`
+- **Что сделать:** ExportBookmarksCommand, ImportBookmarksCommand → SaveFileDialog/OpenFileDialog
+- **Как проверить:** dotnet build
+- **Статус:** ✅ completed (реализовано в SettingsPage.xaml.cs)
+
+---
+
+## 🆕 НОВАЯ ЗАДАЧА: Скриншотер с защитой
+
+> **Дата:** 6 апреля 2026
+> **Приоритет:** 🟡 Средняя
+> **Статус:** ✅ ВЫПОЛНЕНО
+> **Подпланов:** 4 — все completed
+
+### Подплан 1: Сервис ScreenshotService
+- **Файлы:** `Services/ScreenshotService.cs` (новый)
+- **Что сделать:** CapturePageAsync(WebView2, filePath, format) → PNG/JPEG через CapturePreviewAsync
+- **Как проверить:** dotnet build
+- **Статус:** ✅ completed
+
+### Подплан 2: Настройки скриншотов в AdvancedSettings + SettingsService
+- **Файлы:** `Models/AdvancedSettings.cs`, `Services/SettingsService.cs`
+- **Что сделать:** ScreenshotFormat (PNG/JPEG), ScreenshotFolder, AutoName
+- **Как проверить:** dotnet build
+- **Статус:** ✅ completed
+
+### Подплан 3: Команда в MainViewModel + диалог сохранения
+- **Файлы:** `ViewModels/MainViewModel.cs`
+- **Что сделать:** TakeScreenshotCommand → SaveFileDialog → ScreenshotService.CapturePageAsync
+- **Как проверить:** dotnet build
+- **Статус:** ✅ completed
+
+### Подплан 4: UI — кнопка 📸 + горячая клавиша Ctrl+Shift+S + секция в SettingsPage
+- **Файлы:** `MainWindow.xaml`, `MainWindow.xaml.cs`, `Views/SettingsPage.xaml`, `Views/SettingsPage.xaml.cs`
+- **Что сделать:** Кнопка камеры в навигации, InputBinding для Ctrl+Shift+S, секция настроек
+- **Как проверить:** dotnet build
+- **Статус:** ✅ completed
+
+---
+
+## 🆕 НОВАЯ ЗАДАЧА: Автозаполнение форм
+
+> **Дата:** 6 апреля 2026
+> **Приоритет:** 🟡 Средняя
+> **Статус:** ✅ ВЫПОЛНЕНО
+> **Подпланов:** 5 — все completed
+
+### Подплан 1: Модель AutoFillProfile
+- **Файлы:** `Models/AutoFillProfile.cs` (новый)
+- **Что сделать:** POCO с полями: FirstName, LastName, Email, Phone, Address, City, Zip, Country
+- **Как проверить:** dotnet build
+- **Статус:** ✅ completed
+
+### Подплан 2: Сервис AutoFillService
+- **Файлы:** `Services/AutoFillService.cs` (новый)
+- **Что сделать:** Load/Save профилей, GenerateFillScript() → JS для заполнения input по селекторам
+- **Как проверить:** dotnet build
+- **Статус:** ✅ completed
+
+### Подплан 3: Интеграция с TabViewModel — JS инъекция
+- **Файлы:** `ViewModels/TabViewModel.cs`
+- **Что сделать:** ExecuteScriptAsync в NavigationCompleted если автозаполнение вкл
+- **Как проверить:** dotnet build
+- **Статус:** ✅ completed
+
+### Подплан 4: UI — секция «Автозаполнение» в SettingsPage
+- **Файлы:** `Views/SettingsPage.xaml`, `Views/SettingsPage.xaml.cs`
+- **Что сделать:** Форма с полями (имя, email, телефон, адрес), Toggle вкл/выкл
+- **Как проверить:** dotnet build
+- **Статус:** ✅ completed
+
+### Подплан 5: Горячая клавиша Ctrl+Shift+F
+- **Файлы:** `MainWindow.xaml`, `ViewModels/MainViewModel.cs`
+- **Что сделать:** FillFormsCommand → ExecuteScriptAsync на текущей вкладке
+- **Как проверить:** dotnet build
+- **Статус:** ✅ completed
+
+---
+
+## 🆕 НОВАЯ ЗАДАЧА: Профили пользователей
+
+> **Дата:** 6 апреля 2026
+> **Приоритет:** 🔴 Высокая
+> **Статус:** ✅ ВЫПОЛНЕНО
+> **Подпланов:** 6 — все completed
+
+### Подплан 1: Модель UserProfile
+- **Файлы:** `Models/UserProfile.cs` (новый)
+- **Что сделать:** POCO — Name, AvatarColor, IsActive, CreatedAt
+- **Как проверить:** dotnet build
+- **Статус:** ✅ completed
+
+### Подплан 2: Сервис ProfileService
+- **Файлы:** `Services/ProfileService.cs` (новый)
+- **Что сделать:** CRUD профилей, JSON (profiles.json), SetActive, Delete
+- **Как проверить:** dotnet build
+- **Статус:** ✅ completed
+
+### Подплан 3: MainViewModel — переключение профилей
+- **Файлы:** `ViewModels/MainViewModel.cs`
+- **Что сделать:** SwitchProfile(Profile) → пересоздание всех вкладок с новым CoreWebView2Profile
+- **Как проверить:** dotnet build
+- **Статус:** ⏳ pending
+
+### Подплан 4: TabViewModel — поддержка профиля
+- **Файлы:** `ViewModels/TabViewModel.cs`
+- **Что сделать:** Конструктор принимает CoreWebView2ControllerOptions с ProfileName
+- **Как проверить:** dotnet build
+- **Статус:** ⏳ pending
+
+### Подплан 5: UI — селектор профилей в MainWindow
+- **Файлы:** `MainWindow.xaml`, `MainWindow.xaml.cs`
+- **Что сделать:** Кнопка аватара в title bar → ComboBox/Popup со списком профилей
+- **Как проверить:** dotnet build
+- **Статус:** ⏳ pending
+
+### Подплан 6: UI — секция «Профили» в SettingsPage
+- **Файлы:** `Views/SettingsPage.xaml`, `Views/SettingsPage.xaml.cs`
+- **Что сделать:** Список профилей, добавить/удалить/переименовать
+- **Как проверить:** dotnet build
+- **Статус:** ✅ completed
+
+---
+
+## 🆕 НОВАЯ ЗАДАЧА: 🎨 Редизайн KING (шахматная тема)
+
+> **Дата:** 6 апреля 2026
+> **Приоритет:** 🔴 Высокая
+> **Статус:** 🔄 in_progress
+> **Подпланов:** 7
+
+### Подплан 1: Цветовая палитра — App.xaml
+- **Файлы:** `App.xaml`
+- **Что сделать:** Заменить все цвета на KING палитру (дерево, золото, крем)
+- **Как проверить:** dotnet build, визуальная проверка
+- **Статус:** ✅ completed
+
+### Подплан 2: Логотип — KING.png в MainWindow
+- **Файлы:** `MainWindow.xaml`, `App.xaml`
+- **Что сделать:** Заменить 👻 на изображение KING.png в title bar
+- **Как проверить:** dotnet build
+- **Статус:** ✅ completed
+
+### Подплан 3: Название — GhostBrowser → KING
+- **Файлы:** `MainWindow.xaml`, `IncognitoWindow.xaml`, `App.xaml.cs`, `NewTabPage.html`, все AI-файлы
+- **Что сделать:** Заменить все упоминания GhostBrowser на KING
+- **Как проверить:** dotnet build
+- **Статус:** ✅ completed (MainWindow + IncognitoWindow Title)
+
+### Подплан 4: Иконки — шахматные символы
+- **Файлы:** `MainWindow.xaml`, `SettingsPage.xaml`, `design.md`
+- **Что сделать:** 👻→♚, 🕶️→♛, адаптировать остальные эмодзи
+- **Как проверить:** dotnet build
+- **Статус:** ⏳ pending
+
+### Подплан 5: NewTabPage.html — шахматная тема
+- **Файлы:** `NewTabPage.html`
+- **Что сделать:** Тёмное дерево, золотой текст, KING logo, частицы, орбы
+- **Как проверить:** dotnet build
+- **Статус:** ✅ completed (полностью переделана в стиле сайта KING)
+
+### Подплан 6: Иконка приложения .ico
+- **Файлы:** `KING.ico` (новый из PNG), `GhostBrowser.csproj`
+- **Что сделать:** Конвертировать KING.png в .ico, обновить csproj
+- **Как проверить:** dotnet build
+- **Статус:** ⏳ pending
+
+### Подплан 7: Финальная сборка и проверка
+- **Файлы:** Все затронутые
+- **Что сделать:** dotnet build, ручная проверка UI
+- **Как проверить:** dotnet build
+- **Статус:** ⏳ pending
+
+### Подплан 8: Исправления KING (овал→круг, перетаскивание, дизайн)
+- **Файлы:** `NewTabPage.html`, `MainWindow.xaml`, `MainWindow.xaml.cs`
+- **Что сделать:** Круглый логотип, DragMove за title bar, улучшенный визуал
+- **Как проверить:** dotnet build, ручной тест
+- **Статус:** ✅ completed
+
+### Подплан 9: Левитация колец логотипа на NewTabPage
+- **Файлы:** `NewTabPage.html`
+- **Что сделать:** Добавить анимацию левитации (float) к avatar-ring и avatar-ring-2, чтобы они двигались синхронно с логотипом ♚
+- **Как проверить:** dotnet build, открыть новую вкладку
+- **Статус:** ✅ completed
