@@ -229,7 +229,8 @@
                 </Grid.RowDefinitions>
 
                 <!-- ════════════ TITLE BAR ════════════ -->
-                <Border Grid.Row="0" BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="0,0,0,1">
+                <Border Grid.Row="0" BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="0,0,0,1"
+                        CornerRadius="14,14,0,0">
                     <Border.Background>
                         <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                             <GradientStop Color="{StaticResource BgDeepest}" Offset="0"/>
@@ -514,7 +515,8 @@
                                 Content="{Binding DisplayedContent}"/>
 
                 <!-- ════════════ STATUS BAR ════════════ -->
-                <Border Grid.Row="5" BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="0,1,0,0">
+                <Border Grid.Row="5" BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="0,1,0,0"
+                        CornerRadius="0,0,14,14">
                     <Border.Background>
                         <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                             <GradientStop Color="{StaticResource BgDeepest}" Offset="0"/>
