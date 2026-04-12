@@ -28,6 +28,7 @@ namespace GhostBrowser.ViewModels
         private bool _canGoForward;
         private object? _displayedContent;
         private bool _isSettingsOpen;
+        private bool _isSidebarOpen;
 
         // Panic mode — сохраняем ВСЕ вкладки
         private bool _isPanicMode;
@@ -151,6 +152,12 @@ namespace GhostBrowser.ViewModels
             }
         }
 
+        public bool IsSidebarOpen
+        {
+            get => _isSidebarOpen;
+            set => Set(ref _isSidebarOpen, value);
+        }
+
         /// <summary>
         /// True когда активен режим паники (F12).
         /// </summary>
@@ -180,6 +187,7 @@ namespace GhostBrowser.ViewModels
         public AsyncRelayCommand RestoreSessionCommand { get; }
         public ICommand DeleteSessionCommand { get; }
         public ICommand ApplyThemeCommand { get; }
+        public ICommand ToggleSidebarCommand { get; }
 
         /// <summary>
         /// Асинхронная команда создания вкладки.
@@ -234,6 +242,7 @@ namespace GhostBrowser.ViewModels
             RestoreSessionCommand = new AsyncRelayCommand(async p => await RestoreSessionAsync(p?.ToString() ?? ""));
             DeleteSessionCommand = new RelayCommand(p => DeleteSession(p?.ToString() ?? ""));
             ApplyThemeCommand = new RelayCommand(p => ApplyTheme(p?.ToString() ?? ""));
+            ToggleSidebarCommand = new RelayCommand(_ => IsSidebarOpen = !IsSidebarOpen);
 
             // Clock timer
             _clockTimer = new System.Windows.Threading.DispatcherTimer

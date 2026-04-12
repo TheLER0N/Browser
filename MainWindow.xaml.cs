@@ -318,6 +318,18 @@ namespace GhostBrowser
                 return;
             }
 
+            // Ctrl+B — боковая панель
+            if (e.KeyboardDevice.Modifiers == ModifierKeys.Control && e.Key == Key.B)
+            {
+                ViewModel.ToggleSidebarCommand.Execute(null);
+                if (ViewModel.IsSidebarOpen)
+                {
+                    SidebarPanel.RefreshData();
+                }
+                e.Handled = true;
+                return;
+            }
+
             ViewModel.HandleKeyboardShortcut(e.Key, e.KeyboardDevice.Modifiers);
             base.OnKeyDown(e);
         }
