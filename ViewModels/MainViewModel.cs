@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -50,6 +51,7 @@ namespace GhostBrowser.ViewModels
         public Services.SnippingToolBlocker SnippingToolBlockerService { get; }
         public Services.TrayService TrayServiceInstance { get; } = new();
         public Services.SessionService SessionService { get; }
+        public Services.ScreenshotService ScreenshotService { get; } = new();
 
         // ==================== Collections ====================
 
@@ -188,6 +190,7 @@ namespace GhostBrowser.ViewModels
         public ICommand DeleteSessionCommand { get; }
         public ICommand ApplyThemeCommand { get; }
         public ICommand ToggleSidebarCommand { get; }
+        public AsyncRelayCommand TakeScreenshotCommand { get; }
 
         /// <summary>
         /// Асинхронная команда создания вкладки.
@@ -243,6 +246,7 @@ namespace GhostBrowser.ViewModels
             DeleteSessionCommand = new RelayCommand(p => DeleteSession(p?.ToString() ?? ""));
             ApplyThemeCommand = new RelayCommand(p => ApplyTheme(p?.ToString() ?? ""));
             ToggleSidebarCommand = new RelayCommand(_ => IsSidebarOpen = !IsSidebarOpen);
+            TakeScreenshotCommand = new AsyncRelayCommand(async _ => await TakeScreenshotAsync());
 
             // Clock timer
             _clockTimer = new System.Windows.Threading.DispatcherTimer
@@ -534,6 +538,48 @@ namespace GhostBrowser.ViewModels
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"ApplyTheme error: {ex.Message}");
+            }
+        }
+
+        // ==================== Screenshot ====================
+
+        /// <summary>
+        /// Делает скриншот текущей видимой страницы.
+        /// </summary>
+        public async Task TakeScreenshotAsync()
+        {
+            try
+            {
+                if (SelectedTab?.WebView == null)
+                {
+                    StatusText = "❌ Нет активной страницы для скриншота";
+                    return;
+                }
+
+                StatusText = "📸 Создание скриншота...";
+
+                var filePath = await ScreenshotService.CaptureVisibleAsync(SelectedTab.WebView);
+
+                if (!string.IsNullOrEmpty(filePath))
+                {
+                    StatusText = $"📸 Скриншот сохранён: {Path.GetFileName(filePath)}";
+
+                    // Открываем папку
+                    try
+                    {
+                        System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{filePath}\"");
+                    }
+                    catch { }
+                }
+                else
+                {
+                    StatusText = "❌ Не удалось сделать скриншот";
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"TakeScreenshot error: {ex.Message}");
+                StatusText = $"❌ Ошибка скриншота: {ex.Message}";
             }
         }
 

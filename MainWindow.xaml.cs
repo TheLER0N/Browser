@@ -330,6 +330,14 @@ namespace GhostBrowser
                 return;
             }
 
+            // Ctrl+Shift+P — скриншот
+            if (e.KeyboardDevice.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift) && e.Key == Key.P)
+            {
+                ViewModel.TakeScreenshotCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
             ViewModel.HandleKeyboardShortcut(e.Key, e.KeyboardDevice.Modifiers);
             base.OnKeyDown(e);
         }

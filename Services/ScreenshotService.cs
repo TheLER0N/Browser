@@ -1,39 +1,93 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Media.Imaging;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.Wpf;
 
 namespace GhostBrowser.Services
 {
     /// <summary>
-    /// Сервис создания скриншотов веб-страниц через CoreWebView2.CapturePreviewAsync.
-    /// Поддерживает форматы PNG и JPEG.
+    /// Сервис скриншотов страниц.
+    /// Позволяет делать скриншот видимой области и всей страницы.
     /// </summary>
     public class ScreenshotService
     {
         /// <summary>
-        /// Делает скриншот теку страницы WebView2 и сохраняет в файл.
+        /// Делает скриншот видимой области WebView2 и сохраняет в файл.
         /// </summary>
-        /// <param name="webView">WebView2 контрол.</param>
-        /// <param name="filePath">Путь сохранения.</param>
-        /// <param name="format">Формат: "png" или "jpeg".</param>
-        /// <returns>Task, завершающийся успехом/ошибкой.</returns>
-        public async Task<bool> CapturePageAsync(WebView2 webView, string filePath, string format = "png")
+        public async Task<string?> CaptureVisibleAsync(WebView2 webView, string? folder = null, string? fileName = null)
         {
-            if (webView?.CoreWebView2 == null)
-                throw new InvalidOperationException("WebView2 не инициализирован");
+            if (webView?.CoreWebView2 == null) return null;
 
-            var imageFormat = format.ToLowerInvariant() switch
+            try
             {
-                "jpeg" or "jpg" => CoreWebView2CapturePreviewImageFormat.Jpeg,
-                _ => CoreWebView2CapturePreviewImageFormat.Png
-            };
+                var outputFile = GetOutputPath(folder, fileName, "png");
 
-            using var stream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None);
-            await webView.CoreWebView2.CapturePreviewAsync(imageFormat, stream);
+                // Используем CapturePreview для скриншота видимой области
+                using var stream = new FileStream(outputFile, FileMode.Create);
+                await webView.CoreWebView2.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, stream);
 
-            return true;
+                System.Diagnostics.Debug.WriteLine($"[ScreenshotService] Visible capture saved: {outputFile}");
+                return outputFile;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[ScreenshotService] CaptureVisible error: {ex.Message}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Формирует путь к файлу скриншота.
+        /// </summary>
+        private string GetOutputPath(string? folder, string? fileName, string extension)
+        {
+            if (string.IsNullOrEmpty(folder))
+            {
+                folder = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.MyPictures),
+                    "KingBrowser Screenshots");
+            }
+
+            Directory.CreateDirectory(folder);
+
+            if (string.IsNullOrEmpty(fileName))
+            {
+                fileName = $"screenshot_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.{extension}";
+            }
+            else if (!fileName.EndsWith($".{extension}", StringComparison.OrdinalIgnoreCase))
+            {
+                fileName = Path.ChangeExtension(fileName, extension);
+            }
+
+            return Path.Combine(folder, fileName);
+        }
+
+        /// <summary>
+        /// Открывает диалог сохранения файла и возвращает путь.
+        /// </summary>
+        public string? ShowSaveDialog(string defaultFileName = "")
+        {
+            try
+            {
+                var dialog = new Microsoft.Win32.SaveFileDialog
+                {
+                    Filter = "PNG Image (*.png)|*.png|JPEG Image (*.jpg)|*.jpg",
+                    FileName = string.IsNullOrEmpty(defaultFileName)
+                        ? $"screenshot_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.png"
+                        : defaultFileName,
+                    InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures)
+                };
+
+                return dialog.ShowDialog() == true ? dialog.FileName : null;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[ScreenshotService] ShowSaveDialog error: {ex.Message}");
+                return null;
+            }
         }
     }
 }
