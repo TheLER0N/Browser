@@ -1572,60 +1572,407 @@
                 <!-- ─── About Section ─── -->
                 <StackPanel x:Name="AboutSection" Visibility="Collapsed">
                     <TextBlock Text="О программе" FontSize="22" FontWeight="SemiBold"
-                               Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,4"
+                               Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,20"
                                FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
 
+                    <!-- Logo + Title Card -->
                     <Border Background="{StaticResource BgSurfaceBrush}"
                             BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1"
-                            CornerRadius="16" Padding="32" Margin="0,20,0,28">
+                            CornerRadius="18" Padding="32,28" Margin="0,0,0,20">
                         <StackPanel HorizontalAlignment="Center">
-                            <TextBlock Text="👻" FontSize="44" HorizontalAlignment="Center"
-                                       Margin="0,0,0,14"
-                                       RenderTransformOrigin="0.5,0.5">
-                                <TextBlock.Effect>
-                                    <DropShadowEffect BlurRadius="20" ShadowDepth="0" Opacity="0.4"
+                            <!-- Logo -->
+                            <Border Width="80" Height="80" CornerRadius="20"
+                                    Background="{StaticResource BgDeepestBrush}"
+                                    BorderBrush="{StaticResource BorderSubtleBrush}"
+                                    BorderThickness="1" HorizontalAlignment="Center"
+                                    Margin="0,0,0,18">
+                                <Border.Effect>
+                                    <DropShadowEffect BlurRadius="24" ShadowDepth="0" Opacity="0.3"
                                                       Color="{StaticResource Accent}"/>
-                                </TextBlock.Effect>
-                            </TextBlock>
-                            <TextBlock Text="GhostBrowser" FontSize="22" FontWeight="Bold"
+                                </Border.Effect>
+                                <TextBlock Text="♚" FontSize="44" Foreground="{StaticResource TextPrimaryBrush}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           FontFamily="Segoe UI Emoji, Segoe UI Symbol, Arial"/>
+                            </Border>
+                            <!-- Title -->
+                            <TextBlock Text="KingBrowser" FontSize="28" FontWeight="Bold"
                                        Foreground="{StaticResource TextPrimaryBrush}"
                                        HorizontalAlignment="Center"
                                        FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
-                            <TextBlock Text="v1.0 — Приватный браузер нового поколения"
-                                       FontSize="13" Foreground="{StaticResource TextSecondaryBrush}"
-                                       HorizontalAlignment="Center" Margin="0,6,0,0"
-                                       FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                            <!-- Version badge -->
+                            <Border Background="{StaticResource BgDeepestBrush}"
+                                    CornerRadius="10" Padding="14,6" Margin="0,10,0,0"
+                                    HorizontalAlignment="Center">
+                                <TextBlock Text="v1.1  •  Приватный браузер с режимом невидимости"
+                                           FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"
+                                           HorizontalAlignment="Center"
+                                           FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                            </Border>
                         </StackPanel>
                     </Border>
 
-                    <TextBlock Text="Горячие клавиши" FontSize="16" FontWeight="SemiBold"
-                               Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,14"
+                    <!-- Features Grid -->
+                    <TextBlock Text="✨ Возможности" FontSize="15" FontWeight="SemiBold"
+                               Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,12"
                                FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
                     <Border Background="{StaticResource BgSurfaceBrush}"
                             BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1"
-                            CornerRadius="14" Padding="18">
+                            CornerRadius="14" Padding="18" Margin="0,0,0,20">
+                        <WrapPanel>
+                            <!-- Feature items -->
+                            <Border Background="{StaticResource BgSurfaceBrush}" CornerRadius="10"
+                                    BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1"
+                                    Padding="12,10" Margin="0,0,8,8" MinWidth="200">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="👻" FontSize="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Stealth Mode" FontSize="12" FontWeight="Medium"
+                                               Foreground="{StaticResource TextPrimaryBrush}"
+                                               VerticalAlignment="Center"
+                                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Background="{StaticResource BgSurfaceBrush}" CornerRadius="10"
+                                    BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1"
+                                    Padding="12,10" Margin="0,0,8,8" MinWidth="200">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="📸" FontSize="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Блокировка скриншотов" FontSize="12" FontWeight="Medium"
+                                               Foreground="{StaticResource TextPrimaryBrush}"
+                                               VerticalAlignment="Center"
+                                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Background="{StaticResource BgSurfaceBrush}" CornerRadius="10"
+                                    BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1"
+                                    Padding="12,10" Margin="0,0,8,8" MinWidth="200">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="🛡️" FontSize="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Анти-фингерпринтинг" FontSize="12" FontWeight="Medium"
+                                               Foreground="{StaticResource TextPrimaryBrush}"
+                                               VerticalAlignment="Center"
+                                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Background="{StaticResource BgSurfaceBrush}" CornerRadius="10"
+                                    BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1"
+                                    Padding="12,10" Margin="0,0,8,8" MinWidth="200">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="🕶️" FontSize="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Режим инкогнито" FontSize="12" FontWeight="Medium"
+                                               Foreground="{StaticResource TextPrimaryBrush}"
+                                               VerticalAlignment="Center"
+                                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Background="{StaticResource BgSurfaceBrush}" CornerRadius="10"
+                                    BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1"
+                                    Padding="12,10" Margin="0,0,8,8" MinWidth="200">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="📥" FontSize="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Менеджер загрузок" FontSize="12" FontWeight="Medium"
+                                               Foreground="{StaticResource TextPrimaryBrush}"
+                                               VerticalAlignment="Center"
+                                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Background="{StaticResource BgSurfaceBrush}" CornerRadius="10"
+                                    BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1"
+                                    Padding="12,10" Margin="0,0,8,8" MinWidth="200">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="🌍" FontSize="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Обход блокировок" FontSize="12" FontWeight="Medium"
+                                               Foreground="{StaticResource TextPrimaryBrush}"
+                                               VerticalAlignment="Center"
+                                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Background="{StaticResource BgSurfaceBrush}" CornerRadius="10"
+                                    BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1"
+                                    Padding="12,10" Margin="0,0,8,8" MinWidth="200">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="📑" FontSize="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Менеджер сессий" FontSize="12" FontWeight="Medium"
+                                               Foreground="{StaticResource TextPrimaryBrush}"
+                                               VerticalAlignment="Center"
+                                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Background="{StaticResource BgSurfaceBrush}" CornerRadius="10"
+                                    BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1"
+                                    Padding="12,10" Margin="0,0,8,8" MinWidth="200">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="📌" FontSize="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Боковая панель" FontSize="12" FontWeight="Medium"
+                                               Foreground="{StaticResource TextPrimaryBrush}"
+                                               VerticalAlignment="Center"
+                                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Background="{StaticResource BgSurfaceBrush}" CornerRadius="10"
+                                    BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1"
+                                    Padding="12,10" Margin="0,0,8,8" MinWidth="200">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="🎭" FontSize="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Маскировка UA" FontSize="12" FontWeight="Medium"
+                                               Foreground="{StaticResource TextPrimaryBrush}"
+                                               VerticalAlignment="Center"
+                                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Background="{StaticResource BgSurfaceBrush}" CornerRadius="10"
+                                    BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1"
+                                    Padding="12,10" Margin="0,0,8,8" MinWidth="200">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="🎨" FontSize="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Темы оформления" FontSize="12" FontWeight="Medium"
+                                               Foreground="{StaticResource TextPrimaryBrush}"
+                                               VerticalAlignment="Center"
+                                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                                </StackPanel>
+                            </Border>
+                        </WrapPanel>
+                    </Border>
+
+                    <!-- Hotkeys -->
+                    <TextBlock Text="⌨️ Горячие клавиши" FontSize="15" FontWeight="SemiBold"
+                               Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,12"
+                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                    <Border Background="{StaticResource BgSurfaceBrush}"
+                            BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1"
+                            CornerRadius="14" Padding="16" Margin="0,0,0,20">
+                        <WrapPanel>
+                            <Border Background="{StaticResource BgDeepestBrush}" CornerRadius="8"
+                                    Padding="10,8" Margin="0,0,6,6" MinWidth="180">
+                                <StackPanel Orientation="Horizontal">
+                                    <Border Background="#1e1e2e" CornerRadius="5"
+                                            Padding="6,3" Margin="0,0,8,0">
+                                        <TextBlock Text="Ctrl+T" FontSize="10" FontWeight="Bold"
+                                                   Foreground="#a6e3a1"
+                                                   FontFamily="Consolas, monospace"/>
+                                    </Border>
+                                    <TextBlock Text="Новая вкладка" FontSize="11"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               VerticalAlignment="Center"
+                                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Background="{StaticResource BgDeepestBrush}" CornerRadius="8"
+                                    Padding="10,8" Margin="0,0,6,6" MinWidth="180">
+                                <StackPanel Orientation="Horizontal">
+                                    <Border Background="#1e1e2e" CornerRadius="5"
+                                            Padding="6,3" Margin="0,0,8,0">
+                                        <TextBlock Text="Ctrl+W" FontSize="10" FontWeight="Bold"
+                                                   Foreground="#f9e2af"
+                                                   FontFamily="Consolas, monospace"/>
+                                    </Border>
+                                    <TextBlock Text="Закрыть вкладку" FontSize="11"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               VerticalAlignment="Center"
+                                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Background="{StaticResource BgDeepestBrush}" CornerRadius="8"
+                                    Padding="10,8" Margin="0,0,6,6" MinWidth="180">
+                                <StackPanel Orientation="Horizontal">
+                                    <Border Background="#1e1e2e" CornerRadius="5"
+                                            Padding="6,3" Margin="0,0,8,0">
+                                        <TextBlock Text="Ctrl+L" FontSize="10" FontWeight="Bold"
+                                                   Foreground="White"
+                                                   FontFamily="Consolas, monospace"/>
+                                    </Border>
+                                    <TextBlock Text="Адресная строка" FontSize="11"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               VerticalAlignment="Center"
+                                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Background="{StaticResource BgDeepestBrush}" CornerRadius="8"
+                                    Padding="10,8" Margin="0,0,6,6" MinWidth="180">
+                                <StackPanel Orientation="Horizontal">
+                                    <Border Background="#1e1e2e" CornerRadius="5"
+                                            Padding="6,3" Margin="0,0,8,0">
+                                        <TextBlock Text="Ctrl+R" FontSize="10" FontWeight="Bold"
+                                                   Foreground="White"
+                                                   FontFamily="Consolas, monospace"/>
+                                    </Border>
+                                    <TextBlock Text="Обновить" FontSize="11"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               VerticalAlignment="Center"
+                                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Background="{StaticResource BgDeepestBrush}" CornerRadius="8"
+                                    Padding="10,8" Margin="0,0,6,6" MinWidth="180">
+                                <StackPanel Orientation="Horizontal">
+                                    <Border Background="#1e1e2e" CornerRadius="5"
+                                            Padding="6,3" Margin="0,0,8,0">
+                                        <TextBlock Text="Ctrl+D" FontSize="10" FontWeight="Bold"
+                                                   Foreground="White"
+                                                   FontFamily="Consolas, monospace"/>
+                                    </Border>
+                                    <TextBlock Text="Закладка" FontSize="11"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               VerticalAlignment="Center"
+                                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Background="{StaticResource BgDeepestBrush}" CornerRadius="8"
+                                    Padding="10,8" Margin="0,0,6,6" MinWidth="180">
+                                <StackPanel Orientation="Horizontal">
+                                    <Border Background="#1e1e2e" CornerRadius="5"
+                                            Padding="6,3" Margin="0,0,8,0">
+                                        <TextBlock Text="Ctrl+B" FontSize="10" FontWeight="Bold"
+                                                   Foreground="White"
+                                                   FontFamily="Consolas, monospace"/>
+                                    </Border>
+                                    <TextBlock Text="Боковая панель" FontSize="11"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               VerticalAlignment="Center"
+                                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Background="{StaticResource BgDeepestBrush}" CornerRadius="8"
+                                    Padding="10,8" Margin="0,0,6,6" MinWidth="180">
+                                <StackPanel Orientation="Horizontal">
+                                    <Border Background="#1e1e2e" CornerRadius="5"
+                                            Padding="6,3" Margin="0,0,8,0">
+                                        <TextBlock Text="Ctrl+0" FontSize="10" FontWeight="Bold"
+                                                   Foreground="White"
+                                                   FontFamily="Consolas, monospace"/>
+                                    </Border>
+                                    <TextBlock Text="Паник-кнопка" FontSize="11"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               VerticalAlignment="Center"
+                                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Background="{StaticResource BgDeepestBrush}" CornerRadius="8"
+                                    Padding="10,8" Margin="0,0,6,6" MinWidth="180">
+                                <StackPanel Orientation="Horizontal">
+                                    <Border Background="#1e1e2e" CornerRadius="5"
+                                            Padding="6,3" Margin="0,0,8,0">
+                                        <TextBlock Text="Ctrl+`" FontSize="10" FontWeight="Bold"
+                                                   Foreground="White"
+                                                   FontFamily="Consolas, monospace"/>
+                                    </Border>
+                                    <TextBlock Text="Восстановить из трея" FontSize="11"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               VerticalAlignment="Center"
+                                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Background="{StaticResource BgDeepestBrush}" CornerRadius="8"
+                                    Padding="10,8" Margin="0,0,6,6" MinWidth="180">
+                                <StackPanel Orientation="Horizontal">
+                                    <Border Background="#1e1e2e" CornerRadius="5"
+                                            Padding="6,3" Margin="0,0,8,0">
+                                        <TextBlock Text="F11" FontSize="10" FontWeight="Bold"
+                                                   Foreground="White"
+                                                   FontFamily="Consolas, monospace"/>
+                                    </Border>
+                                    <TextBlock Text="Полный экран" FontSize="11"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               VerticalAlignment="Center"
+                                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Background="{StaticResource BgDeepestBrush}" CornerRadius="8"
+                                    Padding="10,8" Margin="0,0,6,6" MinWidth="180">
+                                <StackPanel Orientation="Horizontal">
+                                    <Border Background="#1e1e2e" CornerRadius="5"
+                                            Padding="6,3" Margin="0,0,8,0">
+                                        <TextBlock Text="Ctrl+⇧+H" FontSize="10" FontWeight="Bold"
+                                                   Foreground="White"
+                                                   FontFamily="Consolas, monospace"/>
+                                    </Border>
+                                    <TextBlock Text="Stealth режим" FontSize="11"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               VerticalAlignment="Center"
+                                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Background="{StaticResource BgDeepestBrush}" CornerRadius="8"
+                                    Padding="10,8" Margin="0,0,6,6" MinWidth="180">
+                                <StackPanel Orientation="Horizontal">
+                                    <Border Background="#1e1e2e" CornerRadius="5"
+                                            Padding="6,3" Margin="0,0,8,0">
+                                        <TextBlock Text="Ctrl+⇧+N" FontSize="10" FontWeight="Bold"
+                                                   Foreground="White"
+                                                   FontFamily="Consolas, monospace"/>
+                                    </Border>
+                                    <TextBlock Text="Окно инкогнито" FontSize="11"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               VerticalAlignment="Center"
+                                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Background="{StaticResource BgDeepestBrush}" CornerRadius="8"
+                                    Padding="10,8" Margin="0,0,6,6" MinWidth="180">
+                                <StackPanel Orientation="Horizontal">
+                                    <Border Background="#1e1e2e" CornerRadius="5"
+                                            Padding="6,3" Margin="0,0,8,0">
+                                        <TextBlock Text="Ctrl+⇧+P" FontSize="10" FontWeight="Bold"
+                                                   Foreground="White"
+                                                   FontFamily="Consolas, monospace"/>
+                                    </Border>
+                                    <TextBlock Text="Скриншот" FontSize="11"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               VerticalAlignment="Center"
+                                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Background="{StaticResource BgDeepestBrush}" CornerRadius="8"
+                                    Padding="10,8" Margin="0,0,6,6" MinWidth="180">
+                                <StackPanel Orientation="Horizontal">
+                                    <Border Background="#1e1e2e" CornerRadius="5"
+                                            Padding="6,3" Margin="0,0,8,0">
+                                        <TextBlock Text="Ctrl+⇧+S" FontSize="10" FontWeight="Bold"
+                                                   Foreground="White"
+                                                   FontFamily="Consolas, monospace"/>
+                                    </Border>
+                                    <TextBlock Text="Блок. PrintScreen" FontSize="11"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               VerticalAlignment="Center"
+                                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Background="{StaticResource BgDeepestBrush}" CornerRadius="8"
+                                    Padding="10,8" Margin="0,0,6,6" MinWidth="180">
+                                <StackPanel Orientation="Horizontal">
+                                    <Border Background="#1e1e2e" CornerRadius="5"
+                                            Padding="6,3" Margin="0,0,8,0">
+                                        <TextBlock Text="Alt+←/→" FontSize="10" FontWeight="Bold"
+                                                   Foreground="White"
+                                                   FontFamily="Consolas, monospace"/>
+                                    </Border>
+                                    <TextBlock Text="Назад/Вперёд" FontSize="11"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               VerticalAlignment="Center"
+                                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                                </StackPanel>
+                            </Border>
+                        </WrapPanel>
+                    </Border>
+
+                    <!-- Tech + Footer -->
+                    <Border Background="{StaticResource BgSurfaceBrush}"
+                            BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1"
+                            CornerRadius="14" Padding="18" Margin="0,0,0,16">
                         <StackPanel>
-                            <TextBlock Text="Ctrl+T  —  Новая вкладка" FontSize="13"
-                                       Foreground="{StaticResource TextSecondaryBrush}" Margin="0,6"
+                            <TextBlock Text="Технологии" FontSize="13" FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       Margin="0,0,0,8"
+                                       FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                            <TextBlock Text="C# 12  •  .NET 7 WPF  •  WebView2 (Chromium)  •  MVVM  •  Win32 API"
+                                       FontSize="11.5" Foreground="{StaticResource TextSecondaryBrush}"
+                                       TextWrapping="Wrap" LineHeight="17"
                                        FontFamily="Consolas, 'Cascadia Code', monospace"/>
-                            <TextBlock Text="Ctrl+W  —  Закрыть вкладку" FontSize="13"
-                                       Foreground="{StaticResource TextSecondaryBrush}" Margin="0,6"
-                                       FontFamily="Consolas, 'Cascadia Code', monospace"/>
-                            <TextBlock Text="Ctrl+L  —  Адресная строка" FontSize="13"
-                                       Foreground="{StaticResource TextSecondaryBrush}" Margin="0,6"
-                                       FontFamily="Consolas, 'Cascadia Code', monospace"/>
-                            <TextBlock Text="Ctrl+Shift+H  —  Stealth режим" FontSize="13"
-                                       Foreground="{StaticResource TextSecondaryBrush}" Margin="0,6"
-                                       FontFamily="Consolas, 'Cascadia Code', monospace"/>
-                            <TextBlock Text="Alt+←/→  —  Назад/Вперёд" FontSize="13"
-                                       Foreground="{StaticResource TextSecondaryBrush}" Margin="0,6"
-                                       FontFamily="Consolas, 'Cascadia Code', monospace"/>
-                            <TextBlock Text="Ctrl+R  —  Обновить" FontSize="13"
-                                       Foreground="{StaticResource TextSecondaryBrush}" Margin="0,6"
-                                       FontFamily="Consolas, 'Cascadia Code', monospace"/>
-                            <TextBlock Text="Ctrl+D  —  Закладка" FontSize="13"
-                                       Foreground="{StaticResource TextSecondaryBrush}" Margin="0,6"
-                                       FontFamily="Consolas, 'Cascadia Code', monospace"/>
+                            <Border BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="0,1,0,0"
+                                    Margin="0,14,0,14"/>
+                            <TextBlock Text="© 2026 KingBrowser  •  MIT License"
+                                       FontSize="11" Foreground="{StaticResource TextTertiaryBrush}"
+                                       HorizontalAlignment="Center"
+                                       FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
                         </StackPanel>
                     </Border>
                 </StackPanel>

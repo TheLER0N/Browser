@@ -14,7 +14,7 @@ namespace GhostBrowser
             {
                 MessageBox.Show(
                     $"Необработанное исключение:\n\n{args.Exception.Message}\n\nStack Trace:\n{args.Exception.StackTrace}",
-                    "GhostBrowser — Ошибка",
+                    "KingBrowser — Ошибка",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
                 args.Handled = true;
@@ -27,7 +27,7 @@ namespace GhostBrowser
                 {
                     MessageBox.Show(
                         $"Критическая ошибка:\n\n{ex.GetType().Name}: {ex.Message}\n\nStack Trace:\n{ex.StackTrace}",
-                        "GhostBrowser — Критическая ошибка",
+                        "KingBrowser — Критическая ошибка",
                         MessageBoxButton.OK,
                         MessageBoxImage.Error);
                 }

@@ -313,7 +313,7 @@ namespace GhostBrowser.ViewModels
                 if (!string.IsNullOrEmpty(title))
                     Title = title;
 
-                if (!url.StartsWith("ghost://"))
+                if (!url.StartsWith("ghost://") && !(url.StartsWith("file://") && url.EndsWith("NewTabPage.html")))
                     Url = url;
 
                 // Update navigation commands state
@@ -362,7 +362,17 @@ namespace GhostBrowser.ViewModels
             if (WebView != null)
             {
                 var url = WebView.Source?.ToString() ?? "";
-                Url = url;
+                // Если это локальный файл NewTabPage.html — подменяем на ghost://newtab
+                if (url.StartsWith("file://", StringComparison.OrdinalIgnoreCase) &&
+                    url.EndsWith("NewTabPage.html", StringComparison.OrdinalIgnoreCase))
+                {
+                    Url = "ghost://newtab";
+                    Title = "Новая вкладка";
+                }
+                else
+                {
+                    Url = url;
+                }
                 CanGoBack = WebView.CanGoBack;
                 CanGoForward = WebView.CanGoForward;
             }
@@ -383,7 +393,7 @@ namespace GhostBrowser.ViewModels
 
             return "<html><body style=\"background:#06080d;color:#f0f6fc;font-family:Segoe UI,sans-serif;" +
                    "display:flex;align-items:center;justify-content:center;height:100vh;margin:0;\">" +
-                   "<h1>GhostBrowser</h1></body></html>";
+                   "<h1>KingBrowser</h1></body></html>";
         }
 
         // ==================== Download Interception ====================

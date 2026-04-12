@@ -260,7 +260,22 @@ namespace GhostBrowser
 
         private void Menu_About_Click(object sender, RoutedEventArgs e)
             => MessageBox.Show(
-                "GhostBrowser v1.0\n\nПриватный браузер нового поколения",
+                "KingBrowser v1.1\n\n" +
+                "Приватный браузер с режимом невидимости\n\n" +
+                "══════════ Возможности ══════════\n\n" +
+                "👻 Stealth Mode — скрытие от OBS, Discord, Zoom\n" +
+                "📸 Блокировка скриншотов (PrintScreen, Snipping Tool)\n" +
+                "🛡️ Анти-фингерпринтинг (Canvas, WebGL, Audio)\n" +
+                "🕶️ Режим инкогнито с полной очисткой данных\n" +
+                "📥 Менеджер загрузок с паузой/возобновлением\n" +
+                "🌍 Обход блокировок (DoH, SOCKS5/HTTP прокси)\n" +
+                "📑 Менеджер сессий — сохранение/восстановление вкладок\n" +
+                "📌 Боковая панель — закладки, история, загрузки (Ctrl+B)\n" +
+                "📸 Скриншот страницы (Ctrl+Shift+P)\n" +
+                "🎭 Маскировка User-Agent (7 пресетов + кастомный)\n" +
+                "🎨 Настраиваемые темы и акцентные цвета\n\n" +
+                "══════════ Технологии ══════════\n\n" +
+                "C# 12, .NET 7 WPF, WebView2, MVVM",
                 "О программе",
                 MessageBoxButton.OK,
                 MessageBoxImage.Information);
