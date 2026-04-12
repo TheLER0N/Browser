@@ -23,8 +23,6 @@
     </WindowChrome.WindowChrome>
 
     <Window.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
-
         <Storyboard x:Key="WindowFadeIn">
             <DoubleAnimation Storyboard.TargetName="WindowRoot"
                              Storyboard.TargetProperty="Opacity"
@@ -475,43 +473,32 @@
                 <Grid Grid.Row="5">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="300" MinWidth="250" MaxWidth="450"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
                     <!-- Main content -->
-                    <ContentControl x:Name="ContentArea"
+                    <ContentControl Grid.Column="0" x:Name="ContentArea"
                                     Content="{Binding DisplayedContent}"
                                     Background="{StaticResource BgDeepestBrush}"/>
 
                     <!-- Sidebar Panel -->
-                    <views:SidebarPanel x:Name="SidebarPanel"
-                                        Grid.Column="1"
-                                        DataContext="{Binding}"
-                                        Visibility="{Binding IsSidebarOpen, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <views:SidebarPanel.Style>
-                            <Style TargetType="UserControl">
-                                <Setter Property="Visibility" Value="Collapsed"/>
+                    <Border Grid.Column="1"
+                            Background="{StaticResource BgDeepBrush}"
+                            BorderBrush="{StaticResource BorderSubtleBrush}"
+                            BorderThickness="1,0,0,0">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Width" Value="0"/>
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsSidebarOpen}" Value="True">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                        <DataTrigger.EnterActions>
-                                            <BeginStoryboard>
-                                                <Storyboard>
-                                                    <ThicknessAnimation Storyboard.TargetProperty="Margin"
-                                                                        From="300,0,-300,0" To="0"
-                                                                        Duration="0:0:0.25">
-                                                        <ThicknessAnimation.EasingFunction>
-                                                            <PowerEase EasingMode="EaseOut"/>
-                                                        </ThicknessAnimation.EasingFunction>
-                                                    </ThicknessAnimation>
-                                                </Storyboard>
-                                            </BeginStoryboard>
-                                        </DataTrigger.EnterActions>
+                                        <Setter Property="Width" Value="300"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
-                        </views:SidebarPanel.Style>
-                    </views:SidebarPanel>
+                        </Border.Style>
+                        <views:SidebarPanel x:Name="SidebarPanel"
+                                            DataContext="{Binding}"/>
+                    </Border>
                 </Grid>
 
                 <!-- ════════════ STATUS BAR ════════════ -->

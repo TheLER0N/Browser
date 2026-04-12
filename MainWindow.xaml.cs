@@ -322,10 +322,6 @@ namespace GhostBrowser
             if (e.KeyboardDevice.Modifiers == ModifierKeys.Control && e.Key == Key.B)
             {
                 ViewModel.ToggleSidebarCommand.Execute(null);
-                if (ViewModel.IsSidebarOpen)
-                {
-                    SidebarPanel.RefreshData();
-                }
                 e.Handled = true;
                 return;
             }

@@ -1,17 +1,15 @@
 <UserControl x:Class="GhostBrowser.Views.SidebarPanel"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             Background="{StaticResource BgDeepBrush}"
-             BorderBrush="{StaticResource BorderSubtleBrush}"
-             BorderThickness="1,0,0,0">
+             Background="{StaticResource BgDeepBrush}">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Header with close button -->
-        <Border Grid.Row="0" Padding="12,10"
+        <!-- Header with tab buttons and close -->
+        <Border Grid.Row="0" Padding="10,8"
                 BorderBrush="{StaticResource BorderSubtleBrush}"
                 BorderThickness="0,0,0,1">
             <Grid>
@@ -20,41 +18,39 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Tab buttons -->
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                     <Button x:Name="TabBookmarksBtn" Content="⭐ Закладки"
-                            Style="{StaticResource GlassBtn}" Padding="10,6" Margin="0,0,4,0"
-                            FontSize="11" Click="TabBookmarks_Click"
+                            Style="{StaticResource GlassBtn}" Padding="8,5" Margin="0,0,3,0"
+                            FontSize="10" Click="TabBookmarks_Click"
                             FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
                     <Button x:Name="TabHistoryBtn" Content="📜 История"
-                            Style="{StaticResource GlassBtn}" Padding="10,6" Margin="0,0,4,0"
-                            FontSize="11" Click="TabHistory_Click"
+                            Style="{StaticResource GlassBtn}" Padding="8,5" Margin="0,0,3,0"
+                            FontSize="10" Click="TabHistory_Click"
                             FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
                     <Button x:Name="TabDownloadsBtn" Content="📥 Загрузки"
-                            Style="{StaticResource GlassBtn}" Padding="10,6"
-                            FontSize="11" Click="TabDownloads_Click"
+                            Style="{StaticResource GlassBtn}" Padding="8,5"
+                            FontSize="10" Click="TabDownloads_Click"
                             FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
                 </StackPanel>
 
-                <!-- Close button -->
-                <Button Grid.Column="1" Content="✕" Width="28" Height="28"
-                        Style="{StaticResource IconBtn}" FontSize="11"
-                        Click="CloseBtn_Click" ToolTip="Закрыть панель"/>
+                <Button Grid.Column="1" Content="✕" Width="26" Height="26"
+                        Style="{StaticResource IconBtn}" FontSize="10"
+                        Click="CloseBtn_Click" ToolTip="Закрыть"/>
             </Grid>
         </Border>
 
-        <!-- Content area -->
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="8">
+        <!-- Content -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="6">
             <Grid>
                 <!-- Bookmarks Tab -->
-                <StackPanel x:Name="BookmarksTab" Visibility="Visible">
-                <ItemsControl x:Name="BookmarksList">
+                <StackPanel x:Name="BookmarksTab">
+                <ItemsControl ItemsSource="{Binding BookmarkService.Bookmarks}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Button Content="{Binding Title}"
                                     Style="{StaticResource GlassBtn}"
-                                    Margin="0,0,0,4" Padding="10,6"
-                                    FontSize="11" HorizontalContentAlignment="Left"
+                                    Margin="0,0,0,3" Padding="8,5"
+                                    FontSize="10" HorizontalContentAlignment="Left"
                                     Cursor="Hand"
                                     Command="{Binding DataContext.NavigateToBookmarkCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                     CommandParameter="{Binding Url}"
@@ -62,27 +58,37 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
-                <TextBlock x:Name="BookmarksEmptyText"
-                           Text="Нет закладок"
-                           FontSize="12" Foreground="{StaticResource TextTertiaryBrush}"
-                           TextAlignment="Center" Margin="0,20,0,0"
-                           FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                <TextBlock Text="Нет закладок"
+                           FontSize="11" Foreground="{StaticResource TextTertiaryBrush}"
+                           TextAlignment="Center" Margin="0,16,0,0"
+                           FontFamily="Segoe UI Variable, Segoe UI, sans-serif">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding BookmarkService.Bookmarks.Count}" Value="0">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
             </StackPanel>
 
             <!-- History Tab -->
             <StackPanel x:Name="HistoryTab" Visibility="Collapsed">
-                <ItemsControl x:Name="HistoryList">
+                <ItemsControl ItemsSource="{Binding HistoryService.History}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Border Background="{StaticResource BgSurfaceBrush}"
                                     BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1"
-                                    CornerRadius="8" Padding="10" Margin="0,0,0,4">
+                                    CornerRadius="6" Padding="8" Margin="0,0,0,3">
                                 <StackPanel>
-                                    <TextBlock Text="{Binding Title}" FontSize="12" FontWeight="Medium"
+                                    <TextBlock Text="{Binding Title}" FontSize="11" FontWeight="Medium"
                                                Foreground="{StaticResource TextPrimaryBrush}"
                                                TextTrimming="CharacterEllipsis"
                                                FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
-                                    <TextBlock Text="{Binding Url}" FontSize="10"
+                                    <TextBlock Text="{Binding Url}" FontSize="9"
                                                Foreground="{StaticResource TextTertiaryBrush}"
                                                TextTrimming="CharacterEllipsis" Margin="0,2,0,0"
                                                FontFamily="Consolas, monospace"/>
@@ -91,31 +97,41 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
-                <TextBlock x:Name="HistoryEmptyText"
-                           Text="Нет истории"
-                           FontSize="12" Foreground="{StaticResource TextTertiaryBrush}"
-                           TextAlignment="Center" Margin="0,20,0,0"
-                           FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                <TextBlock Text="Нет истории"
+                           FontSize="11" Foreground="{StaticResource TextTertiaryBrush}"
+                           TextAlignment="Center" Margin="0,16,0,0"
+                           FontFamily="Segoe UI Variable, Segoe UI, sans-serif">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HistoryService.History.Count}" Value="0">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
             </StackPanel>
 
             <!-- Downloads Tab -->
             <StackPanel x:Name="DownloadsTab" Visibility="Collapsed">
-                <ItemsControl x:Name="DownloadsList">
+                <ItemsControl ItemsSource="{Binding DownloadService.ActiveDownloads}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Border Background="{StaticResource BgSurfaceBrush}"
                                     BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1"
-                                    CornerRadius="8" Padding="10" Margin="0,0,0,4">
+                                    CornerRadius="6" Padding="8" Margin="0,0,0,3">
                                 <StackPanel>
-                                    <TextBlock Text="{Binding FileName}" FontSize="12" FontWeight="Medium"
+                                    <TextBlock Text="{Binding FileName}" FontSize="11" FontWeight="Medium"
                                                Foreground="{StaticResource TextPrimaryBrush}"
                                                TextTrimming="CharacterEllipsis"
                                                FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
-                                    <TextBlock Text="{Binding StatusText}" FontSize="10"
+                                    <TextBlock Text="{Binding StatusText}" FontSize="9"
                                                Foreground="{StaticResource TextTertiaryBrush}"
                                                Margin="0,2,0,0"
                                                FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
-                                    <ProgressBar Height="3" Margin="0,4,0,0"
+                                    <ProgressBar Height="3" Margin="0,3,0,0"
                                                  Maximum="100" Value="{Binding Progress}"
                                                  Background="{StaticResource BgDeepestBrush}">
                                         <ProgressBar.Foreground>
@@ -130,11 +146,21 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
-                <TextBlock x:Name="DownloadsEmptyText"
-                           Text="Нет загрузок"
-                           FontSize="12" Foreground="{StaticResource TextTertiaryBrush}"
-                           TextAlignment="Center" Margin="0,20,0,0"
-                           FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                <TextBlock Text="Нет загрузок"
+                           FontSize="11" Foreground="{StaticResource TextTertiaryBrush}"
+                           TextAlignment="Center" Margin="0,16,0,0"
+                           FontFamily="Segoe UI Variable, Segoe UI, sans-serif">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding DownloadService.ActiveDownloads.Count}" Value="0">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
             </StackPanel>
             </Grid>
         </ScrollViewer>
