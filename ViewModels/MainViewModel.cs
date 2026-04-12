@@ -48,6 +48,7 @@ namespace GhostBrowser.ViewModels
         public Services.GlobalHotkey GlobalHotkeyService { get; }
         public Services.SnippingToolBlocker SnippingToolBlockerService { get; }
         public Services.TrayService TrayServiceInstance { get; } = new();
+        public Services.SessionService SessionService { get; }
 
         // ==================== Collections ====================
 
@@ -175,6 +176,9 @@ namespace GhostBrowser.ViewModels
         public ICommand TogglePrintScreenBlockCommand { get; }
         public ICommand ToggleSnippingToolBlockCommand { get; }
         public ICommand ApplyUserAgentPresetCommand { get; }
+        public ICommand SaveSessionCommand { get; }
+        public AsyncRelayCommand RestoreSessionCommand { get; }
+        public ICommand DeleteSessionCommand { get; }
 
         /// <summary>
         /// Асинхронная команда создания вкладки.
@@ -204,6 +208,7 @@ namespace GhostBrowser.ViewModels
             DownloadService = new Services.DownloadService();
             GlobalHotkeyService = new Services.GlobalHotkey();
             SnippingToolBlockerService = new Services.SnippingToolBlocker();
+            SessionService = new Services.SessionService();
 
             // Загружаем папку загрузок из настроек
             DownloadService.LoadDownloadFolder(SettingsService);
@@ -224,6 +229,9 @@ namespace GhostBrowser.ViewModels
             TogglePrintScreenBlockCommand = new RelayCommand(_ => TogglePrintScreenBlock());
             ToggleSnippingToolBlockCommand = new RelayCommand(_ => ToggleSnippingToolBlock());
             ApplyUserAgentPresetCommand = new AsyncRelayCommand(async _ => await ApplyUserAgentPresetAsync());
+            SaveSessionCommand = new RelayCommand(_ => SaveCurrentSession());
+            RestoreSessionCommand = new AsyncRelayCommand(async p => await RestoreSessionAsync(p?.ToString() ?? ""));
+            DeleteSessionCommand = new RelayCommand(p => DeleteSession(p?.ToString() ?? ""));
 
             // Clock timer
             _clockTimer = new System.Windows.Threading.DispatcherTimer
@@ -482,6 +490,96 @@ namespace GhostBrowser.ViewModels
             {
                 System.Diagnostics.Debug.WriteLine($"ApplyUserAgentPreset error: {ex.Message}");
                 StatusText = $"❌ Ошибка применения User-Agent: {ex.Message}";
+            }
+        }
+
+        // ==================== Session Management ====================
+
+        /// <summary>
+        /// Сохраняет текущую сессию (URL всех открытых вкладок).
+        /// </summary>
+        public void SaveCurrentSession()
+        {
+            try
+            {
+                var urls = Tabs.Select(t => t.Url).ToList();
+                var session = SessionService.SaveSession(urls);
+                StatusText = $"💾 Сессия сохранена: {session.Name} ({session.TabCount} вкладок)";
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"SaveCurrentSession error: {ex.Message}");
+                StatusText = $"❌ Ошибка сохранения сессии: {ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// Восстанавливает сессию по ID.
+        /// Закрывает текущие вкладки и открывает сохранённые URL.
+        /// </summary>
+        public async Task RestoreSessionAsync(string sessionId)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"=== Restoring session: {sessionId} ===");
+
+                var urls = SessionService.RestoreSession(sessionId);
+                if (urls == null || urls.Count == 0)
+                {
+                    StatusText = "❌ Сессия не найдена или пуста";
+                    return;
+                }
+
+                // Закрываем текущие вкладки
+                var tabsToClose = Tabs.ToList();
+                Tabs.Clear();
+                SelectedTab = null;
+                foreach (var tab in tabsToClose)
+                {
+                    tab.Dispose();
+                }
+
+                // Открываем URL из сессии
+                var env = await GetEnvironmentAsync();
+                foreach (var url in urls)
+                {
+                    await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+                    {
+                        var tab = new TabViewModel(env, SearchService, DownloadService, SettingsService, url);
+                        Tabs.Add(tab);
+                        SelectedTab = tab;
+                    });
+                }
+
+                UpdateCloseTabCanExecute();
+                StatusText = $"📂 Сессия восстановлена: {urls.Count} вкладок";
+
+                System.Diagnostics.Debug.WriteLine("=== Session restored successfully ===");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"RestoreSession error: {ex.Message}");
+                StatusText = $"❌ Ошибка восстановления сессии: {ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// Удаляет сессию по ID.
+        /// </summary>
+        public void DeleteSession(string sessionId)
+        {
+            try
+            {
+                var deleted = SessionService.DeleteSession(sessionId);
+                if (deleted)
+                {
+                    StatusText = "🗑️ Сессия удалена";
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"DeleteSession error: {ex.Message}");
+                StatusText = $"❌ Ошибка удаления сессии: {ex.Message}";
             }
         }
 

@@ -57,6 +57,7 @@ namespace GhostBrowser.Views
             if (PrivacySection != null) PrivacySection.Visibility = section == "Приватность" ? Visibility.Visible : Visibility.Collapsed;
             if (NetworkSection != null) NetworkSection.Visibility = section == "Сеть" ? Visibility.Visible : Visibility.Collapsed;
             if (MaskingSection != null) MaskingSection.Visibility = section == "Маскировка" ? Visibility.Visible : Visibility.Collapsed;
+            if (SessionsSection != null) SessionsSection.Visibility = section == "Сессии" ? Visibility.Visible : Visibility.Collapsed;
             if (StealthSection != null) StealthSection.Visibility = section == "Stealth 2.0" ? Visibility.Visible : Visibility.Collapsed;
             if (HistorySection != null) HistorySection.Visibility = section == "История" ? Visibility.Visible : Visibility.Collapsed;
             if (BookmarksSection != null) BookmarksSection.Visibility = section == "Закладки" ? Visibility.Visible : Visibility.Collapsed;
@@ -79,6 +80,13 @@ namespace GhostBrowser.Views
             if (section == "Маскировка" && SS != null)
             {
                 LoadMaskingSettings();
+            }
+
+            // При открытии Сессий — обновляем список и пустое состояние
+            if (section == "Сессии" && VM != null)
+            {
+                SessionsList.ItemsSource = VM.SessionService.Sessions;
+                UpdateSessionsEmptyState();
             }
 
             if (section == "История" && VM != null) HistoryList.ItemsSource = VM.HistoryService.History;
@@ -110,6 +118,7 @@ namespace GhostBrowser.Views
             if (NavStealthBtn != null) NavStealthBtn.Background = _currentSection == "Stealth 2.0" ? active : inactive;
             if (NavNetworkBtn != null) NavNetworkBtn.Background = _currentSection == "Сеть" ? active : inactive;
             if (NavMaskingBtn != null) NavMaskingBtn.Background = _currentSection == "Маскировка" ? active : inactive;
+            if (NavSessionsBtn != null) NavSessionsBtn.Background = _currentSection == "Сессии" ? active : inactive;
             if (NavHistoryBtn != null) NavHistoryBtn.Background = _currentSection == "История" ? active : inactive;
             if (NavBookmarksBtn != null) NavBookmarksBtn.Background = _currentSection == "Закладки" ? active : inactive;
             if (NavDownloadsBtn != null) NavDownloadsBtn.Background = _currentSection == "Загрузки" ? active : inactive;
@@ -122,6 +131,7 @@ namespace GhostBrowser.Views
         private void NavStealth_Click(object sender, RoutedEventArgs e) => ShowSection("Stealth 2.0");
         private void NavNetwork_Click(object sender, RoutedEventArgs e) => ShowSection("Сеть");
         private void NavMasking_Click(object sender, RoutedEventArgs e) => ShowSection("Маскировка");
+        private void NavSessions_Click(object sender, RoutedEventArgs e) => ShowSection("Сессии");
         private void NavHistory_Click(object sender, RoutedEventArgs e) => ShowSection("История");
         private void NavBookmarks_Click(object sender, RoutedEventArgs e) => ShowSection("Закладки");
         private void NavDownloads_Click(object sender, RoutedEventArgs e) => ShowSection("Загрузки");
@@ -837,6 +847,17 @@ namespace GhostBrowser.Views
         // ═══════════════════════════════════════════
         // Masking / User-Agent Settings
         // ═══════════════════════════════════════════
+
+        /// <summary>
+        /// Обновляет видимость пустого состояния для сессий.
+        /// </summary>
+        private void UpdateSessionsEmptyState()
+        {
+            if (VM == null || SessionsEmptyText == null) return;
+
+            var hasSessions = VM.SessionService.Sessions.Count > 0;
+            SessionsEmptyText.Visibility = hasSessions ? Visibility.Collapsed : Visibility.Visible;
+        }
 
         /// <summary>
         /// Загружает настройки маскировки UI.

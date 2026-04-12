@@ -53,6 +53,9 @@
                 <Button x:Name="NavMaskingBtn" Content="🎭  Маскировка"
                         Style="{StaticResource MenuNavItemBtn}" Margin="8,2"
                         Click="NavMasking_Click" FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                <Button x:Name="NavSessionsBtn" Content="📑  Сессии"
+                        Style="{StaticResource MenuNavItemBtn}" Margin="8,2"
+                        Click="NavSessions_Click" FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
                 <Button x:Name="NavHistoryBtn" Content="📜  История"
                         Style="{StaticResource MenuNavItemBtn}" Margin="8,2"
                         Click="NavHistory_Click" FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
@@ -725,6 +728,126 @@
                                        TextWrapping="Wrap" LineHeight="17"
                                        FontWeight="Medium"
                                        Margin="0,4,0,0"
+                                       FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- ─── Sessions Section ─── -->
+                <StackPanel x:Name="SessionsSection" Visibility="Collapsed">
+                    <TextBlock Text="📑 Менеджер сессий" FontSize="22" FontWeight="SemiBold"
+                               Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,4"
+                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                    <TextBlock Text="Сохраняйте и восстанавливайте наборы открытых вкладок"
+                               Foreground="{StaticResource TextTertiaryBrush}" FontSize="12.5"
+                               Margin="0,0,0,28"
+                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+
+                    <!-- Save Current Session Button -->
+                    <Button Content="💾  Сохранить текущую сессию"
+                            Style="{StaticResource GlassBtn}"
+                            Padding="16,12"
+                            FontSize="13"
+                            Command="{Binding SaveSessionCommand}"
+                            FontFamily="Segoe UI Variable, Segoe UI, sans-serif"
+                            Margin="0,0,0,14"/>
+
+                    <!-- Sessions List -->
+                    <TextBlock Text="Сохранённые сессии" FontSize="13" FontWeight="SemiBold"
+                               Foreground="{StaticResource TextSecondaryBrush}"
+                               Margin="0,0,0,10"
+                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+
+                    <ItemsControl x:Name="SessionsList"
+                                  ItemsSource="{Binding SessionService.Sessions}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="{StaticResource BgSurfaceBrush}"
+                                        BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1"
+                                        CornerRadius="10" Padding="14" Margin="0,0,0,8">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- Session Info -->
+                                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="Medium"
+                                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                                       FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                                <TextBlock FontSize="11"
+                                                           Foreground="{StaticResource TextTertiaryBrush}"
+                                                           FontFamily="Segoe UI Variable, Segoe UI, sans-serif">
+                                                    <TextBlock.Text>
+                                                        <MultiBinding StringFormat="{}📅 {0}  ·  📄 {1} вкладок">
+                                                            <Binding Path="CreatedAt" StringFormat="dd.MM.yyyy HH:mm"/>
+                                                            <Binding Path="TabCount"/>
+                                                        </MultiBinding>
+                                                    </TextBlock.Text>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </StackPanel>
+
+                                        <!-- Restore Button -->
+                                        <Button Grid.Column="1" Content="📂"
+                                                Style="{StaticResource IconBtn}"
+                                                Margin="0,0,6,0"
+                                                ToolTip="Восстановить сессию"
+                                                Command="{Binding DataContext.RestoreSessionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding Id}"
+                                                FontSize="14"/>
+
+                                        <!-- Delete Button -->
+                                        <Button Grid.Column="2" Content="🗑️"
+                                                Style="{StaticResource IconBtn}"
+                                                ToolTip="Удалить сессию"
+                                                Command="{Binding DataContext.DeleteSessionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding Id}"
+                                                FontSize="14"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+
+                    <!-- Empty State -->
+                    <TextBlock x:Name="SessionsEmptyText"
+                               Text="Нет сохранённых сессий"
+                               FontSize="12" Foreground="{StaticResource TextTertiaryBrush}"
+                               TextAlignment="Center" Margin="0,20,0,0"
+                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+
+                    <!-- Info Card -->
+                    <Border Background="{StaticResource BgSurfaceBrush}"
+                            BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1"
+                            CornerRadius="12" Padding="14" Margin="0,18,0,0">
+                        <StackPanel>
+                            <TextBlock Text="💡 Как это работает" FontSize="13" FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       Margin="0,0,0,8"
+                                       FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                            <TextBlock Text="• Сохраните текущие вкладки как сессию для быстрого восстановления"
+                                       FontSize="11.5" Foreground="{StaticResource TextSecondaryBrush}"
+                                       TextWrapping="Wrap" LineHeight="17"
+                                       Margin="0,0,0,4"
+                                       FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                            <TextBlock Text="• Можно сохранить несколько сессий для разных задач (работа, учёба, развлечения)"
+                                       FontSize="11.5" Foreground="{StaticResource TextSecondaryBrush}"
+                                       TextWrapping="Wrap" LineHeight="17"
+                                       Margin="0,0,0,4"
+                                       FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                            <TextBlock Text="• При восстановлении текущие вкладки закрываются и открываются сохранённые"
+                                       FontSize="11.5" Foreground="{StaticResource AccentSoftBrush}"
+                                       TextWrapping="Wrap" LineHeight="17"
+                                       FontWeight="Medium"
                                        FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
                         </StackPanel>
                     </Border>
