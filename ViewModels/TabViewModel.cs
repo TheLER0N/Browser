@@ -136,9 +136,13 @@ namespace GhostBrowser.ViewModels
 
                     // Отключаем autofill для защиты приватности
                     _screenshotBlocker.DisableAutofill(webView.CoreWebView2);
-                    
-                    // Устанавливаем кастомный User-Agent — маскировка под обычный Chrome
-                    _screenshotBlocker.SetCustomUserAgent(webView.CoreWebView2);
+
+                    // Устанавливаем User-Agent из настроек (пресет или кастомный)
+                    var uaPreset = Enum.TryParse<Services.UserAgentPreset>(_settingsService?.UserAgentPreset ?? "Chrome", out var parsedPreset)
+                        ? parsedPreset
+                        : Services.UserAgentPreset.Chrome;
+                    var customUa = _settingsService?.CustomUserAgentValue ?? "";
+                    _screenshotBlocker.SetCustomUserAgent(webView.CoreWebView2, uaPreset, customUa);
 
                     // Внедряем скрипты блокировки скриншотов и fingerprinting
                     // Проверяем настройку AntiFingerprint — если выключена, скрипты не внедряются

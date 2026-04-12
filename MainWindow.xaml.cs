@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -20,6 +21,56 @@ namespace GhostBrowser
     /// </summary>
     public partial class MainWindow : Window
     {
+        // ═══════════════════════════════════════════
+        // Win32 API для WS_EX_TOOLWINDOW — скрытие из Alt+Tab
+        // ═══════════════════════════════════════════
+        private const int GWL_EXSTYLE = -20;
+        private const int WS_EX_TOOLWINDOW = 0x00000080;
+        private const int WS_EX_APPWINDOW = 0x00040000;
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+
+        private const uint SWP_NOMOVE = 0x0002;
+        private const uint SWP_NOSIZE = 0x0001;
+        private const uint SWP_NOZORDER = 0x0004;
+        private const uint SWP_FRAMECHANGED = 0x0020;
+        private static readonly IntPtr HWND_TOP = new IntPtr(0);
+
+        private void ApplyToolWindowStyle()
+        {
+            try
+            {
+                var hWnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+                if (hWnd == IntPtr.Zero) return;
+
+                // Получаем текущий расширенный стиль
+                var currentStyle = GetWindowLong(hWnd, GWL_EXSTYLE);
+                
+                // Добавляем WS_EX_TOOLWINDOW (скрывает из Alt+Tab)
+                // Убираем WS_EX_APPWINDOW (возвращает в панель задач при необходимости)
+                currentStyle |= WS_EX_TOOLWINDOW;
+                currentStyle &= ~WS_EX_APPWINDOW;
+                
+                SetWindowLong(hWnd, GWL_EXSTYLE, currentStyle);
+                
+                // Применяем изменения
+                SetWindowPos(hWnd, HWND_TOP, 0, 0, 0, 0, 
+                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+
+                System.Diagnostics.Debug.WriteLine("[MainWindow] WS_EX_TOOLWINDOW applied — hidden from Alt+Tab");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[MainWindow] ApplyToolWindowStyle error: {ex.Message}");
+            }
+        }
         private MainViewModel ViewModel => (MainViewModel)DataContext;
 
         // Два независимых флага: обычный maximize и полноэкранный режим.
@@ -43,10 +94,10 @@ namespace GhostBrowser
         public MainWindow()
         {
             InitializeComponent();
-            
+
             // Загружаем логотип KING11.png с проверкой существования файла
             LoadLogoImage();
-            
+
             var vm = new MainViewModel();
             DataContext = vm;
 
@@ -61,6 +112,12 @@ namespace GhostBrowser
 
             // Инициализируем сервис блокировки Snipping Tool
             vm.SnippingToolBlockerService.Initialize(this);
+
+            // Применяем WS_EX_TOOLWINDOW — скрытие из Alt+Tab
+            SourceInitialized += (s, e) => ApplyToolWindowStyle();
+
+            // Инициализируем сервис трея
+            vm.TrayServiceInstance.Initialize(this, vm.StealthService);
 
             // Анимация появления окна
             Loaded += (s, e) =>
@@ -110,7 +167,11 @@ namespace GhostBrowser
 
         // ==================== Управление окном ====================
 
-        private void BtnMinimize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
+        private void BtnMinimize_Click(object sender, RoutedEventArgs e)
+        {
+            // Сворачиваем в трей вместо обычной минимизации
+            ViewModel.TrayServiceInstance.MinimizeToTray();
+        }
 
         private void BtnMaximize_Click(object sender, RoutedEventArgs e) => ToggleMaximize();
 
@@ -373,15 +434,23 @@ namespace GhostBrowser
 
         /// <summary>
         /// Обработчик события нажатия глобальной горячей клавиши.
-        /// ID 100 = F12 (паник-кнопка).
+        /// ID 100 = Ctrl+0 (паник-кнопка)
+        /// ID 200 = Ctrl+` (восстановление из трея)
         /// </summary>
         private void GlobalHotkeyService_HotKeyPressed(object? sender, int hotkeyId)
         {
-            if (hotkeyId == 100) // F12 — паник-кнопка
+            if (hotkeyId == 100) // Ctrl+0 — паник-кнопка
             {
                 Dispatcher.InvokeAsync(() =>
                 {
                     ViewModel.ExecutePanicAsync(this);
+                });
+            }
+            else if (hotkeyId == 200) // Ctrl+` — восстановление из трея
+            {
+                Dispatcher.InvokeAsync(() =>
+                {
+                    ViewModel.TrayServiceInstance.RestoreFromTray();
                 });
             }
         }

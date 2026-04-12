@@ -230,7 +230,7 @@ namespace GhostBrowser.ViewModels
 
             await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
             {
-                var tab = new TabViewModel(env, SearchService, null, null, url);
+                var tab = new TabViewModel(env, SearchService, null, SettingsService, url);
                 Tabs.Add(tab);
                 SelectedTab = tab;
                 UpdateCloseTabCanExecute();

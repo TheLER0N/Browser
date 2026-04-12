@@ -56,6 +56,7 @@ namespace GhostBrowser.Views
             if (GeneralSection != null) GeneralSection.Visibility = section == "Общие" ? Visibility.Visible : Visibility.Collapsed;
             if (PrivacySection != null) PrivacySection.Visibility = section == "Приватность" ? Visibility.Visible : Visibility.Collapsed;
             if (NetworkSection != null) NetworkSection.Visibility = section == "Сеть" ? Visibility.Visible : Visibility.Collapsed;
+            if (MaskingSection != null) MaskingSection.Visibility = section == "Маскировка" ? Visibility.Visible : Visibility.Collapsed;
             if (StealthSection != null) StealthSection.Visibility = section == "Stealth 2.0" ? Visibility.Visible : Visibility.Collapsed;
             if (HistorySection != null) HistorySection.Visibility = section == "История" ? Visibility.Visible : Visibility.Collapsed;
             if (BookmarksSection != null) BookmarksSection.Visibility = section == "Закладки" ? Visibility.Visible : Visibility.Collapsed;
@@ -72,6 +73,12 @@ namespace GhostBrowser.Views
             if (section == "Сеть" && SS != null)
             {
                 LoadNetworkSettings();
+            }
+
+            // При открытии Маскировки — загружаем настройки
+            if (section == "Маскировка" && SS != null)
+            {
+                LoadMaskingSettings();
             }
 
             if (section == "История" && VM != null) HistoryList.ItemsSource = VM.HistoryService.History;
@@ -102,6 +109,7 @@ namespace GhostBrowser.Views
             if (NavPrivacyBtn != null) NavPrivacyBtn.Background = _currentSection == "Приватность" ? active : inactive;
             if (NavStealthBtn != null) NavStealthBtn.Background = _currentSection == "Stealth 2.0" ? active : inactive;
             if (NavNetworkBtn != null) NavNetworkBtn.Background = _currentSection == "Сеть" ? active : inactive;
+            if (NavMaskingBtn != null) NavMaskingBtn.Background = _currentSection == "Маскировка" ? active : inactive;
             if (NavHistoryBtn != null) NavHistoryBtn.Background = _currentSection == "История" ? active : inactive;
             if (NavBookmarksBtn != null) NavBookmarksBtn.Background = _currentSection == "Закладки" ? active : inactive;
             if (NavDownloadsBtn != null) NavDownloadsBtn.Background = _currentSection == "Загрузки" ? active : inactive;
@@ -113,6 +121,7 @@ namespace GhostBrowser.Views
         private void NavPrivacy_Click(object sender, RoutedEventArgs e) => ShowSection("Приватность");
         private void NavStealth_Click(object sender, RoutedEventArgs e) => ShowSection("Stealth 2.0");
         private void NavNetwork_Click(object sender, RoutedEventArgs e) => ShowSection("Сеть");
+        private void NavMasking_Click(object sender, RoutedEventArgs e) => ShowSection("Маскировка");
         private void NavHistory_Click(object sender, RoutedEventArgs e) => ShowSection("История");
         private void NavBookmarks_Click(object sender, RoutedEventArgs e) => ShowSection("Закладки");
         private void NavDownloads_Click(object sender, RoutedEventArgs e) => ShowSection("Загрузки");
@@ -822,6 +831,126 @@ namespace GhostBrowser.Views
             catch (Exception ex)
             {
                 NetworkStatusText.Text = $"❌ Ошибка: {ex.Message}";
+            }
+        }
+
+        // ═══════════════════════════════════════════
+        // Masking / User-Agent Settings
+        // ═══════════════════════════════════════════
+
+        /// <summary>
+        /// Загружает настройки маскировки UI.
+        /// </summary>
+        private void LoadMaskingSettings()
+        {
+            if (SS == null) return;
+
+            // Устанавливаем выбранный пресет в ComboBox
+            var preset = SS.UserAgentPreset;
+            if (UserAgentPresetCombo != null)
+            {
+                foreach (System.Windows.Controls.ComboBoxItem item in UserAgentPresetCombo.Items)
+                {
+                    if (item.Tag?.ToString() == preset)
+                    {
+                        UserAgentPresetCombo.SelectedItem = item;
+                        break;
+                    }
+                }
+            }
+
+            // Загружаем кастомный User-Agent
+            if (CustomUserAgentInput != null)
+            {
+                CustomUserAgentInput.Text = SS.CustomUserAgentValue;
+            }
+
+            // Показываем/скрываем поле кастомного UA
+            UpdateCustomUserAgentVisibility(preset);
+
+            // Отображаем текущий User-Agent
+            UpdateCurrentUserAgentDisplay(preset);
+        }
+
+        /// <summary>
+        /// Обновляет видимость поля кастомного User-Agent.
+        /// </summary>
+        private void UpdateCustomUserAgentVisibility(string preset)
+        {
+            if (CustomUserAgentCard != null)
+            {
+                CustomUserAgentCard.Visibility = preset == "Custom" ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
+
+        /// <summary>
+        /// Обновляет отображение текущего User-Agent.
+        /// </summary>
+        private void UpdateCurrentUserAgentDisplay(string preset)
+        {
+            if (CurrentUserAgentDisplay != null)
+            {
+                var customUa = SS?.CustomUserAgentValue ?? "";
+                var uaString = Services.ScreenshotBlocker.GetUserAgentString(
+                    (Services.UserAgentPreset)Enum.Parse(typeof(Services.UserAgentPreset), preset),
+                    customUa);
+                CurrentUserAgentDisplay.Text = uaString;
+            }
+        }
+
+        /// <summary>
+        /// Обработчик изменения пресета User-Agent.
+        /// </summary>
+        private void UserAgentPresetCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (UserAgentPresetCombo.SelectedItem is not System.Windows.Controls.ComboBoxItem selectedItem) return;
+            var preset = selectedItem.Tag?.ToString() ?? "Chrome";
+
+            UpdateCustomUserAgentVisibility(preset);
+            UpdateCurrentUserAgentDisplay(preset);
+
+            // Сохраняем пресет
+            if (SS != null)
+            {
+                SS.UserAgentPreset = preset;
+            }
+        }
+
+        /// <summary>
+        /// Применяет User-Agent и пересоздаёт вкладки.
+        /// </summary>
+        private async void ApplyUserAgentBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (VM == null) return;
+
+            // Сохраняем кастомный UA если выбран Custom
+            if (UserAgentPresetCombo.SelectedItem is System.Windows.Controls.ComboBoxItem selectedItem)
+            {
+                var preset = selectedItem.Tag?.ToString() ?? "Chrome";
+                if (preset == "Custom" && CustomUserAgentInput != null)
+                {
+                    if (SS != null)
+                    {
+                        SS.CustomUserAgentValue = CustomUserAgentInput.Text;
+                    }
+                }
+            }
+
+            ApplyUserAgentBtn.IsEnabled = false;
+            NetworkStatusText.Text = "⏳ Применение User-Agent...";
+
+            try
+            {
+                await VM.ApplyUserAgentPresetAsync();
+                NetworkStatusText.Text = "✅ User-Agent успешно применён";
+            }
+            catch (Exception ex)
+            {
+                NetworkStatusText.Text = $"❌ Ошибка: {ex.Message}";
+            }
+            finally
+            {
+                ApplyUserAgentBtn.IsEnabled = true;
             }
         }
     }

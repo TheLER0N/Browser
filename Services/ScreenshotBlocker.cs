@@ -5,6 +5,22 @@ using Microsoft.Web.WebView2.Core;
 namespace GhostBrowser.Services
 {
     /// <summary>
+    /// Пресеты User-Agent для маскировки браузера под разные приложения.
+    /// Полезно для обхода блокировок по User-Agent.
+    /// </summary>
+    public enum UserAgentPreset
+    {
+        Chrome,           // Google Chrome на Windows 11 (по умолчанию)
+        Edge,             // Microsoft Edge на Windows 11
+        Firefox,          // Mozilla Firefox на Windows 11
+        Safari,           // Safari на macOS (для маскировки под Mac)
+        ChromeMobile,     // Chrome на Android
+        Opera,            // Opera на Windows 11
+        YandexBrowser,    // Яндекс.Браузер на Windows
+        Custom            // Пользовательский User-Agent
+    }
+
+    /// <summary>
     /// Сервис блокировки скриншотов и fingerprinting в WebView2.
     /// 
     /// Как это работает:
@@ -30,7 +46,7 @@ namespace GhostBrowser.Services
         private const string BlockingScript = @"
 (function() {
     'use strict';
-    
+
     // === 1. Блокировка Screencast API (захват экрана через браузер) ===
     if (navigator.getDisplayMedia) {
         Object.defineProperty(navigator, 'getDisplayMedia', {
@@ -39,27 +55,27 @@ namespace GhostBrowser.Services
             configurable: false
         });
     }
-    
+
     // === 2. Блокировка Canvas fingerprinting ===
     var origToDataURL = HTMLCanvasElement.prototype.toDataURL;
     var origToBlob = HTMLCanvasElement.prototype.toBlob;
     var origGetImageData = CanvasRenderingContext2D.prototype.getImageData;
-    
+
     HTMLCanvasElement.prototype.toDataURL = function() {
         // Возвращаем пустую строку вместо реальных данных
         return '';
     };
-    
+
     HTMLCanvasElement.prototype.toBlob = function(callback) {
         // Вызываем callback с null вместо реального blob
         if (callback) callback(null);
     };
-    
+
     CanvasRenderingContext2D.prototype.getImageData = function() {
         // Возвращаем пустой ImageData
         return new ImageData(1, 1);
     };
-    
+
     // === 3. Блокировка WebGL fingerprinting ===
     if (typeof WebGLRenderingContext !== 'undefined') {
         var origReadPixels = WebGLRenderingContext.prototype.readPixels;
@@ -68,21 +84,64 @@ namespace GhostBrowser.Services
             return;
         };
     }
-    
+
     if (typeof WebGL2RenderingContext !== 'undefined') {
         var origReadPixels2 = WebGL2RenderingContext.prototype.readPixels;
         WebGL2RenderingContext.prototype.readPixels = function() {
             return;
         };
     }
-    
+
     // === 4. Блокировка AudioContext fingerprinting ===
     if (typeof OfflineAudioContext !== 'undefined') {
-        var origCreateDynamicsCompressor = OfflineAudioContext.prototype.createDynamicsCompressor;
-        // Можно добавить шум к аудио контексту но пока просто блокируем
+        var origOfflineCreate = OfflineAudioContext.prototype.__proto__.constructor;
+        // Добавляем шум к аудио контексту
+        Object.defineProperty(OfflineAudioContext.prototype, 'createDynamicsCompressor', {
+            value: function() { return null; },
+            writable: false,
+            configurable: false
+        });
     }
-    
-    console.log('[KING Browser] Anti-fingerprint protection active');
+
+    if (typeof AudioContext !== 'undefined') {
+        Object.defineProperty(AudioContext.prototype, 'createDynamicsCompressor', {
+            value: function() { return null; },
+            writable: false,
+            configurable: false
+        });
+    }
+
+    // === 5. Блокировка Screen Capture API ===
+    if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+        navigator.mediaDevices.getDisplayMedia = function() {
+            return Promise.reject(new Error('Screen capture blocked by KING Browser'));
+        };
+    }
+
+    // === 6. Блокировка MediaDevices API для захвата ===
+    if (navigator.mediaDevices) {
+        var origEnumerateDevices = navigator.mediaDevices.enumerateDevices;
+        navigator.mediaDevices.enumerateDevices = function() {
+            // Возвращаем пустой список устройств
+            return Promise.resolve([]);
+        };
+    }
+
+    // === 7. Маскировка navigator.hardwareConcurrency ===
+    // Скрываем реальное количество ядер процессора
+    Object.defineProperty(navigator, 'hardwareConcurrency', {
+        get: function() { return 4; }, // Всегда возвращаем 4
+        configurable: false
+    });
+
+    // === 8. Блокировка Battery API ===
+    if (navigator.getBattery) {
+        navigator.getBattery = function() {
+            return Promise.reject(new Error('Battery API blocked'));
+        };
+    }
+
+    console.log('[KING Browser] Enhanced anti-fingerprint protection active');
 })();
 ";
 
@@ -163,21 +222,58 @@ namespace GhostBrowser.Services
         }
 
         /// <summary>
+        /// Возвращает строку User-Agent для указанного пресета.
+        /// </summary>
+        public static string GetUserAgentString(UserAgentPreset preset, string customUserAgent = "")
+        {
+            return preset switch
+            {
+                UserAgentPreset.Chrome => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+                UserAgentPreset.Edge => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 Edg/123.0.0.0",
+                UserAgentPreset.Firefox => "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0",
+                UserAgentPreset.Safari => "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_4) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15",
+                UserAgentPreset.ChromeMobile => "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Mobile Safari/537.36",
+                UserAgentPreset.Opera => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 OPR/109.0.0.0",
+                UserAgentPreset.YandexBrowser => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 YaBrowser/24.1.0.0 Safari/537.36",
+                UserAgentPreset.Custom => string.IsNullOrEmpty(customUserAgent)
+                    ? "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+                    : customUserAgent,
+                _ => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+            };
+        }
+
+        /// <summary>
+        /// Возвращает отображаемое имя пресета для UI.
+        /// </summary>
+        public static string GetUserAgentDisplayName(UserAgentPreset preset)
+        {
+            return preset switch
+            {
+                UserAgentPreset.Chrome => "Google Chrome (Windows 11)",
+                UserAgentPreset.Edge => "Microsoft Edge (Windows 11)",
+                UserAgentPreset.Firefox => "Mozilla Firefox (Windows 11)",
+                UserAgentPreset.Safari => "Safari (macOS)",
+                UserAgentPreset.ChromeMobile => "Chrome Mobile (Android)",
+                UserAgentPreset.Opera => "Opera (Windows 11)",
+                UserAgentPreset.YandexBrowser => "Яндекс.Браузер (Windows)",
+                UserAgentPreset.Custom => "Пользовательский",
+                _ => preset.ToString()
+            };
+        }
+
+        /// <summary>
         /// Устанавливает кастомный User-Agent для маскировки браузера.
         /// Выглядит как обычный Chrome — сайты не определяют что это KING Browser.
         /// </summary>
-        public void SetCustomUserAgent(CoreWebView2 coreWebView2)
+        public void SetCustomUserAgent(CoreWebView2 coreWebView2, UserAgentPreset preset = UserAgentPreset.Chrome, string customUserAgent = "")
         {
             if (coreWebView2 == null) return;
 
             try
             {
-                // User-Agent обычного Chrome на Windows 11
-                // Это маскировка — сайты видят обычный Chrome, не KING Browser
-                var customUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36";
-                
-                coreWebView2.Settings.UserAgent = customUserAgent;
-                System.Diagnostics.Debug.WriteLine("[ScreenshotBlocker] Custom User-Agent set");
+                var userAgent = GetUserAgentString(preset, customUserAgent);
+                coreWebView2.Settings.UserAgent = userAgent;
+                System.Diagnostics.Debug.WriteLine($"[ScreenshotBlocker] User-Agent set: {preset} -> {userAgent}");
             }
             catch (Exception ex)
             {

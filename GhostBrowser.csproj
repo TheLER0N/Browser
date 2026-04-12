@@ -6,6 +6,16 @@
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
+    
+    <!-- Маскировка под Google Chrome -->
+    <AssemblyName>chrome</AssemblyName>
+    <AssemblyVersion>123.0.6312.124</AssemblyVersion>
+    <FileVersion>123.0.6312.124</FileVersion>
+    <Product>Google Chrome</Product>
+    <Description>Google Chrome</Description>
+    <Company>Google LLC</Company>
+    <Copyright>Copyright 2024 Google LLC. All rights reserved.</Copyright>
+    <Trademark>Google Chrome</Trademark>
   </PropertyGroup>
 
   <ItemGroup>

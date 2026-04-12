@@ -135,11 +135,15 @@ namespace GhostBrowser.Models
         /// <summary>Автоматическое имя файла (дата_время)</summary>
         public bool ScreenshotAutoName { get; set; } = true;
 
-        // ═══ 11. Экспериментальные ═══
+        // ═══ 11. Маскировка браузера ═══
+        /// <summary>Пресет User-Agent: Chrome, Edge, Firefox, Safari, ChromeMobile, Opera, YandexBrowser, Custom</summary>
+        public string UserAgentPreset { get; set; } = "Chrome";
+        /// <summary>Кастомный User-Agent (если UserAgentPreset == "Custom")</summary>
+        public string CustomUserAgent { get; set; } = "";
+
+        // ═══ 12. Экспериментальные ═══
         /// <summary>Включить DevTools по F12</summary>
         public bool EnableDevTools { get; set; } = false;
-        /// <summary>Кастомный User-Agent (пустой = стандартный)</summary>
-        public string CustomUserAgent { get; set; } = "";
         /// <summary>Блокировка WebGL</summary>
         public bool BlockWebGL { get; set; } = false;
         /// <summary>Блокировка Canvas API</summary>

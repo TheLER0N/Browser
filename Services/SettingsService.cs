@@ -63,6 +63,12 @@ namespace GhostBrowser.Services
         public string ProxyPassword { get; set; } = "";
         /// <summary>Включить DevTools по F12</summary>
         public bool EnableDevTools { get; set; } = false;
+
+        // === Маскировка браузера ===
+        /// <summary>Пресет User-Agent: Chrome, Edge, Firefox, Safari, ChromeMobile, Opera, YandexBrowser, Custom</summary>
+        public string UserAgentPreset { get; set; } = "Chrome";
+        /// <summary>Кастомный User-Agent (если UserAgentPreset == "Custom")</summary>
+        public string CustomUserAgentValue { get; set; } = "";
     }
 
     /// <summary>
@@ -129,6 +135,10 @@ namespace GhostBrowser.Services
         public bool BlockSnippingTool { get => _settings.BlockSnippingTool; set { if (_settings.BlockSnippingTool != value) { _settings.BlockSnippingTool = value; OnPropertyChanged(); SaveSettings(); } } }
         public bool AntiFingerprint { get => _settings.AntiFingerprint; set { if (_settings.AntiFingerprint != value) { _settings.AntiFingerprint = value; OnPropertyChanged(); SaveSettings(); } } }
         public bool EnablePanicKey { get => _settings.EnablePanicKey; set { if (_settings.EnablePanicKey != value) { _settings.EnablePanicKey = value; OnPropertyChanged(); SaveSettings(); } } }
+
+        // === Маскировка браузера свойства ===
+        public string UserAgentPreset { get => _settings.UserAgentPreset; set { if (_settings.UserAgentPreset != value) { _settings.UserAgentPreset = value; OnPropertyChanged(); SaveSettings(); } } }
+        public string CustomUserAgentValue { get => _settings.CustomUserAgentValue; set { if (_settings.CustomUserAgentValue != value) { _settings.CustomUserAgentValue = value; OnPropertyChanged(); SaveSettings(); } } }
         
         /// <summary>
         /// Папка загрузок по умолчанию.

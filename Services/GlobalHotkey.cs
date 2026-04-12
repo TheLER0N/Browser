@@ -9,20 +9,22 @@ namespace GhostBrowser.Services
     /// <summary>
     /// Сервис глобальных горячих клавиш — перехватывает системные комбинации клавиш
     /// до того, как они достигнут других приложений.
-    /// 
+    ///
     /// Используется для блокировки PrintScreen и других системных горячих клавиш.
-    /// 
+    ///
     /// Как это работает:
     /// - RegisterHotKey регистрирует глобальный хук на уровне Windows
     /// - Когда пользователь нажимает зарегистрированную комбинацию, Windows
     ///   отправляет сообщение WM_HOTKEY нашему приложению
     /// - Другие приложения НЕ получают это событие (оно перехвачено)
     /// - При закрытии приложения хуки снимаются через UnregisterHotKey
-    /// 
+    ///
     /// Ограничения:
     /// - Работает только пока приложение запущено
     /// - Некоторые комбинации (Ctrl+Alt+Del) НЕЛЬЗЯ перехватить
     /// - При сворачивании окна хуки всё ещё работают (глобальные)
+    /// 
+    /// Паник-кнопка: Ctrl+0 (ID=100)
     /// </summary>
     public class GlobalHotkey : IDisposable
     {
@@ -47,7 +49,8 @@ namespace GhostBrowser.Services
         // === Virtual-key codes ===
         private const uint VK_SNAPSHOT = 0x2C;           // PrintScreen
         private const uint VK_ESCAPE = 0x1B;             // Escape
-        private const uint VK_F12 = 0x7B;                // F12 — Паник-кнопка
+        private const uint VK_0 = 0x30;                  // 0 — Паник-кнопка (Ctrl+0)
+        private const uint VK_OEM_3 = 0xC0;              // ` (тильда/ё) — Восстановление из трея (Ctrl+`)
 
         // === Модификаторы ===
         private const uint MOD_NOREPEAT = 0x4000;        // Не повторять при удержании
@@ -63,6 +66,7 @@ namespace GhostBrowser.Services
         private HwndSource? _hwndSource;
         private bool _isBlockingEnabled;
         private bool _isPanicKeyEnabled;
+        private bool _isRestoreFromTrayKeyEnabled;
 
         /// <summary>
         /// Событие срабатывания горячей клавиши.
@@ -75,9 +79,14 @@ namespace GhostBrowser.Services
         public bool IsBlockingEnabled => _isBlockingEnabled;
 
         /// <summary>
-        /// Включена ли паник-кнопка F12.
+        /// Включена ли паник-кнопка Ctrl+0.
         /// </summary>
         public bool IsPanicKeyEnabled => _isPanicKeyEnabled;
+
+        /// <summary>
+        /// Включена ли клавиша восстановления из трея Ctrl+`.
+        /// </summary>
+        public bool IsRestoreFromTrayKeyEnabled => _isRestoreFromTrayKeyEnabled;
 
         /// <summary>
         /// Инициализирует сервис и подписывается на сообщения окна.
@@ -238,7 +247,7 @@ namespace GhostBrowser.Services
         }
 
         /// <summary>
-        /// Выключает паник-кнопку F12.
+        /// Выключает паник-кнопку Ctrl+0.
         /// </summary>
         public void DisablePanicKey()
         {
@@ -260,38 +269,94 @@ namespace GhostBrowser.Services
         }
 
         /// <summary>
-        /// Регистрирует хоткей F12 (ID = 100).
+        /// Регистрирует хоткей Ctrl+0 (ID = 100).
         /// </summary>
         private void RegisterPanicKey()
         {
             if (_hWnd == IntPtr.Zero) return;
 
-            bool success = RegisterHotKey(_hWnd, 100, MOD_NOREPEAT, VK_F12);
+            bool success = RegisterHotKey(_hWnd, 100, MOD_CONTROL | MOD_NOREPEAT, VK_0);
             if (!success)
             {
                 var error = Marshal.GetLastWin32Error();
-                System.Diagnostics.Debug.WriteLine($"RegisterHotKey F12 failed. Error: {error}");
+                System.Diagnostics.Debug.WriteLine($"RegisterHotKey Ctrl+0 failed. Error: {error}");
             }
             else
             {
-                System.Diagnostics.Debug.WriteLine("Panic key (F12) enabled");
+                System.Diagnostics.Debug.WriteLine("Panic key (Ctrl+0) enabled");
             }
         }
 
         /// <summary>
-        /// Снимает хоткей F12.
+        /// Снимает хоткей Ctrl+0.
         /// </summary>
         private void UnregisterPanicKey()
         {
             if (_hWnd == IntPtr.Zero) return;
             UnregisterHotKey(_hWnd, 100);
-            System.Diagnostics.Debug.WriteLine("Panic key (F12) disabled");
+            System.Diagnostics.Debug.WriteLine("Panic key (Ctrl+0) disabled");
+        }
+
+        // ═══════════════════════════════════════════
+        // ВОССТАНОВЛЕНИЕ ИЗ ТРЕЯ (Ctrl+`)
+        // ═══════════════════════════════════════════
+
+        /// <summary>
+        /// Включает клавишу восстановления из трея Ctrl+`.
+        /// При нажатии Ctrl+` генерируется событие HotKeyPressed с ID = 200.
+        /// </summary>
+        public void EnableRestoreFromTrayKey()
+        {
+            if (_isRestoreFromTrayKeyEnabled) return;
+            _isRestoreFromTrayKeyEnabled = true;
+            if (_hWnd == IntPtr.Zero) return;
+            RegisterRestoreFromTrayKey();
+        }
+
+        /// <summary>
+        /// Выключает клавишу восстановления из трея Ctrl+`.
+        /// </summary>
+        public void DisableRestoreFromTrayKey()
+        {
+            if (!_isRestoreFromTrayKeyEnabled) return;
+            _isRestoreFromTrayKeyEnabled = false;
+            UnregisterRestoreFromTrayKey();
+        }
+
+        /// <summary>
+        /// Регистрирует хоткей Ctrl+` (ID = 200).
+        /// </summary>
+        private void RegisterRestoreFromTrayKey()
+        {
+            if (_hWnd == IntPtr.Zero) return;
+
+            bool success = RegisterHotKey(_hWnd, 200, MOD_CONTROL | MOD_NOREPEAT, VK_OEM_3);
+            if (!success)
+            {
+                var error = Marshal.GetLastWin32Error();
+                System.Diagnostics.Debug.WriteLine($"RegisterHotKey Ctrl+` failed. Error: {error}");
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("Restore from tray key (Ctrl+`) enabled");
+            }
+        }
+
+        /// <summary>
+        /// Снимает хоткей Ctrl+`.
+        /// </summary>
+        private void UnregisterRestoreFromTrayKey()
+        {
+            if (_hWnd == IntPtr.Zero) return;
+            UnregisterHotKey(_hWnd, 200);
+            System.Diagnostics.Debug.WriteLine("Restore from tray key (Ctrl+`) disabled");
         }
 
         public void Dispose()
         {
             UnregisterAllHotkeys();
             UnregisterPanicKey();
+            UnregisterRestoreFromTrayKey();
 
             if (_hwndSource != null)
             {
@@ -309,6 +374,7 @@ namespace GhostBrowser.Services
             _hWnd = IntPtr.Zero;
             _isBlockingEnabled = false;
             _isPanicKeyEnabled = false;
+            _isRestoreFromTrayKeyEnabled = false;
         }
     }
 }

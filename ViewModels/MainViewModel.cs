@@ -29,10 +29,10 @@ namespace GhostBrowser.ViewModels
         private object? _displayedContent;
         private bool _isSettingsOpen;
 
-        // Panic mode
+        // Panic mode — сохраняем ВСЕ вкладки
         private bool _isPanicMode;
-        private TabViewModel? _panicSelectedTab;
-        private string? _panicUrl;
+        private List<(string? Url, int Index)>? _panicTabs;
+        private int _panicSelectedTabIndex;
         private bool _panicWasSettingsOpen;
 
         private CoreWebView2Environment? _environment;
@@ -47,6 +47,7 @@ namespace GhostBrowser.ViewModels
         public Services.DownloadService DownloadService { get; }
         public Services.GlobalHotkey GlobalHotkeyService { get; }
         public Services.SnippingToolBlocker SnippingToolBlockerService { get; }
+        public Services.TrayService TrayServiceInstance { get; } = new();
 
         // ==================== Collections ====================
 
@@ -173,6 +174,7 @@ namespace GhostBrowser.ViewModels
         public ICommand FocusUrlCommand { get; }
         public ICommand TogglePrintScreenBlockCommand { get; }
         public ICommand ToggleSnippingToolBlockCommand { get; }
+        public ICommand ApplyUserAgentPresetCommand { get; }
 
         /// <summary>
         /// Асинхронная команда создания вкладки.
@@ -221,6 +223,7 @@ namespace GhostBrowser.ViewModels
             FocusUrlCommand = new RelayCommand(_ => UrlInput = SelectedTab?.Url ?? "");
             TogglePrintScreenBlockCommand = new RelayCommand(_ => TogglePrintScreenBlock());
             ToggleSnippingToolBlockCommand = new RelayCommand(_ => ToggleSnippingToolBlock());
+            ApplyUserAgentPresetCommand = new AsyncRelayCommand(async _ => await ApplyUserAgentPresetAsync());
 
             // Clock timer
             _clockTimer = new System.Windows.Threading.DispatcherTimer
@@ -263,9 +266,12 @@ namespace GhostBrowser.ViewModels
                 SnippingToolBlockerService.EnableBlocking();
             }
 
-            // === Stealth 2.0: Паник-кнопка F12 ===
+            // === Stealth 2.0: Паник-кнопка Ctrl+0 ===
             // По умолчанию включена (STEALTH-002)
             GlobalHotkeyService.EnablePanicKey();
+            
+            // Клавиша восстановления из трея Ctrl+` — включена по умолчанию
+            GlobalHotkeyService.EnableRestoreFromTrayKey();
 
             // Subscribe to bookmark changes
             BookmarkService.Bookmarks.CollectionChanged += (s, e) => UpdateBookmarkState();
@@ -450,6 +456,32 @@ namespace GhostBrowser.ViewModels
             {
                 System.Diagnostics.Debug.WriteLine($"ReinitializeEnvironment error: {ex.Message}");
                 StatusText = $"❌ Ошибка применения настроек: {ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// Применяет новый пресет User-Agent и пересоздаёт вкладки.
+        /// Вызывается из настроек при смене маскировки браузера.
+        /// </summary>
+        public async Task ApplyUserAgentPresetAsync()
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"=== Applying User-Agent preset: {SettingsService.UserAgentPreset} ===");
+
+                // Пересоздаём среду и вкладки (User-Agent применяется при инициализации каждой вкладки)
+                await ReinitializeEnvironmentAsync();
+
+                var presetName = SettingsService.UserAgentPreset;
+                var preset = Enum.TryParse<UserAgentPreset>(presetName, out var parsed) ? parsed : UserAgentPreset.Chrome;
+                StatusText = $"✅ User-Agent: {ScreenshotBlocker.GetUserAgentDisplayName(preset)}";
+
+                System.Diagnostics.Debug.WriteLine("=== User-Agent preset applied successfully ===");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"ApplyUserAgentPreset error: {ex.Message}");
+                StatusText = $"❌ Ошибка применения User-Agent: {ex.Message}";
             }
         }
 
@@ -721,13 +753,14 @@ namespace GhostBrowser.ViewModels
         ///
         /// Логика:
         /// 1. Если НЕ в режиме паники → активируем панику
-        ///    - Сохраняем текущее состояние (вкладка, URL, настройки)
-        ///    - Сворачиваем окно
+        ///    - Сохраняем ВСЕ вкладки и их URL
+        ///    - Сворачиваем окно в трей
         ///    - Открываем Google
         ///    - Очищаем cookies и кэш WebView2
         /// 2. Если УЖЕ в режиме паники → восстанавливаем
         ///    - Разворачиваем окно
-        ///    - Восстанавливаем вкладку и URL
+        ///    - Восстанавливаем ВСЕ вкладки с URL
+        ///    - Восстанавливаем выбранную вкладку
         /// </summary>
         public async void ExecutePanicAsync(System.Windows.Window window)
         {
@@ -739,15 +772,22 @@ namespace GhostBrowser.ViewModels
                     _isPanicMode = true;
                     IsPanicMode = true;
 
-                    // Сохраняем состояние до паники
-                    _panicSelectedTab = SelectedTab;
-                    _panicUrl = SelectedTab?.Url;
+                    // Сохраняем ВСЕ вкладки и их URL
+                    _panicTabs = new List<(string? Url, int Index)>();
+                    for (int i = 0; i < Tabs.Count; i++)
+                    {
+                        var url = Tabs[i].Url == "ghost://newtab" ? null : Tabs[i].Url;
+                        _panicTabs.Add((url, i));
+                    }
+                    
+                    // Запоминаем какая вкладка была выбрана
+                    _panicSelectedTabIndex = SelectedTab != null ? Tabs.IndexOf(SelectedTab) : -1;
                     _panicWasSettingsOpen = IsSettingsOpen;
 
-                    System.Diagnostics.Debug.WriteLine("PANIC MODE ACTIVATED");
+                    System.Diagnostics.Debug.WriteLine($"PANIC MODE ACTIVATED — {Tabs.Count} tabs saved");
 
-                    // Сворачиваем окно
-                    window.WindowState = System.Windows.WindowState.Minimized;
+                    // Сворачиваем в трей
+                    TrayServiceInstance.MinimizeToTray();
 
                     // Закрываем настройки если открыты
                     if (IsSettingsOpen)
@@ -774,30 +814,44 @@ namespace GhostBrowser.ViewModels
                         }
                     }
 
-                    StatusText = "⚠️ PANIC MODE — F12 to restore";
+                    StatusText = "⚠️ PANIC MODE — Ctrl+0 to restore";
                 }
                 else
                 {
-                    // === ВОССТАНАВЛИВАЕМ ===
+                    // === ВОССТАНАВЛИВАЕМ ВСЕ ВКЛАДКИ ===
                     _isPanicMode = false;
                     IsPanicMode = false;
 
-                    System.Diagnostics.Debug.WriteLine("PANIC MODE DEACTIVATED");
+                    System.Diagnostics.Debug.WriteLine("PANIC MODE DEACTIVATED — Restoring tabs");
 
                     // Разворачиваем окно
-                    window.WindowState = System.Windows.WindowState.Normal;
-                    window.Activate();
+                    TrayServiceInstance.RestoreFromTray();
 
-                    // Восстанавливаем вкладку
-                    if (_panicSelectedTab != null && Tabs.Contains(_panicSelectedTab))
+                    // Восстанавливаем ВСЕ вкладки если они были сохранены
+                    if (_panicTabs != null && _panicTabs.Count > 0)
                     {
-                        SelectedTab = _panicSelectedTab;
-
-                        // Восстанавливаем URL если он был
-                        if (!string.IsNullOrEmpty(_panicUrl))
+                        // Закрываем текущие вкладки (созданные после паники)
+                        var tabsToClose = Tabs.ToList();
+                        Tabs.Clear();
+                        SelectedTab = null;
+                        foreach (var tab in tabsToClose)
                         {
-                            NavigateToUrl(_panicUrl);
+                            tab.Dispose();
                         }
+
+                        // Создаём вкладки с сохранёнными URL
+                        foreach (var (url, index) in _panicTabs)
+                        {
+                            await CreateTabAsync(url);
+                        }
+
+                        // Восстанавливаем выбранную вкладку
+                        if (_panicSelectedTabIndex >= 0 && _panicSelectedTabIndex < Tabs.Count)
+                        {
+                            SelectedTab = Tabs[_panicSelectedTabIndex];
+                        }
+
+                        System.Diagnostics.Debug.WriteLine($"Restored {_panicTabs.Count} tabs");
                     }
 
                     // Восстанавливаем настройки если были открыты
@@ -809,8 +863,8 @@ namespace GhostBrowser.ViewModels
                     StatusText = "Готово";
 
                     // Очищаем сохранённое состояние
-                    _panicSelectedTab = null;
-                    _panicUrl = null;
+                    _panicTabs = null;
+                    _panicSelectedTabIndex = -1;
                     _panicWasSettingsOpen = false;
                 }
             }
@@ -958,6 +1012,7 @@ namespace GhostBrowser.ViewModels
             StealthService.Dispose();
             GlobalHotkeyService.Dispose(); // Снимает глобальные хуки PrintScreen
             SnippingToolBlockerService.Dispose(); // Снимает хук WM_PRINTCLIENT
+            TrayServiceInstance.Dispose(); // Удаляет иконку из трея
             SettingsService.Dispose(); // Освобождает HttpClient
             DownloadService.Dispose(); // Останавливает таймер и отменяет загрузки
 

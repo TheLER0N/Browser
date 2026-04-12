@@ -4,7 +4,7 @@
         xmlns:local="clr-namespace:GhostBrowser"
         xmlns:vm="clr-namespace:GhostBrowser.ViewModels"
         xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
-        Title="KING"
+        Title="Google Chrome"
         Height="720" Width="1280"
         WindowStyle="None"
         AllowsTransparency="True"
@@ -14,7 +14,8 @@
         MouseLeftButtonDown="Window_MouseLeftButtonDown"
         SnapsToDevicePixels="True"
         UseLayoutRounding="True"
-        SizeChanged="Window_SizeChanged">
+        SizeChanged="Window_SizeChanged"
+        ShowInTaskbar="False">
 
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0" ResizeBorderThickness="8" GlassFrameThickness="0"/>
