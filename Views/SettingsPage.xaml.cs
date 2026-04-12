@@ -58,6 +58,7 @@ namespace GhostBrowser.Views
             if (NetworkSection != null) NetworkSection.Visibility = section == "Сеть" ? Visibility.Visible : Visibility.Collapsed;
             if (MaskingSection != null) MaskingSection.Visibility = section == "Маскировка" ? Visibility.Visible : Visibility.Collapsed;
             if (SessionsSection != null) SessionsSection.Visibility = section == "Сессии" ? Visibility.Visible : Visibility.Collapsed;
+            if (AppearanceSection != null) AppearanceSection.Visibility = section == "Внешний вид" ? Visibility.Visible : Visibility.Collapsed;
             if (StealthSection != null) StealthSection.Visibility = section == "Stealth 2.0" ? Visibility.Visible : Visibility.Collapsed;
             if (HistorySection != null) HistorySection.Visibility = section == "История" ? Visibility.Visible : Visibility.Collapsed;
             if (BookmarksSection != null) BookmarksSection.Visibility = section == "Закладки" ? Visibility.Visible : Visibility.Collapsed;
@@ -119,6 +120,7 @@ namespace GhostBrowser.Views
             if (NavNetworkBtn != null) NavNetworkBtn.Background = _currentSection == "Сеть" ? active : inactive;
             if (NavMaskingBtn != null) NavMaskingBtn.Background = _currentSection == "Маскировка" ? active : inactive;
             if (NavSessionsBtn != null) NavSessionsBtn.Background = _currentSection == "Сессии" ? active : inactive;
+            if (NavAppearanceBtn != null) NavAppearanceBtn.Background = _currentSection == "Внешний вид" ? active : inactive;
             if (NavHistoryBtn != null) NavHistoryBtn.Background = _currentSection == "История" ? active : inactive;
             if (NavBookmarksBtn != null) NavBookmarksBtn.Background = _currentSection == "Закладки" ? active : inactive;
             if (NavDownloadsBtn != null) NavDownloadsBtn.Background = _currentSection == "Загрузки" ? active : inactive;
@@ -132,6 +134,7 @@ namespace GhostBrowser.Views
         private void NavNetwork_Click(object sender, RoutedEventArgs e) => ShowSection("Сеть");
         private void NavMasking_Click(object sender, RoutedEventArgs e) => ShowSection("Маскировка");
         private void NavSessions_Click(object sender, RoutedEventArgs e) => ShowSection("Сессии");
+        private void NavAppearance_Click(object sender, RoutedEventArgs e) => ShowSection("Внешний вид");
         private void NavHistory_Click(object sender, RoutedEventArgs e) => ShowSection("История");
         private void NavBookmarks_Click(object sender, RoutedEventArgs e) => ShowSection("Закладки");
         private void NavDownloads_Click(object sender, RoutedEventArgs e) => ShowSection("Загрузки");

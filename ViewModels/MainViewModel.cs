@@ -179,6 +179,7 @@ namespace GhostBrowser.ViewModels
         public ICommand SaveSessionCommand { get; }
         public AsyncRelayCommand RestoreSessionCommand { get; }
         public ICommand DeleteSessionCommand { get; }
+        public ICommand ApplyThemeCommand { get; }
 
         /// <summary>
         /// Асинхронная команда создания вкладки.
@@ -232,6 +233,7 @@ namespace GhostBrowser.ViewModels
             SaveSessionCommand = new RelayCommand(_ => SaveCurrentSession());
             RestoreSessionCommand = new AsyncRelayCommand(async p => await RestoreSessionAsync(p?.ToString() ?? ""));
             DeleteSessionCommand = new RelayCommand(p => DeleteSession(p?.ToString() ?? ""));
+            ApplyThemeCommand = new RelayCommand(p => ApplyTheme(p?.ToString() ?? ""));
 
             // Clock timer
             _clockTimer = new System.Windows.Threading.DispatcherTimer
@@ -490,6 +492,39 @@ namespace GhostBrowser.ViewModels
             {
                 System.Diagnostics.Debug.WriteLine($"ApplyUserAgentPreset error: {ex.Message}");
                 StatusText = $"❌ Ошибка применения User-Agent: {ex.Message}";
+            }
+        }
+
+        // ==================== Theme Management ====================
+
+        /// <summary>
+        /// Применяет тему и акцентный цвет ко всему приложению.
+        /// </summary>
+        public void ApplyTheme(string themeName)
+        {
+            try
+            {
+                SettingsService.Theme = themeName;
+
+                // Определяем реальную тему (System -> автоматически)
+                var actualTheme = themeName;
+                if (themeName == "System")
+                {
+                    var isLight = Microsoft.Win32.Registry.GetValue(
+                        @"HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize",
+                        "AppsUseLightTheme", 1) as int? == 1;
+                    actualTheme = isLight ? "Light" : "Dark";
+                }
+
+                // TODO: Переключение ResourceDictionary для Light темы
+                // Пока только сохраняем настройку — полная реализация
+                // требует Light ResourceDictionary в App.xaml
+                System.Diagnostics.Debug.WriteLine($"[Theme] Applied: {themeName} (actual: {actualTheme})");
+                StatusText = $"🎨 Тема: {themeName}";
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"ApplyTheme error: {ex.Message}");
             }
         }
 

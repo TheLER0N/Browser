@@ -69,6 +69,12 @@ namespace GhostBrowser.Services
         public string UserAgentPreset { get; set; } = "Chrome";
         /// <summary>Кастомный User-Agent (если UserAgentPreset == "Custom")</summary>
         public string CustomUserAgentValue { get; set; } = "";
+
+        // === Темы оформления ===
+        /// <summary>Тема: "Dark", "Light", "System"</summary>
+        public string Theme { get; set; } = "Dark";
+        /// <summary>Акцентный цвет: "Blue", "Purple", "Green", "Red", "Orange", "Cyan"</summary>
+        public string AccentColor { get; set; } = "Blue";
     }
 
     /// <summary>
@@ -139,6 +145,10 @@ namespace GhostBrowser.Services
         // === Маскировка браузера свойства ===
         public string UserAgentPreset { get => _settings.UserAgentPreset; set { if (_settings.UserAgentPreset != value) { _settings.UserAgentPreset = value; OnPropertyChanged(); SaveSettings(); } } }
         public string CustomUserAgentValue { get => _settings.CustomUserAgentValue; set { if (_settings.CustomUserAgentValue != value) { _settings.CustomUserAgentValue = value; OnPropertyChanged(); SaveSettings(); } } }
+
+        // === Темы оформления свойства ===
+        public string Theme { get => _settings.Theme; set { if (_settings.Theme != value) { _settings.Theme = value; OnPropertyChanged(); SaveSettings(); } } }
+        public string AccentColor { get => _settings.AccentColor; set { if (_settings.AccentColor != value) { _settings.AccentColor = value; OnPropertyChanged(); SaveSettings(); } } }
         
         /// <summary>
         /// Папка загрузок по умолчанию.

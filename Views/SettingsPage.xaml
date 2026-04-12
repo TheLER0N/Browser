@@ -56,6 +56,9 @@
                 <Button x:Name="NavSessionsBtn" Content="📑  Сессии"
                         Style="{StaticResource MenuNavItemBtn}" Margin="8,2"
                         Click="NavSessions_Click" FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                <Button x:Name="NavAppearanceBtn" Content="🎨  Внешний вид"
+                        Style="{StaticResource MenuNavItemBtn}" Margin="8,2"
+                        Click="NavAppearance_Click" FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
                 <Button x:Name="NavHistoryBtn" Content="📜  История"
                         Style="{StaticResource MenuNavItemBtn}" Margin="8,2"
                         Click="NavHistory_Click" FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
@@ -845,6 +848,118 @@
                                        Margin="0,0,0,4"
                                        FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
                             <TextBlock Text="• При восстановлении текущие вкладки закрываются и открываются сохранённые"
+                                       FontSize="11.5" Foreground="{StaticResource AccentSoftBrush}"
+                                       TextWrapping="Wrap" LineHeight="17"
+                                       FontWeight="Medium"
+                                       FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- ─── Appearance Section ─── -->
+                <StackPanel x:Name="AppearanceSection" Visibility="Collapsed">
+                    <TextBlock Text="🎨 Внешний вид" FontSize="22" FontWeight="SemiBold"
+                               Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,4"
+                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                    <TextBlock Text="Настройте тему и акцентный цвет под себя"
+                               Foreground="{StaticResource TextTertiaryBrush}" FontSize="12.5"
+                               Margin="0,0,0,28"
+                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+
+                    <!-- Theme Selection -->
+                    <TextBlock Text="Тема оформления" FontSize="12" FontWeight="Medium"
+                               Foreground="{StaticResource TextSecondaryBrush}"
+                               Margin="0,0,0,8"
+                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                        <Button Content="🌙  Тёмная" Padding="16,10" Margin="0,0,8,0"
+                                Style="{StaticResource GlassBtn}" FontSize="12"
+                                Command="{Binding ApplyThemeCommand}"
+                                CommandParameter="Dark"
+                                FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                        <Button Content="☀️  Светлая" Padding="16,10" Margin="0,0,8,0"
+                                Style="{StaticResource GlassBtn}" FontSize="12"
+                                Command="{Binding ApplyThemeCommand}"
+                                CommandParameter="Light"
+                                FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                        <Button Content="🖥️  Системная" Padding="16,10"
+                                Style="{StaticResource GlassBtn}" FontSize="12"
+                                Command="{Binding ApplyThemeCommand}"
+                                CommandParameter="System"
+                                FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                    </StackPanel>
+
+                    <!-- Accent Color Selection -->
+                    <TextBlock Text="Акцентный цвет" FontSize="12" FontWeight="Medium"
+                               Foreground="{StaticResource TextSecondaryBrush}"
+                               Margin="0,0,0,10"
+                               FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,18">
+                        <!-- Blue -->
+                        <Button Width="36" Height="36" Margin="0,0,8,0"
+                                Style="{StaticResource GlassBtn}" FontSize="16"
+                                Content="🔵"
+                                Command="{Binding ApplyThemeCommand}"
+                                CommandParameter="AccentBlue"
+                                ToolTip="Синий"
+                                FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                        <!-- Purple -->
+                        <Button Width="36" Height="36" Margin="0,0,8,0"
+                                Style="{StaticResource GlassBtn}" FontSize="16"
+                                Content="🟣"
+                                Command="{Binding ApplyThemeCommand}"
+                                CommandParameter="AccentPurple"
+                                ToolTip="Фиолетовый"
+                                FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                        <!-- Green -->
+                        <Button Width="36" Height="36" Margin="0,0,8,0"
+                                Style="{StaticResource GlassBtn}" FontSize="16"
+                                Content="🟢"
+                                Command="{Binding ApplyThemeCommand}"
+                                CommandParameter="AccentGreen"
+                                ToolTip="Зелёный"
+                                FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                        <!-- Red -->
+                        <Button Width="36" Height="36" Margin="0,0,8,0"
+                                Style="{StaticResource GlassBtn}" FontSize="16"
+                                Content="🔴"
+                                Command="{Binding ApplyThemeCommand}"
+                                CommandParameter="AccentRed"
+                                ToolTip="Красный"
+                                FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                        <!-- Orange -->
+                        <Button Width="36" Height="36" Margin="0,0,8,0"
+                                Style="{StaticResource GlassBtn}" FontSize="16"
+                                Content="🟠"
+                                Command="{Binding ApplyThemeCommand}"
+                                CommandParameter="AccentOrange"
+                                ToolTip="Оранжевый"
+                                FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                        <!-- Cyan -->
+                        <Button Width="36" Height="36"
+                                Style="{StaticResource GlassBtn}" FontSize="16"
+                                Content="🔷"
+                                Command="{Binding ApplyThemeCommand}"
+                                CommandParameter="AccentCyan"
+                                ToolTip="Голубой"
+                                FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                    </StackPanel>
+
+                    <!-- Info Card -->
+                    <Border Background="{StaticResource BgSurfaceBrush}"
+                            BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1"
+                            CornerRadius="12" Padding="14">
+                        <StackPanel>
+                            <TextBlock Text="💡 Примечание" FontSize="13" FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       Margin="0,0,0,8"
+                                       FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                            <TextBlock Text="• Светлая тема и кастомные акцентные цвета будут полностью реализованы в следующем обновлении"
+                                       FontSize="11.5" Foreground="{StaticResource TextSecondaryBrush}"
+                                       TextWrapping="Wrap" LineHeight="17"
+                                       Margin="0,0,0,4"
+                                       FontFamily="Segoe UI Variable, Segoe UI, sans-serif"/>
+                            <TextBlock Text="• Сейчас тема сохраняется в настройках и будет применяться автоматически"
                                        FontSize="11.5" Foreground="{StaticResource AccentSoftBrush}"
                                        TextWrapping="Wrap" LineHeight="17"
                                        FontWeight="Medium"
