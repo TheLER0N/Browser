@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -24,12 +22,10 @@ namespace GhostBrowser.Views
         public SettingsPage()
         {
             InitializeComponent();
-            // ShowSection вызываем после Loaded, когда все элементы гарантированно созданы
         }
 
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
-            // Показываем секцию DNS при первом открытии
             ShowSection("DNS");
             InitializeSettings();
         }
@@ -38,11 +34,8 @@ namespace GhostBrowser.Views
         {
             if (SS == null || VM == null) return;
 
-            // Все основные настройки привязаны через XAML Binding.
-            // Только FontSizeText требует ручного обновления (отображение значения).
             FontSizeText.Text = $"{SS.FontSize}px";
 
-            // Инициализируем поле папки загрузок
             if (DownloadFolderInput != null)
             {
                 DownloadFolderInput.Text = SS.DownloadFolder;
@@ -65,25 +58,21 @@ namespace GhostBrowser.Views
             if (DownloadsSection != null) DownloadsSection.Visibility = section == "Загрузки" ? Visibility.Visible : Visibility.Collapsed;
             if (AboutSection != null) AboutSection.Visibility = section == "О программе" ? Visibility.Visible : Visibility.Collapsed;
 
-            // При открытии Stealth 2.0 — обновляем toggle из настроек
             if (section == "Stealth 2.0" && SS != null && VM != null)
             {
                 UpdateStealthToggles();
             }
 
-            // При открытии Сети — загружаем настройки
             if (section == "Сеть" && SS != null)
             {
                 LoadNetworkSettings();
             }
 
-            // При открытии Маскировки — загружаем настройки
             if (section == "Маскировка" && SS != null)
             {
                 LoadMaskingSettings();
             }
 
-            // При открытии Сессий — обновляем список и пустое состояние
             if (section == "Сессии" && VM != null)
             {
                 SessionsList.ItemsSource = VM.SessionService.Sessions;
@@ -93,7 +82,6 @@ namespace GhostBrowser.Views
             if (section == "История" && VM != null) HistoryList.ItemsSource = VM.HistoryService.History;
             if (section == "Закладки" && VM != null) BookmarksList.ItemsSource = VM.BookmarkService.Bookmarks;
 
-            // Привязываем коллекции загрузок
             if (section == "Загрузки" && VM != null)
             {
                 if (ActiveDownloadsList != null)
@@ -101,7 +89,6 @@ namespace GhostBrowser.Views
                 if (CompletedDownloadsList != null)
                     CompletedDownloadsList.ItemsSource = VM.DownloadService.CompletedDownloads;
 
-                // Обновляем поле папки загрузок
                 if (DownloadFolderInput != null)
                     DownloadFolderInput.Text = VM.DownloadService.DownloadFolder;
             }
@@ -182,10 +169,6 @@ namespace GhostBrowser.Views
 
         // ==================== Download Section Handlers ====================
 
-        /// <summary>
-        /// Обработчик кнопки Pause/Resume для элемента загрузки.
-        /// Использует Tag кнопки для получения привязанного DownloadItem.
-        /// </summary>
         private void PauseResumeBtn_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button btn && btn.Tag is DownloadItem item)
@@ -197,9 +180,6 @@ namespace GhostBrowser.Views
             }
         }
 
-        /// <summary>
-        /// Обработчик кнопки отмены загрузки.
-        /// </summary>
         private void CancelDownloadBtn_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button btn && btn.Tag is DownloadItem item)
@@ -208,10 +188,6 @@ namespace GhostBrowser.Views
             }
         }
 
-        /// <summary>
-        /// Обработчик кнопки открытия файла.
-        /// Запускает файл программой по умолчанию.
-        /// </summary>
         private void OpenFileBtn_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button btn && btn.Tag is DownloadItem item)
@@ -220,10 +196,6 @@ namespace GhostBrowser.Views
             }
         }
 
-        /// <summary>
-        /// Обработчик кнопки открытия папки с файлом.
-        /// Открывает проводник с выделенным файлом.
-        /// </summary>
         private void OpenFileLocationBtn_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button btn && btn.Tag is DownloadItem item)
@@ -232,10 +204,6 @@ namespace GhostBrowser.Views
             }
         }
 
-        /// <summary>
-        /// Обработчик кнопки удаления загрузки.
-        /// Удаляет файл с диска и запись из истории.
-        /// </summary>
         private void DeleteDownloadBtn_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button btn && btn.Tag is DownloadItem item)
@@ -244,27 +212,16 @@ namespace GhostBrowser.Views
             }
         }
 
-        /// <summary>
-        /// Обработчик кнопки очистки завершённых загрузок.
-        /// Удаляет все Completed/Cancelled/Failed из списка (файлы остаются на диске).
-        /// </summary>
         private void ClearCompletedBtn_Click(object sender, RoutedEventArgs e)
         {
             DS?.ClearCompleted();
         }
 
-        /// <summary>
-        /// Обработчик кнопки открытия папки загрузок.
-        /// </summary>
         private void OpenDownloadFolderBtn_Click(object sender, RoutedEventArgs e)
         {
             DS?.OpenDownloadFolder();
         }
 
-        /// <summary>
-        /// Обработчик кнопки выбора папки загрузок.
-        /// Открывает диалог FolderBrowserDialog и сохраняет выбор.
-        /// </summary>
         private void ChooseDownloadFolderBtn_Click(object sender, RoutedEventArgs e)
         {
             if (DS == null) return;
@@ -275,7 +232,6 @@ namespace GhostBrowser.Views
                 UseDescriptionForTitle = true
             };
 
-            // Если текущая папка существует — устанавливаем как начальную
             var currentFolder = DS.DownloadFolder;
             if (Directory.Exists(currentFolder))
             {
@@ -286,7 +242,6 @@ namespace GhostBrowser.Views
             {
                 DS.DownloadFolder = dialog.SelectedPath;
 
-                // Обновляем поле в UI
                 if (DownloadFolderInput != null)
                 {
                     DownloadFolderInput.Text = dialog.SelectedPath;
@@ -296,10 +251,6 @@ namespace GhostBrowser.Views
 
         // ==================== Stealth 2.0 ====================
 
-        /// <summary>
-        /// Обновляет Toggle-кнопки Stealth 2.0 из текущих настроек.
-        /// Вызывается при открытии секции.
-        /// </summary>
         private void UpdateStealthToggles()
         {
             if (SS == null) return;
@@ -313,9 +264,6 @@ namespace GhostBrowser.Views
             UpdateStealthStatus();
         }
 
-        /// <summary>
-        /// Обновляет текст статуса защиты.
-        /// </summary>
         private void UpdateStealthStatus()
         {
             if (SS == null || StealthStatusText == null || VM == null) return;
@@ -347,7 +295,6 @@ namespace GhostBrowser.Views
             {
                 SS.AutoBlockPrintScreen = BlockPrintScreenToggle.IsChecked == true;
                 
-                // Сразу применяем к сервису
                 if (SS.AutoBlockPrintScreen)
                     VM.GlobalHotkeyService.EnableBlocking();
                 else
@@ -363,7 +310,6 @@ namespace GhostBrowser.Views
             {
                 SS.BlockSnippingTool = BlockSnippingToolToggle.IsChecked == true;
                 
-                // Сразу применяем к сервису
                 if (SS.BlockSnippingTool)
                     VM.SnippingToolBlockerService.EnableBlocking();
                 else
@@ -400,460 +346,153 @@ namespace GhostBrowser.Views
 
         // ==================== Network / Bypass ====================
 
-        private List<Services.ProxyEntry> _proxyList = new();
-
-        /// <summary>
-        /// Загружает настройки сети в UI.
-        /// </summary>
         private void LoadNetworkSettings()
         {
             if (SS == null) return;
 
             var settings = SS.Settings;
+            var mode = Services.ProxyService.NormalizeMode(settings.BypassMode);
 
-            // Устанавливаем режим обхода
-            if (BypassModeCombo != null)
+            // Initialize GoodbyeDPI UI
+            if (GoodbyeDpiStatusText != null)
             {
-                var mode = settings.BypassMode;
-                foreach (ComboBoxItem item in BypassModeCombo.Items)
+                GoodbyeDpiStatusText.Text = mode == Services.ProxyService.ModeGoodbyeDPI ? "Статус: Запущен" : "Статус: Выключен";
+            }
+
+            // Initialize DNS DoH Combo
+            if (DnsModeCombo != null)
+            {
+                foreach (ComboBoxItem item in DnsModeCombo.Items)
                 {
-                    if (item.Tag?.ToString() == mode ||
-                        (mode == "proxy" && item.Tag?.ToString() == $"proxy_{settings.ProxyType}"))
+                    if (item.Tag?.ToString() == mode && (mode == Services.ProxyService.ModeDoHCloudflare || mode == Services.ProxyService.ModeDoHGoogle))
                     {
-                        BypassModeCombo.SelectedItem = item;
+                        DnsModeCombo.SelectedItem = item;
+                        break;
+                    }
+                    else if (mode != Services.ProxyService.ModeDoHCloudflare && mode != Services.ProxyService.ModeDoHGoogle && item.Tag?.ToString() == "none")
+                    {
+                        DnsModeCombo.SelectedItem = item;
                         break;
                     }
                 }
-
-                // Подписываемся на изменения
-                BypassModeCombo.SelectionChanged += BypassModeCombo_SelectionChanged;
             }
 
-            // Заполняем поля прокси
-            if (ProxyServerInput != null) ProxyServerInput.Text = settings.ProxyServer;
-            if (ProxyPortInput != null) ProxyPortInput.Text = settings.ProxyServerPort > 0 ? settings.ProxyServerPort.ToString() : "1080";
-            if (ProxyUsernameInput != null) ProxyUsernameInput.Text = settings.ProxyUsername;
-            if (ProxyPasswordInput != null) ProxyPasswordInput.Text = settings.ProxyPassword;
-
-            // Показываем/скрываем карточку прокси
-            UpdateProxyVisibility();
-
-            // Подписываемся на изменения полей
-            SubscribeProxyInputs();
-
-            // Загружаем список бесплатных прокси
-            LoadProxyList();
-
-            // Статус
-            UpdateNetworkStatus();
-        }
-
-        /// <summary>
-        /// Загружает список бесплатных прокси из API.
-        /// </summary>
-        private async void LoadProxyList()
-        {
-            // Показываем статус загрузки
-            if (ProxyRecommendationText != null)
-                ProxyRecommendationText.Text = "⏳ Загрузка прокси из ProxyScrape API...";
-
-            try
+            // Initialize VPN Key Input
+            if (VpnKeyInput != null)
             {
-                // Загружаем прокси из API
-                _proxyList = await Services.ProxyManager.FetchProxiesAsync();
-
-                if (ProxyListView != null)
+                if (mode == Services.ProxyService.ModeVpnXray)
                 {
-                    ProxyListView.ItemsSource = _proxyList;
+                    VpnKeyInput.Text = settings.VpnKey;
                 }
-
-                var count = Services.ProxyManager.CachedCount;
-                if (count > 0)
+                else if (Services.ProxyService.IsProxyMode(mode))
                 {
-                    if (ProxyRecommendationText != null)
-                        ProxyRecommendationText.Text = $"Загружено {count} прокси. Нажмите «🔄 Проверить все» для проверки.";
+                    VpnKeyInput.Text = $"{settings.ProxyServer}:{settings.ProxyServerPort}";
                 }
                 else
                 {
-                    if (ProxyRecommendationText != null)
-                        ProxyRecommendationText.Text = "⚠️ Не удалось загрузить прокси. Проверьте интернет-соединение.";
+                    VpnKeyInput.Text = "";
                 }
             }
-            catch (Exception ex)
-            {
-                if (ProxyRecommendationText != null)
-                    ProxyRecommendationText.Text = $"❌ Ошибка загрузки: {ex.Message}";
-            }
         }
 
-        /// <summary>
-        /// Подписывает кнопки "Apply" для каждого прокси.
-        /// Вызывается после обновления списка.
-        /// </summary>
-        private void SubscribeApplyButtons()
+        private async void StartGoodbyeDpiBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (ProxyListView == null) return;
-            // Кнопки обрабатываются через ProxyApplyBtn_Click (Tag = ProxyEntry)
-        }
-
-        /// <summary>
-        /// Клик по кнопке "→" у прокси — применяет его.
-        /// </summary>
-        private void ProxyApplyBtn_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button { Tag: Services.ProxyEntry proxy })
-            {
-                ApplyProxyEntry(proxy);
-            }
-        }
-
-        private void ProxyListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (ProxyListView?.SelectedItem is not Services.ProxyEntry proxy) return;
-
-            ApplyProxyEntry(proxy);
-            ProxyListView.SelectedItem = null;
-        }
-
-        /// <summary>
-        /// Применяет выбранный прокси.
-        /// </summary>
-        private async void ApplyProxyEntry(Services.ProxyEntry proxy)
-        {
-            if (VM == null || SS == null) return;
-
-            var settings = SS.Settings;
-            settings.BypassMode = "proxy";
-            settings.ProxyType = proxy.Type;
-            settings.ProxyServer = proxy.Address;
-            settings.ProxyServerPort = proxy.Port;
+            if (SS == null || VM == null) return;
+            SS.Settings.BypassMode = Services.ProxyService.ModeGoodbyeDPI;
             SS.SaveSettings();
+            LoadNetworkSettings();
+            
+            if (GoodbyeDpiStatusText != null) GoodbyeDpiStatusText.Text = "Статус: Запуск...";
+            await VM.ReinitializeEnvironmentAsync();
+            if (GoodbyeDpiStatusText != null) GoodbyeDpiStatusText.Text = "Статус: Запущен";
+        }
 
-            // Обновляем UI поля
-            if (BypassModeCombo != null)
+        private async void StopGoodbyeDpiBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (SS == null || VM == null) return;
+            if (SS.Settings.BypassMode == Services.ProxyService.ModeGoodbyeDPI)
             {
-                foreach (ComboBoxItem item in BypassModeCombo.Items)
-                {
-                    if (item.Tag?.ToString() == $"proxy_{proxy.Type}")
-                    {
-                        BypassModeCombo.SelectedItem = item;
-                        break;
-                    }
-                }
+                SS.Settings.BypassMode = Services.ProxyService.ModeDirect;
+                SS.SaveSettings();
             }
-            if (ProxyServerInput != null) ProxyServerInput.Text = proxy.Address;
-            if (ProxyPortInput != null) ProxyPortInput.Text = proxy.Port.ToString();
+            LoadNetworkSettings();
+            await VM.ReinitializeEnvironmentAsync();
+            if (GoodbyeDpiStatusText != null) GoodbyeDpiStatusText.Text = "Статус: Выключен";
+        }
 
-            UpdateProxyVisibility();
-            UpdateNetworkStatus();
+        private async void DnsModeCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (SS == null || VM == null || DnsModeCombo.SelectedItem is not ComboBoxItem selectedItem) return;
+            var tag = selectedItem.Tag?.ToString() ?? "none";
 
-            NetworkStatusText.Text = $"⏳ Применение {proxy.CountryFlag} {proxy.Address}:{proxy.Port}...";
-
-            try
+            // If GoodbyeDPI is active, DoH won't override BypassMode immediately here unless we want to disable GoodbyeDPI.
+            // For simplicity, we just set BypassMode if we are explicitly selecting DoH.
+            if (tag == "none" && SS.Settings.BypassMode != Services.ProxyService.ModeGoodbyeDPI && !Services.ProxyService.IsProxyMode(SS.Settings.BypassMode))
             {
+                SS.Settings.BypassMode = Services.ProxyService.ModeDirect;
+                SS.SaveSettings();
                 await VM.ReinitializeEnvironmentAsync();
             }
-            catch (Exception ex)
+            else if (tag != "none")
             {
-                NetworkStatusText.Text = $"❌ Ошибка: {ex.Message}";
+                SS.Settings.BypassMode = tag;
+                SS.SaveSettings();
+                LoadNetworkSettings();
+                await VM.ReinitializeEnvironmentAsync();
             }
         }
 
-        /// <summary>
-        /// Проверяет все бесплатные прокси и обновляет список.
-        /// </summary>
-        private async void RefreshProxyListBtn_Click(object sender, RoutedEventArgs e)
+        private async void ApplyVpnKeyBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (RefreshProxyListBtn == null) return;
+            if (SS == null || VM == null || VpnKeyInput == null) return;
 
-            RefreshProxyListBtn.IsEnabled = false;
-            RefreshProxyListBtn.Content = "⏳  Проверка...";
+            var key = VpnKeyInput.Text.Trim();
+            if (string.IsNullOrEmpty(key)) return;
 
-            if (ProxyRecommendationText != null)
-                ProxyRecommendationText.Text = "⏳ Загружаем свежие прокси из API...";
-
-            try
+            if (key.StartsWith("vless://") || key.StartsWith("vmess://"))
             {
-                // Сбрасываем кеш — загружаем заново
-                await Services.ProxyManager.FetchProxiesAsync();
-
-                if (ProxyRecommendationText != null)
-                    ProxyRecommendationText.Text = $"⏳ Проверка {Services.ProxyManager.CachedCount} прокси (~15 сек)...";
-
-                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
-                _proxyList = await Services.ProxyManager.TestAllAsync(maxConcurrent: 10, cts.Token);
-
-                if (ProxyListView != null)
-                {
-                    ProxyListView.ItemsSource = null;
-                    ProxyListView.ItemsSource = _proxyList;
-                }
-
-                var working = _proxyList.Count(p => p.IsWorking);
-                if (ProxyRecommendationText != null)
-                    ProxyRecommendationText.Text = working > 0
-                        ? $"🟢 Найдено {working} рабочих прокси из {_proxyList.Count}. Нажмите → для применения."
-                        : $"🔴 Ни один прокси не работает. {_proxyList.Count} проверено.";
-            }
-            catch (Exception ex)
-            {
-                if (ProxyRecommendationText != null)
-                    ProxyRecommendationText.Text = $"❌ Ошибка проверки: {ex.Message}";
-            }
-
-            RefreshProxyListBtn.IsEnabled = true;
-            RefreshProxyListBtn.Content = "🔄  Проверить все";
-        }
-
-        private bool _proxyInputsSubscribed;
-
-        private void SubscribeProxyInputs()
-        {
-            if (_proxyInputsSubscribed) return;
-            _proxyInputsSubscribed = true;
-
-            if (ProxyServerInput != null) ProxyServerInput.TextChanged += ProxyInput_TextChanged;
-            if (ProxyPortInput != null) ProxyPortInput.TextChanged += ProxyInput_TextChanged;
-            if (ProxyUsernameInput != null) ProxyUsernameInput.TextChanged += ProxyInput_TextChanged;
-            if (ProxyPasswordInput != null) ProxyPasswordInput.TextChanged += ProxyInput_TextChanged;
-        }
-
-        private void ProxyInput_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            SaveProxySettings();
-            UpdateProxyVisibility();
-        }
-
-        private async void BypassModeCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (SS == null || BypassModeCombo?.SelectedItem is not ComboBoxItem selectedItem || VM == null) return;
-
-            var tag = selectedItem.Tag?.ToString() ?? "none";
-            var settings = SS.Settings;
-
-            if (tag == "none")
-            {
-                settings.BypassMode = "none";
-            }
-            else if (tag == "doh_cloudflare")
-            {
-                settings.BypassMode = "doh_cloudflare";
-            }
-            else if (tag == "doh_google")
-            {
-                settings.BypassMode = "doh_google";
-            }
-            else if (tag.StartsWith("proxy_"))
-            {
-                settings.BypassMode = "proxy";
-                settings.ProxyType = tag.Replace("proxy_", "");
-            }
-
-            UpdateProxyVisibility();
-            UpdateNetworkStatus();
-            SS.SaveSettings();
-
-            // Применяем настройки к WebView2 без перезапуска
-            await VM.ReinitializeEnvironmentAsync();
-        }
-
-        private void SaveProxySettings()
-        {
-            if (SS == null) return;
-
-            var settings = SS.Settings;
-
-            if (int.TryParse(ProxyPortInput?.Text, out var port))
-                settings.ProxyServerPort = port;
-
-            settings.ProxyServer = ProxyServerInput?.Text ?? "";
-            settings.ProxyUsername = ProxyUsernameInput?.Text ?? "";
-            settings.ProxyPassword = ProxyPasswordInput?.Text ?? "";
-
-            // Автосохранение
-            SS.SaveSettings();
-            UpdateNetworkStatus();
-        }
-
-        private void UpdateProxyVisibility()
-        {
-            if (SS == null) return;
-
-            var settings = SS.Settings;
-            bool showProxy = settings.BypassMode == "proxy";
-
-            if (ProxySettingsCard != null)
-                ProxySettingsCard.Visibility = showProxy ? Visibility.Visible : Visibility.Collapsed;
-
-            if (ProxyWarningCard != null)
-            {
-                bool hasWarning = showProxy &&
-                    (string.IsNullOrWhiteSpace(settings.ProxyServer) || settings.ProxyServerPort <= 0);
-                ProxyWarningCard.Visibility = hasWarning ? Visibility.Visible : Visibility.Collapsed;
-            }
-        }
-
-        private void UpdateNetworkStatus()
-        {
-            if (SS == null || NetworkStatusText == null) return;
-
-            var settings = SS.Settings;
-            var desc = Services.ProxyService.GetBypassModeDescription(settings.BypassMode);
-
-            if (settings.BypassMode == "proxy")
-            {
-                bool isValid = Services.ProxyService.IsValidConfig(
-                    settings.BypassMode, settings.ProxyType, settings.ProxyServer, settings.ProxyServerPort);
-                NetworkStatusText.Text = isValid
-                    ? $"✅ {desc} — {settings.ProxyServer}:{settings.ProxyServerPort}"
-                    : $"⚠️ {desc} — настройте сервер и порт";
+                SS.Settings.VpnKey = key;
+                SS.Settings.BypassMode = Services.ProxyService.ModeVpnXray;
+                
+                SS.SaveSettings();
+                LoadNetworkSettings();
+                await VM.ReinitializeEnvironmentAsync();
             }
             else
             {
-                NetworkStatusText.Text = $"✅ {desc}";
+                // Simple parser for IP:Port
+                var parts = key.Split(':');
+                if (parts.Length >= 2 && int.TryParse(parts.Last(), out int port))
+                {
+                    string ip = string.Join(":", parts.Take(parts.Length - 1));
+                    
+                    SS.Settings.ProxyServer = ip;
+                    SS.Settings.ProxyServerPort = port;
+                    SS.Settings.ProxyType = "socks5"; // Default to SOCKS5 for VPN keys
+                    SS.Settings.BypassMode = Services.ProxyService.ModeManualProxy;
+                    
+                    SS.SaveSettings();
+                    LoadNetworkSettings();
+                    await VM.ReinitializeEnvironmentAsync();
+                }
+                else
+                {
+                    MessageBox.Show("Неверный формат ключа. Используйте формат IP:Port или vless://...", "Ошибка настройки", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
             }
         }
 
-        /// <summary>
-        /// Применяет настройки прокси — пересоздаёт среду WebView2.
-        /// </summary>
-        private async void ApplyProxyBtn_Click(object sender, RoutedEventArgs e)
+        private async void DisconnectVpnBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (VM == null || SS == null) return;
-
-            SaveProxySettings();
-
-            // Проверяем корректность
-            var settings = SS.Settings;
-            if (string.IsNullOrWhiteSpace(settings.ProxyServer) || settings.ProxyServerPort <= 0)
-            {
-                MessageBox.Show("Укажите адрес сервера и порт прокси", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            NetworkStatusText.Text = "⏳ Применение настроек прокси...";
-
-            try
-            {
-                await VM.ReinitializeEnvironmentAsync();
-            }
-            catch (Exception ex)
-            {
-                NetworkStatusText.Text = $"❌ Ошибка: {ex.Message}";
-            }
+            if (SS == null || VM == null) return;
+            SS.Settings.BypassMode = Services.ProxyService.ModeDirect;
+            SS.SaveSettings();
+            LoadNetworkSettings();
+            await VM.ReinitializeEnvironmentAsync();
         }
 
-        /// <summary>
-        /// Тест доступности ключевых сайтов.
-        /// </summary>
-        private async void TestSitesBtn_Click(object sender, RoutedEventArgs e)
-        {
-            if (TestResultsCard == null || TestResultsText == null) return;
+        // ==================== Masking / User-Agent ====================
 
-            TestSitesBtn.IsEnabled = false;
-            TestSitesBtn.Content = "⏳  Проверка...";
-            TestResultsCard.Visibility = Visibility.Visible;
-            TestResultsText.Text = "Проверяем доступность сайтов...";
-
-            var sites = new[]
-            {
-                ("Google", "https://www.google.com", "🔍"),
-                ("YouTube", "https://www.youtube.com", "📺"),
-                ("Cloudflare", "https://www.cloudflare.com", "☁️"),
-                ("Telegram Web", "https://web.telegram.org", "✈️"),
-                ("Gemini", "https://gemini.google.com", "💎"),
-            };
-
-            var results = new List<string>();
-
-            using var httpClient = new System.Net.Http.HttpClient { Timeout = TimeSpan.FromSeconds(8) };
-
-            foreach (var (name, url, icon) in sites)
-            {
-                try
-                {
-                    var sw = System.Diagnostics.Stopwatch.StartNew();
-                    var response = await httpClient.GetAsync(url);
-                    sw.Stop();
-
-                    if (response.IsSuccessStatusCode)
-                        results.Add($"{icon} {name} — 🟢 {sw.ElapsedMilliseconds}мс");
-                    else
-                        results.Add($"{icon} {name} — 🟡 HTTP {(int)response.StatusCode}");
-                }
-                catch (System.Net.Http.HttpRequestException)
-                {
-                    results.Add($"{icon} {name} — 🔴 Заблокирован");
-                }
-                catch (TaskCanceledException)
-                {
-                    results.Add($"{icon} {name} — 🔴 Таймаут");
-                }
-                catch (Exception ex)
-                {
-                    results.Add($"{icon} {name} — 🔴 {ex.GetType().Name}");
-                }
-            }
-
-            // Подсчёт
-            var ok = results.Count(r => r.Contains("🟢"));
-            var fail = results.Count(r => r.Contains("🔴"));
-            results.Add("");
-            results.Add(fail == 0
-                ? $"✅ Все сайты доступны ({ok}/{sites.Length})"
-                : $"⚠️ {fail} сайт(ов) заблокировано, {ok}/{sites.Length} доступно");
-
-            TestResultsText.Text = string.Join("\n", results);
-            TestSitesBtn.IsEnabled = true;
-            TestSitesBtn.Content = "🌐  Тест сайтов";
-        }
-
-        /// <summary>
-        /// Тест прокси — проверяем доступность test сайта через текущие настройки.
-        /// </summary>
-        private async void TestProxyBtn_Click(object sender, RoutedEventArgs e)
-        {
-            if (SS == null) return;
-
-            var server = ProxyServerInput?.Text ?? "";
-            var portText = ProxyPortInput?.Text ?? "1080";
-
-            if (string.IsNullOrWhiteSpace(server))
-            {
-                MessageBox.Show("Укажите адрес прокси-сервера", "Тест прокси", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            if (!int.TryParse(portText, out int port) || port <= 0)
-            {
-                MessageBox.Show("Укажите корректный порт", "Тест прокси", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            NetworkStatusText.Text = $"⏳ Проверка прокси {server}:{port}...";
-
-            try
-            {
-                // Простой тест — проверяем что сервер хотя бы резолвится
-                // Полноценный тест прокси требует подключения
-                var isValid = Services.ProxyService.IsValidConfig("proxy", SS.Settings.ProxyType, server, port);
-                NetworkStatusText.Text = isValid
-                    ? $"✅ Прокси {server}:{port} — настройки корректны. Перезапустите браузер для применения."
-                    : $"❌ Некорректные настройки прокси";
-            }
-            catch (Exception ex)
-            {
-                NetworkStatusText.Text = $"❌ Ошибка: {ex.Message}";
-            }
-        }
-
-        // ═══════════════════════════════════════════
-        // Masking / User-Agent Settings
-        // ═══════════════════════════════════════════
-
-        /// <summary>
-        /// Обновляет видимость пустого состояния для сессий.
-        /// </summary>
         private void UpdateSessionsEmptyState()
         {
             if (VM == null || SessionsEmptyText == null) return;
@@ -862,18 +501,14 @@ namespace GhostBrowser.Views
             SessionsEmptyText.Visibility = hasSessions ? Visibility.Collapsed : Visibility.Visible;
         }
 
-        /// <summary>
-        /// Загружает настройки маскировки UI.
-        /// </summary>
         private void LoadMaskingSettings()
         {
             if (SS == null) return;
 
-            // Устанавливаем выбранный пресет в ComboBox
             var preset = SS.UserAgentPreset;
             if (UserAgentPresetCombo != null)
             {
-                foreach (System.Windows.Controls.ComboBoxItem item in UserAgentPresetCombo.Items)
+                foreach (ComboBoxItem item in UserAgentPresetCombo.Items)
                 {
                     if (item.Tag?.ToString() == preset)
                     {
@@ -883,22 +518,15 @@ namespace GhostBrowser.Views
                 }
             }
 
-            // Загружаем кастомный User-Agent
             if (CustomUserAgentInput != null)
             {
                 CustomUserAgentInput.Text = SS.CustomUserAgentValue;
             }
 
-            // Показываем/скрываем поле кастомного UA
             UpdateCustomUserAgentVisibility(preset);
-
-            // Отображаем текущий User-Agent
             UpdateCurrentUserAgentDisplay(preset);
         }
 
-        /// <summary>
-        /// Обновляет видимость поля кастомного User-Agent.
-        /// </summary>
         private void UpdateCustomUserAgentVisibility(string preset)
         {
             if (CustomUserAgentCard != null)
@@ -907,9 +535,6 @@ namespace GhostBrowser.Views
             }
         }
 
-        /// <summary>
-        /// Обновляет отображение текущего User-Agent.
-        /// </summary>
         private void UpdateCurrentUserAgentDisplay(string preset)
         {
             if (CurrentUserAgentDisplay != null)
@@ -922,33 +547,25 @@ namespace GhostBrowser.Views
             }
         }
 
-        /// <summary>
-        /// Обработчик изменения пресета User-Agent.
-        /// </summary>
         private void UserAgentPresetCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (UserAgentPresetCombo.SelectedItem is not System.Windows.Controls.ComboBoxItem selectedItem) return;
+            if (UserAgentPresetCombo.SelectedItem is not ComboBoxItem selectedItem) return;
             var preset = selectedItem.Tag?.ToString() ?? "Chrome";
 
             UpdateCustomUserAgentVisibility(preset);
             UpdateCurrentUserAgentDisplay(preset);
 
-            // Сохраняем пресет
             if (SS != null)
             {
                 SS.UserAgentPreset = preset;
             }
         }
 
-        /// <summary>
-        /// Применяет User-Agent и пересоздаёт вкладки.
-        /// </summary>
         private async void ApplyUserAgentBtn_Click(object sender, RoutedEventArgs e)
         {
             if (VM == null) return;
 
-            // Сохраняем кастомный UA если выбран Custom
-            if (UserAgentPresetCombo.SelectedItem is System.Windows.Controls.ComboBoxItem selectedItem)
+            if (UserAgentPresetCombo.SelectedItem is ComboBoxItem selectedItem)
             {
                 var preset = selectedItem.Tag?.ToString() ?? "Chrome";
                 if (preset == "Custom" && CustomUserAgentInput != null)
@@ -961,16 +578,14 @@ namespace GhostBrowser.Views
             }
 
             ApplyUserAgentBtn.IsEnabled = false;
-            NetworkStatusText.Text = "⏳ Применение User-Agent...";
 
             try
             {
                 await VM.ApplyUserAgentPresetAsync();
-                NetworkStatusText.Text = "✅ User-Agent успешно применён";
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                NetworkStatusText.Text = $"❌ Ошибка: {ex.Message}";
+                // handle error
             }
             finally
             {

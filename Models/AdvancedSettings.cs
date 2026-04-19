@@ -76,6 +76,8 @@ namespace GhostBrowser.Models
         public string ProxyUsername { get; set; } = "";
         /// <summary>Пароль прокси</summary>
         public string ProxyPassword { get; set; } = "";
+        /// <summary>VPN ключ (vless/vmess)</summary>
+        public string VpnKey { get; set; } = "";
         /// <summary>DNS over HTTPS (вкл/выкл) — устаревшее, используется BypassMode</summary>
         public bool DoHEnabled { get; set; } = false;
         /// <summary>DoH провайдер: "cloudflare", "google", "quad9"</summary>

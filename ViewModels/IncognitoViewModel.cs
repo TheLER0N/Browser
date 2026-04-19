@@ -191,8 +191,8 @@ namespace GhostBrowser.ViewModels
                 var additionalArgs = "";
 
                 // Применяем прокси если включен
-                var bypassMode = SettingsService.Settings.BypassMode;
-                if (bypassMode == "proxy")
+                var bypassMode = Services.ProxyService.NormalizeMode(SettingsService.Settings.BypassMode);
+                if (Services.ProxyService.IsProxyMode(bypassMode))
                 {
                     var proxyArg = Services.ProxyService.BuildProxyArgument(
                         SettingsService.Settings.ProxyType,
@@ -208,7 +208,7 @@ namespace GhostBrowser.ViewModels
                 }
 
                 // DoH режимы
-                if (bypassMode == "doh_cloudflare" || bypassMode == "doh_google")
+                if (bypassMode == Services.ProxyService.ModeDoHCloudflare || bypassMode == Services.ProxyService.ModeDoHGoogle)
                 {
                     additionalArgs += " --dns-over-https=secure";
                 }

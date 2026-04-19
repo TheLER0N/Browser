@@ -40,6 +40,8 @@ KingBrowser/
 │   ├── SettingsService.cs      # Настройки + DNS тестирование
 │   ├── DownloadService.cs      # Менеджер загрузок с паузой
 │   ├── ProxyService.cs         # Обход блокировок (DoH, SOCKS5/HTTP)
+│   ├── GoodbyeDPIService.cs    # Интеграция локального обхода DPI (ТСПУ)
+│   ├── XrayService.cs          # Интеграция VPN (vless/vmess)
 │   ├── AdBlockService.cs       # Блокировка рекламы
 │   ├── AutoFillService.cs      # Автозаполнение форм
 │   └── ProfileService.cs       # Мульти-профильность

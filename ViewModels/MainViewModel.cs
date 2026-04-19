@@ -51,6 +51,8 @@ namespace GhostBrowser.ViewModels
         public Services.SnippingToolBlocker SnippingToolBlockerService { get; }
         public Services.TrayService TrayServiceInstance { get; } = new();
         public Services.SessionService SessionService { get; }
+        public Services.GoodbyeDPIService GoodbyeDPIService { get; }
+        public Services.XrayService XrayService { get; }
         public Services.ScreenshotService ScreenshotService { get; } = new();
 
         // ==================== Collections ====================
@@ -221,6 +223,8 @@ namespace GhostBrowser.ViewModels
             GlobalHotkeyService = new Services.GlobalHotkey();
             SnippingToolBlockerService = new Services.SnippingToolBlocker();
             SessionService = new Services.SessionService();
+            GoodbyeDPIService = new Services.GoodbyeDPIService();
+            XrayService = new Services.XrayService();
 
             // Загружаем папку загрузок из настроек
             DownloadService.LoadDownloadFolder(SettingsService);
@@ -299,6 +303,12 @@ namespace GhostBrowser.ViewModels
             // Subscribe to bookmark changes
             BookmarkService.Bookmarks.CollectionChanged += (s, e) => UpdateBookmarkState();
 
+            // Запускаем GoodbyeDPI при старте если он включен
+            if (SettingsService.Settings.BypassMode == Services.ProxyService.ModeGoodbyeDPI)
+            {
+                _ = GoodbyeDPIService.EnsureStartedAsync();
+            }
+
             // Создаём первую вкладку (fire-and-forget, но через AsyncRelayCommand для безопасности)
             _ = CreateTabAsync();
         }
@@ -372,9 +382,10 @@ namespace GhostBrowser.ViewModels
         {
             var args = "";
             var settings = SettingsService.Settings;
+            var mode = Services.ProxyService.NormalizeMode(settings.BypassMode);
 
             // Прокси
-            if (settings.BypassMode == "proxy")
+            if (Services.ProxyService.IsProxyMode(mode))
             {
                 var proxyArg = Services.ProxyService.BuildProxyArgument(
                     settings.ProxyType,
@@ -390,11 +401,24 @@ namespace GhostBrowser.ViewModels
                 }
             }
 
+            if (mode == Services.ProxyService.ModeVpnXray)
+            {
+                args += " --proxy-server=\"socks5://127.0.0.1:10808\"";
+                System.Diagnostics.Debug.WriteLine("Xray VPN Proxy enabled: 127.0.0.1:10808");
+            }
+
             // DoH
-            if (settings.BypassMode == "doh_cloudflare" || settings.BypassMode == "doh_google")
+            if (mode == Services.ProxyService.ModeDoHCloudflare || mode == Services.ProxyService.ModeDoHGoogle)
             {
                 args += " --dns-over-https=secure";
-                System.Diagnostics.Debug.WriteLine($"DoH enabled: {settings.BypassMode}");
+                System.Diagnostics.Debug.WriteLine($"DoH enabled: {mode}");
+            }
+
+            // GoodbyeDPI требует отключения QUIC и Kyber
+            if (mode == Services.ProxyService.ModeGoodbyeDPI)
+            {
+                args += " --disable-quic --disable-features=PostQuantumKyber,Kyber";
+                System.Diagnostics.Debug.WriteLine("GoodbyeDPI: QUIC and Kyber disabled for YouTube.");
             }
 
             // DevTools
@@ -430,6 +454,24 @@ namespace GhostBrowser.ViewModels
             try
             {
                 System.Diagnostics.Debug.WriteLine("=== Reinitializing WebView2 environment ===");
+
+                if (SettingsService.Settings.BypassMode == Services.ProxyService.ModeGoodbyeDPI)
+                {
+                    await GoodbyeDPIService.EnsureStartedAsync();
+                }
+                else
+                {
+                    GoodbyeDPIService.Stop();
+                }
+
+                if (SettingsService.Settings.BypassMode == Services.ProxyService.ModeVpnXray)
+                {
+                    await XrayService.EnsureStartedAsync(SettingsService.Settings.VpnKey);
+                }
+                else
+                {
+                    XrayService.Stop();
+                }
 
                 // Сохраняем URL всех вкладок
                 var savedUrls = new List<string?>();
@@ -1203,6 +1245,8 @@ namespace GhostBrowser.ViewModels
             TrayServiceInstance.Dispose(); // Удаляет иконку из трея
             SettingsService.Dispose(); // Освобождает HttpClient
             DownloadService.Dispose(); // Останавливает таймер и отменяет загрузки
+            GoodbyeDPIService.Stop(); // Останавливает процесс GoodbyeDPI
+            XrayService.Stop(); // Останавливает процесс Xray
 
             foreach (var tab in Tabs)
             {

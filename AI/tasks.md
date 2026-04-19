@@ -26,9 +26,9 @@
 | 17 | Мульти-профильность | 🟢 Низкий | ✅ Завершено | UserProfile, ProfileService |
 | 18 | Блокировка рекламы | 🟢 Низкий | ✅ Завершено | AdBlockFilter, regex |
 | 19 | Автозаполнение форм | 🟢 Низкий | ✅ Завершено | AutoFillProfile, AutoFillService |
-| 20 | Обход блокировок (DNS/Proxy) | 🔴 Высокий | ✅ Завершено | ProxyService, DoH, SOCKS5/HTTP proxy |
+| 20 | Обход блокировок (DNS/Proxy) | 🔴 Высокий | ✅ Завершено | ProxyService, DoH, SOCKS5/HTTP proxy, XrayService (vless), GoodbyeDPI |
 | 21 | Автоприменение настроек сети | 🔴 Высокий | ✅ Завершено | ReinitializeEnvironmentAsync — без перезапуска |
-| 22 | Список бесплатных прокси | 🔴 Высокий | ✅ Завершено | ProxyManager, автопроверка, 1 клик для применения |
+| 22 | Интеграция VPN по ключу и DPI обхода | 🔴 Высокий | ✅ Завершено | XrayService, GoodbyeDPIService, UI refactor |
 | 23 | Маскировка User-Agent (пресеты) | 🔴 Высокий | ✅ Завершено | 7 пресетов + кастомный, обход блокировок колледжа |
 | 24 | Менеджер сессий | 🟡 Средний | ✅ Завершено | Save/Restore/Delete сессий, JSON хранилище |
 | 25 | Темы оформления | 🟡 Средний | ✅ Завершено | Dark/Light/System, 6 акцентных цветов, UI в настройках |

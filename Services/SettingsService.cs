@@ -61,6 +61,8 @@ namespace GhostBrowser.Services
         public string ProxyUsername { get; set; } = "";
         /// <summary>Пароль прокси</summary>
         public string ProxyPassword { get; set; } = "";
+        /// <summary>VPN ключ (vless/vmess)</summary>
+        public string VpnKey { get; set; } = "";
         /// <summary>Включить DevTools по F12</summary>
         public bool EnableDevTools { get; set; } = false;
 
@@ -276,6 +278,7 @@ namespace GhostBrowser.Services
         {
             try
             {
+                NormalizeNetworkSettings(_settings);
                 var json = JsonSerializer.Serialize(_settings, new JsonSerializerOptions { WriteIndented = true });
                 File.WriteAllText(_settingsFile, json);
                 SaveNotification = "✅ Настройки сохранены";
@@ -311,7 +314,10 @@ namespace GhostBrowser.Services
                     var json = File.ReadAllText(_settingsFile);
                     var loaded = JsonSerializer.Deserialize<AppSettings>(json);
                     if (loaded != null)
+                    {
+                        NormalizeNetworkSettings(loaded);
                         _settings = loaded;
+                    }
                 }
             }
             catch (Exception ex)
@@ -320,6 +326,17 @@ namespace GhostBrowser.Services
                 System.Diagnostics.Debug.WriteLine($"LoadSettings error (using defaults): {ex.Message}");
                 _settings = new AppSettings();
             }
+        }
+
+        private static void NormalizeNetworkSettings(AppSettings settings)
+        {
+            settings.BypassMode = ProxyService.NormalizeMode(settings.BypassMode);
+            settings.ProxyType = string.Equals(settings.ProxyType, "http", StringComparison.OrdinalIgnoreCase)
+                ? "http"
+                : "socks5";
+
+            if (settings.ProxyServerPort <= 0 || settings.ProxyServerPort > 65535)
+                settings.ProxyServerPort = 1080;
         }
 
         public void ResetToDefaults() { _settings = new AppSettings(); OnPropertyChanged(); SaveSettings(); }
